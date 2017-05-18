@@ -234,8 +234,13 @@ define(
 						}
 						this._execOnAfterClose();
 					}
+					var objParentForm=this.attr.objForm;
 					this.attr={};
 					this.inherited(arguments);
+					
+					if (objParentForm && objParentForm.objFocusedPanel && objParentForm.objFocusedPanel.doG740Focus) {
+						objParentForm.objFocusedPanel.doG740Focus();
+					}
 				},
 				show: function() {
 					this.inherited(arguments);

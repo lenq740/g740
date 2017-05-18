@@ -809,10 +809,10 @@ define(
 					for (var i=0; i<lst.length; i++) {
 						var objPanel=lst[i];
 						if (!objPanel) continue;
-						if (objPanel.isFocusOnShow) objPanelFocus=objPanel;
-						if (objPanel.declaredClass=='g740.Tree') objPanelTree=objPanel;
-						if (objPanel.declaredClass=='g740.Grid') objPanelGrid=objPanel;
-						if (objPanel.declaredClass=='g740.SimpleFields') objPanelFields=objPanel;
+						if (!objPanelFocus && objPanel.isFocusOnShow) objPanelFocus=objPanel;
+						if (!objPanelTree && objPanel.declaredClass=='g740.Tree') objPanelTree=objPanel;
+						if (!objPanelGrid && objPanel.declaredClass=='g740.Grid') objPanelGrid=objPanel;
+						if (!objPanelFields && objPanel.declaredClass=='g740.SimpleFields') objPanelFields=objPanel;
 						if (!objPanelFirst) objPanelFirst=objPanel;
 					}
 					if (objPanelFocus) return objPanelFocus;
@@ -820,35 +820,6 @@ define(
 					if (objPanelGrid) return objPanelGrid;
 					if (objPanelFields) return objPanelFields;
 					return this;
-/*				
-					var result=null;
-					var childs=this.getChildren();
-					for (var i=0; i<childs.length; i++) {
-						var objChild=childs[i];
-						if (!objChild) continue;
-						if (objChild.g740className=='g740.Panel') {
-							if (objChild.isVisible===false) continue;
-							if (!objChild.doG740Focus) continue;
-							if (!result) {
-								result=objChild;
-								continue;
-							}
-							if (objChild.region=='top' && result.region!='top') {
-								result=objChild;
-								continue;
-							}
-							if (objChild.region=='left' && result.region!='top' && result.region!='left') {
-								result=objChild;
-								continue;
-							}
-							if (objChild.region=='center' && result.region!='top' && result.region!='left' && result.region!='center') {
-								result=objChild;
-								continue;
-							}
-						}
-					}
-					return result;
-*/
 				},
 				
 				_getBestRowSet: function() {
