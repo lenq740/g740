@@ -212,6 +212,9 @@ define(
 			        }
 			    },
 
+				canFocused: function() {
+					return true;
+				},
 			    doG740Focus: function () {
 			        var objParent = this.getParent();
 			        if (objParent && objParent.doG740SelectChild) objParent.doG740SelectChild(this);
@@ -225,7 +228,8 @@ define(
 			        //console.log({mode: 'doG740Focus', this: this});
 			        //this.set('focused',true);
 			    },
-			    doG740ScrollToRow: function (rowIndex) {
+				
+				doG740ScrollToRow: function (rowIndex) {
 			        var domItem = this.getRowNode(rowIndex);
 			        if (!domItem) return false;
 			        var y = this.scrollTop;
@@ -362,6 +366,36 @@ define(
 			                return true;
 			            }
 			        }
+					if (e && e.type == 'keydown') {
+						if (!e.ctrlKey && !e.shiftKey && e.keyCode==9) {
+							// Tab
+							dojo.stopEvent(e);
+							var objParent=this.getParent();
+							if (objParent && objParent.doG740FocusChildNext) {
+								g740.execDelay.go(
+								{
+									delay: 100,
+									obj: objParent,
+									func: objParent.doG740FocusChildNext,
+									para: this
+								});
+							}
+						}
+						if (!e.ctrlKey && e.shiftKey && e.keyCode==9) {
+							// Shift+Tab
+							dojo.stopEvent(e);
+							var objParent=this.getParent();
+							if (objParent && objParent.doG740FocusChildPrev) {
+								g740.execDelay.go(
+								{
+									delay: 100,
+									obj: objParent,
+									func: objParent.doG740FocusChildPrev,
+									para: this
+								});
+							}
+						}
+					}
 			        this.inherited(arguments);
 			    },
 

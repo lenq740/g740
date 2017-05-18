@@ -320,6 +320,10 @@ define(
 					}
 					this.inherited(arguments);
 				},
+				postCreate: function() {
+					this.inherited(arguments);
+					this.focusNode=this.domNodeInput;
+				},
 				onButtonClick: function() {
 				},
 				onKeyDown: function(evt) {
@@ -382,6 +386,10 @@ define(
 					}
 					this.inherited(arguments);
 				},
+				postCreate: function() {
+					this.inherited(arguments);
+					this.focusNode=this.domNodeTextArea;
+				},
 				onButtonClick: function() {
 				},
 				onKeyDown: function(evt) {
@@ -427,41 +435,44 @@ define(
 					'</table>'+
 				'</div>',
 				_readOnly: false,
+				_value: '',
 				getReadOnly: function() {
 					return this._readOnly;
 				},
 				set: function(name, value) {
 					if (name=='value') {
-						this.domNodeInput.value=value;
+						if (this.domNodeInput) {
+							this.domNodeInput.value=value;
+							this._value=value;
+						}
 						return true;
 					}
 					if (name=='readOnly') {
-						this._readOnly=value;
-						if (value) {
-							dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-						}
-						else {
-							dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+						if (this.domNodeInput) {
+							this._readOnly=value;
+							if (value) {
+								if (!dojo.hasClass(this.domNodeInput, 'dijitTextBoxReadOnly')) dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+							}
+							else {
+								if (dojo.hasClass(this.domNodeInput, 'dijitTextBoxReadOnly')) dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+							}
 						}
 						return true;
 					}
 					this.inherited(arguments);
 				},
+				postCreate: function() {
+					this.inherited(arguments);
+					this.focusNode=this.domNodeInput;
+				},
+				
 				onButtonClick: function() {
 				},
 				onKeyDown: function(e) {
-					if (e.keyCode==32 || e.keyCode==13) {	// SPACE, ENTER
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
 						dojo.stopEvent(e);
-						g740.execDelay.go({
-							delay: 50,
-							obj: this,
-							func: this.onButtonClick
-						});
-					}
-					else if (e.keyCode==9) {	// TAB
-					}
-					else {
-						dojo.stopEvent(e);
+						this.onButtonClick();
 					}
 				},
 				onKeyUp: function(evt) {
@@ -476,10 +487,7 @@ define(
 				onBlur: function() {
 				},
 				onFocus: function() {
-				}/*,
-				doG740Focus: function() {
-					console.log(this);
-				}*/
+				}
 			}
 		);
 		
@@ -645,6 +653,7 @@ define(
 			'g740._ListAbstract',
 			[dijit._Widget, dijit._TemplatedMixin],
 			{
+				filter: '',
 				value: null,
 				templateString: '<select class="g740-storelist" multiple data-dojo-attach-event="'+
 					'onchange: doChange, '+
@@ -812,6 +821,8 @@ define(
 					if (this.isAddEmptyItem) result.push({id: '', value: '---//---'});
 					
 					var nodes=objTreeStorage.getChildsOrdered(objTreeStorage.rootNode);
+					var filter='';
+					if (this.filter) filter=this.filter.toLowerCase();
 					for (var i=0; i<nodes.length; i++) {
 						var node=nodes[i];
 						if (!node) continue;
@@ -820,7 +831,11 @@ define(
 						var fields=this.objRowSet.getFields(node);
 						var fld=fields[this.fieldName];
 						if (!fld) continue;
-						var item={id: node.id, value: g740.convertor.js2text(row[this.fieldName+'.value'],fld.type)};
+						var value=g740.convertor.js2text(row[this.fieldName+'.value'],fld.type);
+						if (filter) {
+							if (value.toLowerCase().indexOf(filter)<0) continue;
+						}
+						var item={id: node.id, value: value};
 						result.push(item);
 					}
 					return result;
@@ -872,13 +887,21 @@ define(
 						result.push(item);
 					}
 					
+					var filter='';
+					if (this.filter) filter=this.filter.toLowerCase();
 					for (var i=0; i<lst.length; i++) {
 						if (!lst[i]) continue;
+
+						var value=lst[i];
+						if (filter) {
+							if (value.toLowerCase().indexOf(filter)<0) continue;
+						}
+						
 						if (this.baseType=='string') {
-							var item={id: lst[i], value: lst[i]};
+							var item={id: lst[i], value: value};
 						}
 						if (this.baseType=='num') {
-							var item={id: i+1, value: lst[i]};
+							var item={id: i+1, value: value};
 						}
 						result.push(item);
 					}

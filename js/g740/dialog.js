@@ -302,6 +302,7 @@ define(
 				domNodeOwner: null,						// dom узел, относительно которого размещать диалог
 				objOwner: null,							// dojo объект, из которого вызван диалог
 				fieldDef: null,
+				filter: '',
 				_isSaveOnHide: false,
 				_saveValueOnHide: null,
 				set: function(name, value) {
@@ -443,13 +444,23 @@ define(
 						sync: true
 					});
 
-					var lst=objRefRowSet.objTreeStorage.getChildsOrdered(objRefRowSet.objTreeStorage.rootNode);
+					this.objListRowSet=new g740.ListRowSet(
+						{
+							objRowSet: objRefRowSet,
+							value: refIdValue,
+							fieldName: this.getRefNameFieldName(),
+							isAddEmptyItem: !fldRefId.notnull,
+							filter: this.filter,
+							style: 'margin:0px; padding: 0px; border-style: none;',
+							region: 'center'
+						}, 
+						null
+					);
+					var lst=this.objListRowSet.getItems();
 					var count=lst.length;
-					if (!fldRefId.notnull) count++;
 					if (count<5) count=5;
 					if (count>25) count=25;
 					var h=(count*this.charHeight+5)+'px';
-					
 					var w=350+'px';
 					if (fldRefId.dlgwidth) w=fldRefId.dlgwidth;
 					if (fld.dlgwidth) w=fld.dlgwidth;
@@ -461,17 +472,7 @@ define(
 					}
 					this.width=w;
 					this.height=h;
-					this.objListRowSet=new g740.ListRowSet(
-						{
-							objRowSet: objRefRowSet,
-							value: refIdValue,
-							fieldName: this.getRefNameFieldName(),
-							isAddEmptyItem: !fldRefId.notnull,
-							style: 'margin:0px; padding: 0px; border-style: none;',
-							region: 'center'
-						}, 
-						null
-					);
+					
 					this.objListRowSet.on('KeyDown',dojo.lang.hitch(this,this.onListKeyDown));
 					this.objListRowSet.on('DblClick',dojo.lang.hitch(this,this.onListDblClick));
 					this.addChild(this.objListRowSet);
@@ -507,6 +508,7 @@ define(
 								if (typeof(v)=='undefined') v='';
 								row[fieldName+'.value']=v;
 							}
+							objRowSet.doG740Repaint({ isRowUpdate: true });
 							objRowSet.setFieldProperty({
 								fieldName: refIdFieldName,
 								value: value
@@ -589,25 +591,6 @@ define(
 						var fieldDef=fields[this.fieldName];
 					}
 					
-					var w=200+'px';
-					if (fieldDef.dlgwidth) w=fieldDef.dlgwidth;
-					if (this.domNodeOwner && this.domNodeOwner.clientWidth && !fieldDef.dlgwidth) {
-						w=this.domNodeOwner.clientWidth;
-						if (w>(document.body.clientWidth*0.6)) w=parseInt(document.body.clientWidth*0.6);
-						if (w<200) w=200;
-						w+='px';
-					}
-					
-					var list=fieldDef.list;
-					if (!list) list='';
-					var lst=list.split(';');
-					var count=lst.length;
-					if (count<5) count=5;
-					if (count>25) count=25;
-					var h=(count*this.charHeight+5)+'px';
-					this.width=w;
-					this.height=h;
-					
 					var baseType='string';
 					if (fieldDef.basetype=='num') baseType=fieldDef.basetype;
 					this.objListItems=new g740.ListItems(
@@ -616,11 +599,29 @@ define(
 							value: objRowSet.getFieldProperty({fieldName: this.fieldName}),
 							baseType: baseType,
 							isAddEmptyItem: !fieldDef.notnull,
+							filter: this.filter,
 							style: 'margin:0px; padding: 0px; border-style: none;',
 							region: 'center'
 						}, 
 						null
 					);
+					var lst=this.objListItems.getItems();
+					var count=lst.length;
+					if (count<5) count=5;
+					if (count>25) count=25;
+
+					var w=200+'px';
+					if (fieldDef.dlgwidth) w=fieldDef.dlgwidth;
+					if (this.domNodeOwner && this.domNodeOwner.clientWidth && !fieldDef.dlgwidth) {
+						w=this.domNodeOwner.clientWidth;
+						if (w>(document.body.clientWidth*0.6)) w=parseInt(document.body.clientWidth*0.6);
+						if (w<200) w=200;
+						w+='px';
+					}
+					var h=(count*this.charHeight+5)+'px';
+					this.width=w;
+					this.height=h;
+					
 					this.objListItems.on('KeyDown',dojo.lang.hitch(this,this.onListKeyDown));
 					this.objListItems.on('DblClick',dojo.lang.hitch(this,this.onListDblClick));
 					this.addChild(this.objListItems);
@@ -635,6 +636,7 @@ define(
 						fieldName: this.fieldName,
 						value: value
 					});
+					objRowSet.doG740Repaint({ isRowUpdate: true });
 				},
 				onListKeyDown: function(e) {
 					if (e.keyCode==32 || e.keyCode==13) {

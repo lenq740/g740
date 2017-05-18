@@ -14,6 +14,7 @@ define(
 				g740className: 'g740.FieldEditor',	// Имя базового класса
 				objForm: null,
 				objRowSet: null,
+				objPanel: null,
 				objActionGo: null,
 				rowsetName: null,
 				fieldName: null,
@@ -59,6 +60,10 @@ define(
 						this.color=value;
 						return true;
 					}
+					if (name=='focused') {
+						if (value) this.doG740Focus();
+						return true;
+					}
 					this.inherited(arguments);
 				},
 				preamble: function(para, domElement) {
@@ -93,6 +98,7 @@ define(
 							this.objActionGo.destroy();
 							this.objActionGo=null;
 						}
+						this.objPanel=null;
 						this.inherited(arguments);
 					}
 					finally {
@@ -124,6 +130,7 @@ define(
 				postCreate: function() {
 					this.on('Change',this.onG740Change);
 					this.on('Focus',this.onG740Focus);
+					this.on('Blur',this.onG740Blur);
 					this.on('KeyPress',this.onG740KeyPress);
 					this.inherited(arguments);
 				},
@@ -262,10 +269,14 @@ define(
 				onG740Focus: function() {
 					if (this.rowId && this.objRowSet && this.rowId!=this.objRowSet.getFocusedId()) this.objRowSet.setFocusedId(this.rowId);
 				},
+				onG740Blur: function() {
+				},
 				onG740KeyPress: function(e) {
 				},
 				doG740Focus: function() {
-					if (this.domNode && this.domNode.focus) this.domNode.focus();
+					var node=this.domNode;
+					if (this.focusNode) node=this.focusNode;
+					if (node.focus) node.focus();
 				},
 				_isWaitClick: false,
 				_setWaitClickToFalse: function() {
@@ -293,20 +304,28 @@ define(
 				},
 
 				postCreate: function() {
-					this.textbox.obj=this;
-					this.textbox.onkeydown=function(e) {
-						if (this.obj) {
-							this.obj.onKeyDown(e);
-						}
-					}
 					this.inherited(arguments);
 				},
-				onKeyDown: function(e) {
-					if (e.keyCode==13) {	// ENTER
+				_onKey: function(e) {
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
 						dojo.stopEvent(e);
-						if (this.textbox) {
-							this.set('displayedValue',this.textbox.value);
-						}
+						if (!this.getReadOnly()) this.openDropDown();
+					}
+					else if (this._opened && e.keyCode == 27) {
+						this.closeDropDown();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.textbox) this.set('displayedValue',this.textbox.value);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.textbox) this.set('displayedValue',this.textbox.value);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
 					}
 				},
 				getStyleWidth: function() {
@@ -370,9 +389,22 @@ define(
 					if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
 				},
 				onKeyDown: function(e) {
-					if (e.keyCode==13) {	// ENTER
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
+						this.onG740ButtonClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
 						dojo.stopEvent(e);
 						if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
 					}
 				},
 				onG740ButtonClick: function() {
@@ -455,76 +487,179 @@ define(
 						obj: this,
 						func: this._setWaitClickToFalse
 					});
+				},
+				onG740KeyPress: function(e) {
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
+						this.onG740ButtonClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.domNodeTextArea) this.onG740Change(this.domNodeTextArea.value);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.domNodeTextArea) this.onG740Change(this.domNodeTextArea.value);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+					}
 				}
 			}
 		);
 		// Виджет для поля CheckBox
 		dojo.declare(
-			'g740.FieldEditor.Check',
-			[dijit.form.CheckBox, g740.FieldEditor],
+			'g740.FieldEditor.Icons',
+			[dijit._Widget, dijit._TemplatedMixin, g740.FieldEditor],
 			{
+				value: 0,
+				icons: null,
+				templateString: '<div class="g740-widget-icons" data-dojo-attach-event="onclick: onBodyClick">'+
+					'<input type="checkbox" class="g740-focused" data-dojo-attach-point="focusNode" data-dojo-attach-event="'+
+						'onkeypress: onKeyPress, onfocus: _onWidgetFocus, onblur: _onWidgetBlur'+
+					'"></input>'+
+					'<div class="g740-widget-icons-icon" data-dojo-attach-point="domNodeIcon" data-dojo-attach-event="onclick: doClick"></div>'+
+					'<div class="g740-widget-icons-label" data-dojo-attach-point="domNodeLabel"></div>'+
+				'</div>',
+				constructor: function(para) {
+				},
 				set: function(name, value) {
 					if (name=='value') {
-						var v=g740.convertor.toJavaScript(value,'check');
-						this.set('checked',v);
+						this.setValue(value);
+						return true;
+					}
+					if (name=='readOnly') {
+						if (value) {
+							dojo.addClass(this.domNode, 'g740-readonly');
+						}
+						else {
+							dojo.removeClass(this.domNode, 'g740-readonly');
+						}
 						return true;
 					}
 					this.inherited(arguments);
 				},
-				constructor: function(para, domElement) {
-					var procedureName='g740.FieldEditor.String.constructor';
-					try {
-						this.emptyValue=false;
-						this.inherited(arguments);
-					}
-					finally {
-					}
-				},
-				onG740Change: function(newValue) {
+				postCreate: function() {
 					this.inherited(arguments);
+					if (this.fieldDef) {
+						var caption=this.fieldDef.name;
+						if (this.fieldDef.caption) caption=this.fieldDef.caption;
+						this.setLabel(caption);
+						if (!this.icons) {
+							var list='';
+							if (this.fieldDef.list) list=this.fieldDef.list;
+							this.icons=list.split(';')
+						}
+					}
+					if (!this.icons) this.icons=[];
 				},
-				getStyleWidth: function() {
-					return '';
+				setLabel: function(value) {
+					if (this.domNodeLabel) {
+						this.domNodeLabel.innerHTML='';
+						var domText=document.createTextNode(value);
+						this.domNodeLabel.appendChild(domText);
+					}
+				},
+				getBaseType: function() {
+					var result='string';
+					if (this.fieldDef && this.fieldDef.basetype=='num') result='num';
+					return result;
+				},
+				setValue: function(value) {
+					if (!this.icons) return false;
+					var baseType=this.getBaseType();
+					if (baseType=='num') {
+						if (value>=this.icons.length) value=this.icons.length-1;
+						if (value<0) value=0;
+						this.value=value;
+						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+this.icons[value];
+					}
+					if (baseType=='string') {
+						this.value=value;
+						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+value;
+					}
+				},
+				convertFromValueToTextValue: function(value) {
+					var baseType=this.getBaseType();
+					if (baseType=='num') {
+						if (typeof(value)=='boolean') value=value?1:0;
+					}
+					return value;
+				},
+				doClick: function() {
+					if (!this.icons) return false;
+					if (this.getReadOnly()) return false;
+					var baseType=this.getBaseType();
+					if (baseType=='num') {
+						var value=this.value;
+						value++;
+						if (value>=this.icons.length) value=0;
+						this.onG740Change(value);
+					}
+					if (baseType=='string') {
+						var index=-1;
+						for(var i=0; i<this.icons.length; i++) {
+							if (this.icons[i]==this.value) {
+								index=i;
+								break;
+							}
+						}
+						index++;
+						if (index>=this.icons.length) index=0;
+						this.onG740Change(this.icons[index]);
+					}
+				},
+				onBodyClick: function() {
+					this.set('focused',true);
+				},
+				_onWidgetFocus: function() {
+					if (!dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.addClass(this.domNode, 'g740-widget-focused');
+				},
+				_onWidgetBlur: function() {
+					if (dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.removeClass(this.domNode, 'g740-widget-focused');
+				},
+				onKeyPress: function(e) {
+					if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+					}
+					else if (!e.ctrlKey && !e.shiftKey && e.charCode==32) {
+						dojo.stopEvent(e);
+						this.doClick();
+					}
+					else {
+						dojo.stopEvent(e);
+					}
 				}
 			}
 		);
-	    // Виджет для поля Radio
 		dojo.declare(
-			'g740.FieldEditor.Radio',
-			[dijit.form.RadioButton, g740.FieldEditor],
+			'g740.FieldEditor.Check',
+			[g740.FieldEditor.Icons],
 			{
-			    set: function (name, value) {
-			        if (name == 'value') {
-			            var v = g740.convertor.toJavaScript(value, 'check');
-			            this.set('checked', v);
-			            return true;
-			        }
-			        this.inherited(arguments);
-			    },
-			    constructor: function (para, domElement) {
-			        var procedureName = 'g740.FieldEditor.String.constructor';
-			        try {
-			            this.emptyValue = false;
-			            this.inherited(arguments);
-			        }
-			        finally {
-			        }
-			    },
-			    onG740Change: function (newValue) {
-			        this.inherited(arguments);
-			    },
-			    getStyleWidth: function () {
-			        return '';
-			    }
+				constructor: function(para) {
+					this.icons=['check-off', 'check-on'];
+				},
+				getBaseType: function() {
+					return 'num';
+				}
 			}
 		);
+		
 	    // Виджет для поля List
 		dojo.declare(
 			'g740.FieldEditor.List',
 			[g740.ComboBox, g740.FieldEditor],
 			{
 				postCreate: function() {
-					this.on('ButtonClick',this.onG740ButtonClick);
 					this.inherited(arguments);
 				},
 				onG740Change: function(newValue) {
@@ -565,7 +700,7 @@ define(
 					}
 					return text;
 				},
-				onG740ButtonClick: function() {
+				onButtonClick: function() {
 					if (this.getReadOnly()) return false;
 					if (this.objRowSet && this.rowId!==null) {
 						if (this.objRowSet.getFocusedId()!=this.rowId) {
@@ -582,6 +717,8 @@ define(
 						if (objActionGo.getEnabled()) objActionGo.exec();
 					}
 					else {
+						var filter='';
+						if (this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
 						var objDialog=new g740.DialogEditorList(
 							{ 
 								objForm: this.objForm,
@@ -591,6 +728,7 @@ define(
 								nodeType: this.nodeType,
 								domNodeOwner: this.domNode,
 								objOwner: this,
+								filter: filter,
 								duration: 0, 
 								draggable: false
 							}
@@ -602,6 +740,33 @@ define(
 						obj: this,
 						func: this._setWaitClickToFalse
 					});
+				},
+				onKeyDown: function(e) {
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
+						this.onButtonClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.domNodeInput && this.domNodeInput.value!=this._value) {
+							this.onButtonClick();
+						}
+						else {
+							if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+						}
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.domNodeInput && this.domNodeInput.value!=this._value) {
+							this.onButtonClick();
+						}
+						else {
+							if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+						}
+					}
 				}
 			}
 		);
@@ -611,13 +776,13 @@ define(
 			[g740.ComboBox, g740.FieldEditor],
 			{
 				postCreate: function() {
-					this.on('ButtonClick',this.onG740ButtonClick);
 					this.inherited(arguments);
 				},
 				onG740Change: function(newValue) {
 					return false;
 				},
-				onG740ButtonClick: function() {
+				isDialogOpened: false,
+				onButtonClick: function() {
 					if (this.getReadOnly()) return false;
 					if (this.objRowSet && this.rowId!==null) {
 						if (this.objRowSet.getFocusedId()!=this.rowId) {
@@ -631,9 +796,15 @@ define(
 					
 					var objActionGo=this.getActionGo();
 					if (objActionGo) {
-						if (objActionGo.getEnabled()) objActionGo.exec();
+						this.isDialogOpened=true;
+						if (objActionGo.getEnabled()) {
+							objActionGo.exec();
+						}
 					}
 					else {
+						var filter='';
+						if (this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
+						this.isDialogOpened=true;
 						var objDialog=new g740.DialogEditorRef(
 							{ 
 								objForm: this.objForm,
@@ -642,7 +813,8 @@ define(
 								nodeType: this.nodeType,
 								domNodeOwner: this.domNode,
 								objOwner: this,
-								duration: 0, 
+								filter: filter,
+								duration: 0,
 								draggable: false
 							}
 						);
@@ -653,6 +825,43 @@ define(
 						obj: this,
 						func: this._setWaitClickToFalse
 					});
+				},
+				onKeyDown: function(e) {
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
+						this.onButtonClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.domNodeInput && this.domNodeInput.value!=this._value) {
+							this.onButtonClick();
+						}
+						else {
+							if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+						}
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.domNodeInput && this.domNodeInput.value!=this._value) {
+							this.onButtonClick();
+						}
+						else {
+							if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+						}
+					}
+				},
+				onBlur: function() {
+					if (!this.isDialogOpened && this.domNodeInput && this.domNodeInput.value!=this._value) {
+						this.domNodeInput.value=this._value;
+					}
+					this.inherited(arguments);
+				},
+				onFocus: function() {
+					this.isDialogOpened=false;
+					this.inherited(arguments);
 				}
 			}
 		);
@@ -740,6 +949,7 @@ define(
 							if (domRadio.checked) domRadio.checked=false;
 						}
 					}
+					
 					this.value=newValue;
 				},
 				setReadOnly: function(value) {
@@ -794,6 +1004,7 @@ define(
 						domRadio.valueIndex=i+1;
 						domRadio.valueText=lst[i];
 						dojo.on(domRadio, 'change', dojo.hitch(this, this._onRadioChanged));
+						dojo.on(domRadio, 'keydown', dojo.hitch(this, this.onKeyDown));
 						
 						domLabel.appendChild(domRadio);
 						domLabel.appendChild(domLabelText);
@@ -804,6 +1015,31 @@ define(
 					var readOnly=this.readOnly;
 					this.readOnly='';
 					this.setReadOnly(readOnly);
+				},
+				doG740Focus: function() {
+					if (!this._radioItems) return;
+					var node=this._radioItems[0];
+					if (node && node.focus) node.focus();
+				},
+				onKeyDown: function(e) {
+					if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+					}
+				},
+				onG740Focus: function() {
+					if (!dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.addClass(this.domNode, 'g740-widget-focused');
+					this.inherited(arguments);
+				},
+				onG740Blur: function() {
+					if (dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.removeClass(this.domNode, 'g740-widget-focused');
+					this.inherited(arguments);
 				}
 			}
 		);
@@ -866,6 +1102,7 @@ define(
 				},
 				postCreate: function() {
 					this.render();
+					this.focusNode=this.domNodeFocused;
 					this.inherited(arguments);
 				},
 				setValue: function(newValue) {
@@ -988,8 +1225,23 @@ define(
 					if (!dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.addClass(this.domNode,'g740-widget-focused');
 				},
 				onKeyPress : function(e) {
-					if (!e.ctrlKey && (e.keyCode == 32 || e.keyCode == 13)) {
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
 						this.onButtonClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+					}
+					else {
+						dojo.stopEvent(e);
 					}
 				}
 			}
@@ -1038,15 +1290,7 @@ define(
 				}
 			}
 		);
-
 		
-		// Виджет для поля Icons - пока заглушка
-		dojo.declare(
-			'g740.FieldEditor.Icons',
-			[g740.FieldEditor.String],
-			{
-			}
-		);
 
 	    // Виджет кнопки
 		dojo.declare(

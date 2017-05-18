@@ -901,10 +901,140 @@ define(
 					}
 					return true;
 				},
+				
+				// Передача фокуса ввода
+				canFocused: function() {
+					var result=false;
+					if (this.getChildren) {
+						var lst=this.getChildren();
+						for (var i=0; i<lst.length; i++) {
+							var obj=lst[i];
+							if (!obj) continue;
+							if (!obj.canFocused) continue;
+							if (obj.canFocused()) {
+								result=true;
+								break;
+							}
+						}
+					}
+					return result;
+				},
 				doG740Focus: function() {
 					var objParent=this.getParent();
 					if (objParent && objParent.doG740SelectChild) objParent.doG740SelectChild(this);
 					this.set('focused',true);
+				},
+				doG740FocusChildFirst: function() {
+					var objChild=null;
+					if (this.getChildren) {
+						var lst=this.getChildren();
+						for (var i=0; i<lst.length; i++) {
+							var obj=lst[i];
+							if (!obj) continue;
+							if (!obj.doG740FocusChildNext) continue;
+							if (!obj.canFocused || !obj.canFocused()) continue;
+							objChild=obj;
+							break;
+						}
+					}
+					if (objChild) {
+						if (objChild.doG740FocusChildFirst) objChild.doG740FocusChildFirst();
+						else if (objChild.doG740Focus) objChild.doG740Focus();
+						else {
+							objChild.set('focused',true);
+						}
+					}
+					else {
+						this.doG740Focus();
+					}
+				},
+				doG740FocusChildLast: function() {
+					var objChild=null;
+					if (this.getChildren) {
+						var lst=this.getChildren();
+						for (var i=lst.length-1; i>=0; i--) {
+							var obj=lst[i];
+							if (!obj) continue;
+							if (!obj.doG740FocusChildNext) continue;
+							if (!obj.canFocused || !obj.canFocused()) continue;
+							objChild=obj;
+							break;
+						}
+					}
+					if (objChild) {
+						if (objChild.doG740FocusChildFirst) objChild.doG740FocusChildLast();
+						else if (objChild.doG740Focus) objChild.doG740Focus();
+						else {
+							objChild.set('focused',true);
+						}
+					}
+					else {
+						this.doG740Focus();
+					}
+				},
+				doG740FocusChildNext: function(objChild) {
+					var objChildNext=null;
+					if (this.getChildren) {
+						var lst=this.getChildren();
+						var index=lst.length;
+						for (var i=0; i<lst.length; i++) {
+							if (lst[i]==objChild) {
+								index=i;
+								break;
+							}
+						}
+						for (var i=index+1; i<lst.length; i++) {
+							var obj=lst[i];
+							if (!obj) continue;
+							if (!obj.doG740FocusChildNext) continue;
+							if (!obj.canFocused || !obj.canFocused()) continue;
+							objChildNext=obj;
+							break;
+						}
+					}
+					if (objChildNext) {
+						if (objChildNext.doG740FocusChildFirst) objChildNext.doG740FocusChildFirst();
+						else if (objChildNext.doG740Focus) objChildNext.doG740Focus();
+						else {
+							objChildNext.set('focused',true);
+						}
+					}
+					else {
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext(this);
+					}
+				},
+				doG740FocusChildPrev: function(objChild) {
+					var objChildPrev=null;
+					if (this.getChildren) {
+						var lst=this.getChildren();
+						var index=0;
+						for (var i=0; i<lst.length; i++) {
+							if (lst[i]==objChild) {
+								index=i;
+								break;
+							}
+						}
+						for (var i=index-1; i>=0; i--) {
+							var obj=lst[i];
+							if (!obj) continue;
+							if (!obj.doG740FocusChildPrev) continue;
+							if (!obj.canFocused || !obj.canFocused()) continue;
+							objChildPrev=obj;
+							break;
+						}
+					}
+					if (objChildPrev) {
+						if (objChildPrev.doG740FocusChildLast) objChildPrev.doG740FocusChildLast();
+						else if (objChildPrev.doG740Focus) objChildPrev.doG740Focus();
+						else {
+							objChildPrev.set('focused',true);
+						}
+					}
+					else {
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildPrev) objParent.doG740FocusChildPrev(this);
+					}
 				},
 				doG740SelectChild: function(objChild) {
 					var objParent=this.getParent();
@@ -1136,6 +1266,24 @@ define(
 						//if (this.selectedChildWidget.doG740Focus) this.selectedChildWidget.doG740Focus();
 					}
 */
+				},
+				doG740FocusChildFirst: function() {
+					if (this.selectedChildWidget && this.selectedChildWidget.doG740FocusChildFirst) {
+						this.selectedChildWidget.doG740FocusChildFirst();
+					}
+				},
+				doG740FocusChildLast: function() {
+					if (this.selectedChildWidget && this.selectedChildWidget.doG740FocusChildLast) {
+						this.selectedChildWidget.doG740FocusChildLast();
+					}
+				},
+				doG740FocusChildNext: function(objChild) {
+					var objParent=this.getParent();
+					if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext(this);
+				},
+				doG740FocusChildPrev: function(objChild) {
+					var objParent=this.getParent();
+					if (objParent && objParent.doG740FocusChildPrev) objParent.doG740FocusChildPrev(this);
 				}
 			}
 		);
@@ -1627,6 +1775,12 @@ define(
 						this.fieldName=value;
 						return true;
 					}
+					if (name=='focused') {
+						if (value && this.domTextArea) {
+							this.domTextArea.focus();
+						}
+						return true;
+					}
 					this.inherited(arguments);
 				},
 				postCreate: function() {
@@ -1646,12 +1800,13 @@ define(
 						if (!this.objPanelMemo) return false;
 						this.objPanelMemo.onG740Change(this.value);
 					};
+					dojo.on(this.domTextArea, 'keydown', dojo.hitch(this, this.onKeyDown));
+					this.focusNode=this.domTextArea;
 					
 					var domBtn=document.createElement('div');
 					dojo.addClass(domBtn,'btn');
 					objBody.domNode.appendChild(domBtn);
 					dojo.on(domBtn, 'click', dojo.hitch(this, this.onBtnClick));
-					
 					this.inherited(arguments);
 				},
 				onBtnClick: function() {
@@ -1750,6 +1905,39 @@ define(
 				onG740Blur: function() {
 					if (this.domTextArea) this.onG740Change(this.domTextArea.value);
 					return true;
+				},
+				onKeyDown: function(e) {
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
+						this.onBtnClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.domTextArea) this.onG740Change(this.domTextArea.value);
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.domTextArea) this.onG740Change(this.domTextArea.value);
+						var objParent=this.getParent();
+						if (objParent) objParent.doG740FocusChildPrev(this);
+					}
+				},
+				doG740Focus: function() {
+					if (this.domTextArea) this.domTextArea.focus();
+				},
+				canFocused: function() {
+					return true;
+				},
+				doG740FocusChildFirst: function() {
+					if (this.domTextArea) this.domTextArea.focus();
+				},
+				doG740FocusChildLast: function() {
+					if (this.domTextArea) this.domTextArea.focus();
 				}
 			}
 		);

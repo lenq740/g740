@@ -120,8 +120,12 @@ define(
 						var objTdCaption=document.createElement('td');
 						objTdCaption.className='g740-simplefields-td-caption';
 						objTr.appendChild(objTdCaption);
-						var caption=fld.caption;
-						if (!caption) caption=fld.name;
+						
+						var caption='';
+						if (fld.type!='check') {
+							caption=fld.caption;
+							if (!caption) caption=fld.name;
+						}
 						var objText=document.createTextNode(caption);
 						objTdCaption.appendChild(objText);
 						
@@ -133,6 +137,7 @@ define(
 						
 						var p={
 							objForm: this.objForm,
+							objPanel: this,
 							rowsetName: this.rowsetName,
 							fieldName: fld.name,
 							fieldDef: fld,
@@ -141,9 +146,6 @@ define(
                         var objEditor = g740.panels.createObjField(fld, p, objDiv);
                         this._childs.push(objEditor);
 					}
-				},
-				focus: function() {
-					if (this.domNode) this.domNode.focus();
 				},
 				doG740Repaint: function(para) {
 					var objRowSet=this.getRowSet();
@@ -159,6 +161,100 @@ define(
 				onG740Focus: function() {
 					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
 					return true;
+				},
+				
+				canFocused: function() {
+					var result=false;
+					for(var i=0; i<this._childs.length; i++) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (!obj.getVisible()) continue;
+						result=true;
+						break;
+					}
+					return result;
+				},
+				doG740Focus: function() {
+					this.inherited(arguments);
+					this.doG740FocusChildFirst();
+					
+					for(var i=0; i<this._childs.length; i++) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (!obj.doG740Focus) continue;
+						obj.doG740Focus();
+						break;
+					}
+				},
+				doG740FocusChildFirst: function() {
+					var objChild=null;
+					for(var i=0; i<this._childs.length; i++) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (!obj.getVisible()) continue;
+						objChild=obj;
+						break;
+					}
+					if (objChild) obj.set('focused',true);
+				},
+				doG740FocusChildLast: function() {
+					var objChild=null;
+					for(var i=this._childs.length-1; i>=0; i--) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (!obj.getVisible()) continue;
+						objChild=obj;
+						break;
+					}
+					if (objChild) obj.set('focused',true);
+				},
+				doG740FocusChildNext: function(objChild) {
+					var index=this._childs.length;
+					for(var i=0; i<this._childs.length; i++) {
+						if (objChild==this._childs[i]) {
+							index=i;
+							break;
+						}
+					}
+					var objChild=null;
+					for(var i=index+1; i<this._childs.length; i++) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (!obj.getVisible()) continue;
+						objChild=obj;
+						break;
+					}
+					if (objChild) {
+						obj.set('focused',true);
+					}
+					else {
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext(this);
+					}
+				},
+				doG740FocusChildPrev: function(objChild) {
+					var index=-1;
+					for(var i=0; i<this._childs.length; i++) {
+						if (objChild==this._childs[i]) {
+							index=i;
+							break;
+						}
+					}
+					var objChild=null;
+					for(var i=index-1; i>=0; i--) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (!obj.getVisible()) continue;
+						objChild=obj;
+						break;
+					}
+					if (objChild) {
+						obj.set('focused',true);
+					}
+					else {
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildPrev) objParent.doG740FocusChildPrev(this);
+					}
 				}
 			}
 		);

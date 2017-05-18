@@ -205,6 +205,53 @@ html, body {
 	overflow-y: auto;
 }
 
+
+.g740-widget-icons {
+	height: 17px;
+	position: relative;
+	overflow: hidden;
+	border-style: solid;
+	border-width: 1px;
+	border-color: transparent;
+}
+.g740-widget-icons.g740-readonly{
+	opacity: 0.4;
+}
+.g740-widget-icons.g740-widget-focused {
+	border-color: black;
+}
+.g740-widget-icons .g740-focused {
+	position: absolute;
+	height: 0px;
+	width: 0px;
+	top: 0px;
+	left: 0px;
+	opacity: 0;
+}
+.g740-widget-icons .g740-widget-icons-icon {
+	position: absolute;
+	left: 0px;
+	top: 1px;
+	width: 16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	background-size: cover;
+	cursor: pointer;
+}
+.g740-widget-icons .check-on {
+	background-image: url('icons/check-on.png');
+}
+.g740-widget-icons .check-off {
+	background-image: url('icons/check-off.png');
+}
+.g740-widget-icons .g740-widget-icons-label {
+	position: absolute;
+	left: 20px;
+	top: 1px;
+	line-height: 14px;
+	font-size: 12px;
+}
+
 /* g740.Memo, g740.TextBox, g740.ComboBox */
 .g740-widget-text {
 	margin: 0px;
@@ -288,7 +335,7 @@ html, body {
 	border-style: solid;
 	border-color: lightgray;
 }
-.g740-radiogroupbox:focus {
+.g740-radiogroupbox.g740-widget-focused {
 	border-color: black;
 }
 
