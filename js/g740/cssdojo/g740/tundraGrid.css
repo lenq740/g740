@@ -30,6 +30,10 @@
 	background-color: #e9e9e9;
 	font-family: inherit;
 	font-size: inherit;
+	border: 1px solid transparent;
+}
+.g740 .dojoxGrid.g740-grid-focused {
+	border: 1px solid #d4464e;
 }
 
 .g740  .dojoxGrid th .dojoxGridSortNode {
@@ -88,8 +92,6 @@
 	background-color: #F3F3F3 !important;
 }
 .g740 .dojoxGridHeader .dojoxGridCellFocus {
-	border-color: #ACA899 #919191;
-	border-style: dashed;
 }
 .g740 .dojoxGridArrowButtonChar {
 	float: right;
@@ -198,7 +200,6 @@
 }
 
 .g740 .dojoxGridCellFocus {
-	border: 1px dashed darkblue !important;
 }
 
 .g740 .dojoxGridCellOver {

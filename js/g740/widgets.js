@@ -655,6 +655,7 @@ define(
 			{
 				filter: '',
 				value: null,
+				isAddEmptyItem: false,
 				templateString: '<select class="g740-storelist" multiple data-dojo-attach-event="'+
 					'onchange: doChange, '+
 					'onclick: onClick, ondblclick: onDblClick, '+
@@ -664,6 +665,17 @@ define(
 				postCreate: function() {
 					this.inherited(arguments);
 					this._renderItems();
+					if (this.filter) {
+						this.value='';
+						for (var i=0; i<this.domNode.childNodes.length; i++) {
+							var domOption=this.domNode.childNodes[i];
+							if (domOption.nodeName.toLowerCase()!='option') continue;
+							var id=domOption.getAttribute('value');
+							if (!id) continue;
+							this.value=id;
+							break;
+						}
+					}
 					this._renderValue();
 					g740.execDelay.go({
 						delay: 50,
@@ -686,11 +698,6 @@ define(
 						return true;
 					}
 					this.inherited(arguments);
-				},
-				render: function() {
-					this._renderItems();
-					this._renderValue();
-					this.scrollToSelected();
 				},
 				// абстрактный метод - возвращает упорядоченный массив элементов в виде {id: <id>, value: <value>}
 				getItems: function() {
@@ -780,7 +787,6 @@ define(
 			{
 				fieldName: '',
 				objRowSet: null,
-				isAddEmptyItem: false,
 				constructor: function(para, domElement) {
 					if (!para) para={};
 					if (para.objRowSet) this.objRowSet=para.objRowSet;
@@ -996,14 +1002,6 @@ define(
 					}
 					this.inherited(arguments);
 				},
-				constructor: function(para, domElement) {
-					var procedureName='g740.ToolbarButton.constructor';
-					try {
-						this.on('Click', this.onG740Click);
-					}
-					finally {
-					}
-				},
 				destroy: function() {
 					var procedureName='g740.ToolbarButton.destroy';
 					try {
@@ -1015,6 +1013,11 @@ define(
 					}
 					finally {
 					}
+				},
+				postCreate: function() {
+					this.on('Click', this.onG740Click);
+					this.on('KeyDown', this.onG740KeyDown);
+					this.inherited(arguments);
 				},
 				doG740Repaint: function(para) {
 					var isEnabled=false;
@@ -1039,6 +1042,10 @@ define(
 					});
 					if (this.objAction) return this.objAction.exec();
 					return false;
+				},
+				onG740KeyDown: function(e) {
+					dojo.stopEvent(e);
+					console.log(e);
 				},
 				_isClickTimeout: false,
 				_setClickTimeoutOff: function() {

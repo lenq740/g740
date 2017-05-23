@@ -21,16 +21,14 @@
 .g740 .dijitSelect .dijitButtonContents,
 .g740 .dijitSelect,
 .g740 .dijitTextBox {
-	/* 	For all except dijit.form.NumberSpinner:  the actual input element.
-		For TextBox, ComboBox, Spinner: the div that contains the input.
-		Otherwise the actual input element.
-	*/
-	background:#fff url("../images/validationInputBg.png") repeat-x top left;
-	#background:#fff url('../images/validationInputBg.gif') repeat-x top left;
+	background-color: white;
 }
 .g740 .dijitSelect,
 .g740 .dijitTextBox {
 	border:1px solid #b3b3b3;
+}
+.g740 .dijitTextBox.g740-widget-focused {
+	border:1px solid #d4464e;
 }
 
 .g740 .dijitSelect .dijitArrowButton,

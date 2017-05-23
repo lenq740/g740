@@ -479,6 +479,9 @@ define(
 				if (fldDefType && !result.basetype) {
 					if (fldDefType=='num' && (t=='list' || t=='icons' || t=='radio')) result.basetype='num';
 				}
+				if (t=='memo') {
+					if (g740.xml.isAttr(xmlField,'enter')) result.enter=g740.xml.getAttrValue(xmlField,'enter','0');
+				}
 
 				var lstRequests=g740.xml.findArrayOfChild(xmlField, {nodeName: 'request'});
 				for (var i=0; i<lstRequests.length; i++) {
@@ -1762,6 +1765,7 @@ define(
 				nodeType: '',
 				params: {},
 				domTextArea: null,
+				enter: false,
 				destroy: function() {
 					var procedureName='g740.PanelMemo.destroy';
 					this.params={};
@@ -1876,8 +1880,7 @@ define(
 					try {
 						var objRowSet=this.getRowSet();
 						if (!objRowSet) return false;
-						var fields=objRowSet.getFieldsByNodeType(this.nodeType);
-						var fld=fields[this.fieldName];
+						var fld=this.getFldDef();
 						if (!fld) return false;
 						// Если onchange вызван из doG740Repaint, то отписывать обратно в RowSet не надо
 						if (this._repaint.isRepaint) {
@@ -1914,10 +1917,22 @@ define(
 					}
 					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
 						// Enter, Tab
-						dojo.stopEvent(e);
-						if (this.domTextArea) this.onG740Change(this.domTextArea.value);
-						var objParent=this.getParent();
-						if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext(this);
+						var isEnter=this.enter;
+						var fld=null;
+						var fields=null;
+						var objRowSet=this.getRowSet();
+						if (objRowSet) fields=objRowSet.getFieldsByNodeType(this.nodeType);
+						if (fields) fld=fields[this.fieldName];
+						if (fld && fld.enter) isEnter=true;
+						
+						if (isEnter && e.keyCode==13) {
+						}
+						else {
+							dojo.stopEvent(e);
+							if (this.domTextArea) this.onG740Change(this.domTextArea.value);
+							var objParent=this.getParent();
+							if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext(this);
+						}
 					}
 					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
 						// Shift+Tab
@@ -1938,6 +1953,15 @@ define(
 				},
 				doG740FocusChildLast: function() {
 					if (this.domTextArea) this.domTextArea.focus();
+				},
+				getFldDef: function() {
+					var result=false;
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return false;
+					var fields=objRowSet.getFieldsByNodeType(this.nodeType);
+					var result=fields[this.fieldName];
+					if (!result) return false;
+					return result;
 				}
 			}
 		);
@@ -2053,6 +2077,7 @@ define(
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
 			if (g740.xml.isAttr(xml,'field')) para.fieldName=g740.xml.getAttrValue(xml,'field','');
+			if (g740.xml.isAttr(xml,'enter')) para.enter=g740.xml.getAttrValue(xml,'enter','0');
 			var result=new g740.PanelMemo(para, null);
 			return result;
 		};

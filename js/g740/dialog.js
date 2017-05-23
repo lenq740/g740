@@ -448,7 +448,6 @@ define(
 						requestName: 'refresh',
 						sync: true
 					});
-
 					this.objListRowSet=new g740.ListRowSet(
 						{
 							objRowSet: objRefRowSet,

@@ -361,7 +361,15 @@ define(
 						return false;
 					}
 					this.inherited(arguments);
-				}
+				},
+				onG740Focus: function() {
+					if (this.domNode && !dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.addClass(this.domNode,'g740-widget-focused');
+					this.inherited(arguments);
+				},
+				onG740Blur: function() {
+					if (this.domNode && dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.removeClass(this.domNode,'g740-widget-focused');
+					this.inherited(arguments);
+				},
 			}
 		);
 		// Виджет для поля строки
@@ -496,9 +504,13 @@ define(
 					}
 					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
 						// Enter, Tab
-						dojo.stopEvent(e);
-						if (this.domNodeTextArea) this.onG740Change(this.domNodeTextArea.value);
-						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+						if (this.fieldDef.enter && e.keyCode==13) {
+						}
+						else {
+							dojo.stopEvent(e);
+							if (this.domNodeTextArea) this.onG740Change(this.domNodeTextArea.value);
+							if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+						}
 					}
 					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
 						// Shift+Tab
@@ -782,7 +794,9 @@ define(
 					return false;
 				},
 				isDialogOpened: false,
-				onButtonClick: function() {
+				onButtonClick: function(e) {
+					var isFiltered=false;
+					if (e && e.isFiltered) isFiltered=true;
 					if (this.getReadOnly()) return false;
 					if (this.objRowSet && this.rowId!==null) {
 						if (this.objRowSet.getFocusedId()!=this.rowId) {
@@ -803,7 +817,12 @@ define(
 					}
 					else {
 						var filter='';
-						if (this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
+						if (isFiltered) {
+							if (this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
+							if (filter=='') filter='--//--';
+						}
+						
+						//if (isFiltered && this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
 						this.isDialogOpened=true;
 						var objDialog=new g740.DialogEditorRef(
 							{ 
@@ -836,7 +855,7 @@ define(
 						// Enter, Tab
 						dojo.stopEvent(e);
 						if (this.domNodeInput && this.domNodeInput.value!=this._value) {
-							this.onButtonClick();
+							this.onButtonClick({isFiltered: true});
 						}
 						else {
 							if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
@@ -846,7 +865,7 @@ define(
 						// Shift+Tab
 						dojo.stopEvent(e);
 						if (this.domNodeInput && this.domNodeInput.value!=this._value) {
-							this.onButtonClick();
+							this.onButtonClick({isFiltered: true});
 						}
 						else {
 							if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
@@ -870,13 +889,16 @@ define(
 			'g740.FieldEditor.RadioGroupBox',
 			[dijit._Widget, dijit._TemplatedMixin, g740.FieldEditor],
 			{
-				templateString: '<div class="g740-radiogroupbox"></div>',
+				templateString: '<div class="g740-radiogroupbox">'+
+					'<input type="checkbox" class="g740-focused" data-dojo-attach-point="focusNode"></input>'+
+					'<div data-dojo-attach-point="domBody">'+
+					'</div>'+
+				'</div>',
 				list: '',
 				baseType: 'string',
 				value: '',
-				readOnly: false,
-				groupname: '',
 				_radioItems: null,
+				_selectedIndex: -1,
 				set: function(name, value) {
 					if (name=='list') {
 						if (this.list!=value) {
@@ -892,18 +914,22 @@ define(
 						}
 						return true;
 					}
-					if (name=='groupname') {
-						if (this.groupname!=value) {
-							this.groupname=value;
-						}
-						return true;
-					}
 					if (name=='value') {
 						this.setValue(value);
 						return true;
 					}
 					if (name=='readOnly') {
-						this.setReadOnly(value);
+						if (!this.domNode) return false;
+						if (value) {
+							dojo.addClass(this.domNode, 'g740-readonly');
+						}
+						else {
+							dojo.removeClass(this.domNode, 'g740-readonly');
+						}
+						return true;
+					}
+					if (name=='focused') {
+						if (this.focusNode && value) this.focusNode.focus();
 						return true;
 					}
 					this.inherited(arguments);
@@ -918,128 +944,161 @@ define(
 						this.baseType='string';
 						if (this.fieldDef.basetype=='num') this.baseType='num';
 					}
-					this.groupname=this.rowsetName+'.'+this.fieldName;
+					this.on('focus', this._onWidgetFocus);
+					this.on('blur', this._onWidgetBlur);
+					this.focusNode.obj=this;
+					this.focusNode.onkeypress=function(e) {
+						if (this.obj) this.obj.onKeyPress(e);
+					};
 					this.render();
 					this.inherited(arguments);
 				},
-				setValue: function(value) {
-					if (!this._radioItems) return false;
-					var newValue='';
-					if (this.baseType=='num') {
-						value=g740.convertor.toJavaScript(value,'num');
-						newValue=0;
-					}
-					
-					var isFound=false;
-					for(var i=0; i<this._radioItems.length; i++) {
-						var domRadio=this._radioItems[i];
-						var isOk=false;
-						if (this.baseType=='num' && domRadio.valueIndex==value) isOk=true;
-						if (this.baseType=='string' && domRadio.valueText==value) isOk=true;
-						if (isOk) {
-							domRadio.checked=true;
-							newValue=value;
-							isFound=true;
-							break;
-						}
-					}
-					if (!isFound) {
-						for(var i=0; i<this._radioItems.length; i++) {
-							var domRadio=this._radioItems[i];
-							if (domRadio.checked) domRadio.checked=false;
-						}
-					}
-					
-					this.value=newValue;
-				},
-				setReadOnly: function(value) {
-					value=(value)?true:false;
-					if (value==this.readOnly) return true;
-					if (!this._radioItems) return false;
-					for(var i=0; i<this._radioItems.length; i++) {
-						var domRadio=this._radioItems[i];
-						domRadio.disabled=value;
-					}
-					this.readOnly=value;
-					if (value) {
-						if (!dojo.hasClass(this.domNode, 'dijitTextBoxReadOnly')) dojo.addClass(this.domNode, 'dijitTextBoxReadOnly');
-					}
-					else {
-						if (dojo.hasClass(this.domNode, 'dijitTextBoxReadOnly')) dojo.removeClass(this.domNode, 'dijitTextBoxReadOnly');
-					}
-				},
-				_onRadioChanged: function(e) {
-					if (!this._radioItems) return false;
-					var newValue='';
-					for(var i=0; i<this._radioItems.length; i++) {
-						var domRadio=this._radioItems[i];
-						if (!domRadio.checked) continue;
-						if (this.baseType=='num') newValue=domRadio.valueIndex;
-						if (this.baseType=='string') newValue=domRadio.valueText;
-						break;
-					}
-					if (this.value!=newValue) {
-						this.value=newValue;
-						this.onG740Change(newValue);
-					}
-				},
 				render: function() {
 					if (!this.domNode) return;
-					this._radioItems=[];
-					this.domNode.innerHTML='';
+					if (!this.domBody) return;
+					this.domBody.innerHTML='';
 					var lst=this.list.split(';');
-					if (this.groupname) {
-						if (!g740.RadioGroupBoxName) g740.RadioGroupBoxName=0;
-						g740.RadioGroupBoxName++;
-						this.groupname='RadioGroupBox'+g740.RadioGroupBoxName;
-					}
+					this._radioItems=[];
 					for (var i=0; i<lst.length; i++) {
-						var domDiv=document.createElement('div');
-						var domLabel=document.createElement('label');
-						var domLabelText=document.createTextNode(' '+lst[i]);
+						var domDivItem=document.createElement('div');
+						domDivItem.className='g740-radio-item';
+						if (this.baseType=='num') {
+							domDivItem.setAttribute('data-value',i);
+							domDivItem.setAttribute('data-index',i);
+						}
+						else {
+							domDivItem.setAttribute('data-value',lst[i]);
+							domDivItem.setAttribute('data-index',i);
+						}
+						domDivItem.obj=this;
+						var domDivIcon=document.createElement('div');
+						domDivIcon.className='g740-radio-icon check-off';
+						domDivIcon.onclick=function() {
+							var domDivItem=this.parentNode;
+							if (!domDivItem) return false;
+							if (!domDivItem.obj) return false;
+							if (!domDivItem.obj.doChange) return false;
+							domDivItem.obj.doChange(domDivItem.getAttribute('data-value'));
+							domDivItem.obj.setSelectedIndex(domDivItem.getAttribute('data-index'));
+							domDivItem.obj.set('focused',true);
+						};
 						
-						var domRadio=document.createElement('input');
-						domRadio.setAttribute('type','radio');
-						domRadio.setAttribute('name',this.groupname);
-						domRadio.valueIndex=i+1;
-						domRadio.valueText=lst[i];
-						dojo.on(domRadio, 'change', dojo.hitch(this, this._onRadioChanged));
-						dojo.on(domRadio, 'keydown', dojo.hitch(this, this.onKeyDown));
-						
-						domLabel.appendChild(domRadio);
-						domLabel.appendChild(domLabelText);
-						domDiv.appendChild(domLabel);
-						this.domNode.appendChild(domDiv);
-						this._radioItems.push(domRadio);
+						domDivItem.appendChild(domDivIcon);
+						var domDivLabel=document.createElement('div');
+						domDivLabel.className='g740-radio-label';
+						domDivLabel.onclick=function() {
+							var domDivItem=this.parentNode;
+							if (!domDivItem) return false;
+							if (!domDivItem.obj) return false;
+							if (!domDivItem.obj.doChange) return false;
+							domDivItem.obj.setSelectedIndex(domDivItem.getAttribute('data-index'));
+							domDivItem.obj.set('focused',true);
+						};
+
+						var domLabelText=document.createTextNode(lst[i]);
+						domDivLabel.appendChild(domLabelText);
+						domDivItem.appendChild(domDivLabel);
+						this.domBody.appendChild(domDivItem);
+						this._radioItems.push(domDivItem);
 					}
-					var readOnly=this.readOnly;
-					this.readOnly='';
-					this.setReadOnly(readOnly);
+					this.setValue(this.value);
 				},
-				doG740Focus: function() {
-					if (!this._radioItems) return;
-					var node=this._radioItems[0];
-					if (node && node.focus) node.focus();
+				setValue: function(value) {
+					if (!this._radioItems) return false;
+					if (this.baseType=='num') {
+						value=g740.convertor.toJavaScript(value,'num');
+					}
+					for(var i=0; i<this._radioItems.length; i++) {
+						var domDivItem=this._radioItems[i];
+						var isOk=false;
+						if (domDivItem.getAttribute('data-value')==value) isOk=true;
+						if (isOk) {
+							if (!dojo.hasClass(domDivItem,'check-on')) dojo.addClass(domDivItem,'check-on');
+							if (dojo.hasClass(domDivItem,'check-off')) dojo.removeClass(domDivItem,'check-off');
+						} 
+						else {
+							if (!dojo.hasClass(domDivItem,'check-off')) dojo.addClass(domDivItem,'check-off');
+							if (dojo.hasClass(domDivItem,'check-on')) dojo.removeClass(domDivItem,'check-on');
+						}
+					}
+					this.value=value;
 				},
-				onKeyDown: function(e) {
-					if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+				setSelectedIndex: function(index) {
+					if (!this._radioItems) return false;
+					if (this._selectedIndex==index) return true;
+					for(var i=0; i<this._radioItems.length; i++) {
+						var domDivItem=this._radioItems[i];
+						if (i!=index) {
+							if (dojo.hasClass(domDivItem,'g740-widget-focused')) dojo.removeClass(domDivItem,'g740-widget-focused');
+						}
+						else {
+							if (!dojo.hasClass(domDivItem,'g740-widget-focused')) dojo.addClass(domDivItem,'g740-widget-focused');
+						}
+					}
+					this._selectedIndex=index;
+				},
+				onKeyPress: function(e) {
+					if (e.charCode==32 && !e.ctrlKey) {
+						// Space
+						dojo.stopEvent(e);
+						if (this._radioItems && this._selectedIndex>=0) {
+							var domDivItem=this._radioItems[this._selectedIndex];
+							if (domDivItem) this.doChange(domDivItem.getAttribute('data-value'));
+						}
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
 						// Enter, Tab
 						dojo.stopEvent(e);
-						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+						if (this._radioItems && (this._selectedIndex+1)<this._radioItems.length) {
+							this.setSelectedIndex(this._selectedIndex+1);
+						}
+						else {
+							if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+						}
 					}
 					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
 						// Shift+Tab
 						dojo.stopEvent(e);
-						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+						if (this._radioItems && (this._selectedIndex-1)>=0) {
+							this.setSelectedIndex(this._selectedIndex-1);
+						}
+						else {
+							if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+						}
 					}
 				},
-				onG740Focus: function() {
-					if (!dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.addClass(this.domNode, 'g740-widget-focused');
-					this.inherited(arguments);
+				_onWidgetFocus: function() {
+					var newIndex=-1;
+					if (!this._radioItems) return false;
+					for(var i=0; i<this._radioItems.length; i++) {
+						var domDivItem=this._radioItems[i];
+						if (domDivItem.getAttribute('data-value')==this.value) {
+							newIndex=i;
+							break;
+						}
+					}
+					this.setSelectedIndex(newIndex);
 				},
-				onG740Blur: function() {
-					if (dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.removeClass(this.domNode, 'g740-widget-focused');
-					this.inherited(arguments);
+				_onWidgetBlur: function() {
+					this.setSelectedIndex(-1);
+				},
+				onG740Change: function(newTextValue) {
+				},
+				doChange: function(newValue) {
+					if (!this.objRowSet) return false;
+					var rowId=this.rowId;
+					if (rowId===null) rowId=this.objRowSet.getFocusedId();
+					// Если в дереве не то nodeType, то отписывать не надо
+					if (this.objRowSet.isTree && this.nodeType) {
+						var nodeType='';
+						var node=this.objRowSet.objTreeStorage.getNode(rowId,this.objRowSet.getFocusedParentNode());
+						if (node) nodeType=node.nodeType;
+						if (this.nodeType!=nodeType) return false;
+					}
+					this.objRowSet.setFieldProperty({fieldName: this.fieldName, propertyName: 'value', value: newValue, id: rowId});
+					if (this.isSaveOnChange && this.objRowSet.getExistUnsavedChanges()) {
+						this.objRowSet.exec({requestName: 'save'});
+					}
 				}
 			}
 		);
@@ -1291,7 +1350,6 @@ define(
 			}
 		);
 		
-
 	    // Виджет кнопки
 		dojo.declare(
 			'g740.FieldEditor.Button',

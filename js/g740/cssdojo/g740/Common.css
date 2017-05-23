@@ -13,7 +13,7 @@
 	outline: none;
 }
 .g740 textarea:focus {
-	border-color: black;
+	border-color: #d4464e;
 }
 .g740 input {
 	font-family: inherit;

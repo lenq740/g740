@@ -225,8 +225,6 @@ define(
 			        if (node) rowIndex = this.getItemIndex(node);
 			        this.focus.focusGrid();
 			        this.focus.setFocusIndex(rowIndex, cellIndex);
-			        //console.log({mode: 'doG740Focus', this: this});
-			        //this.set('focused',true);
 			    },
 				
 				doG740ScrollToRow: function (rowIndex) {
@@ -331,6 +329,11 @@ define(
 			                    result = result.split("\n").join(' ');
 			                    if (result.length > 128) result = result.substr(0, 128) + ' ...';
 			                }
+							if (fld.type=='num' && fld.dec) {
+								var value=parseFloat(result);
+								if (isNaN(value)) value=0;
+								result=value.toFixed(fld.dec);
+							}
 			            }
 			            return result;
 			        }
