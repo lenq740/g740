@@ -74,6 +74,7 @@ define(
 		'g740/panelGrid',
 		'g740/panelTree',
 		'g740/panelFields',
+		'g740/panelFieldsMultiline',
 		'g740/panelHtmlFields',
 		'g740/Form',
 		'g740/RowSet'

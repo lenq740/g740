@@ -561,6 +561,9 @@ define(
 						dojo.stopEvent(e);
 						if (this.hide) this.hide();
 					}
+					if (e.keyCode==9) {
+						dojo.stopEvent(e);
+					}
 				},
 				onListDblClick: function(e) {
 					if (this.saveAndHide) this.saveAndHide(this.objListRowSet.value);
@@ -693,7 +696,7 @@ define(
 					var count=lst.length;
 					if (count<5) count=5;
 					if (count>25) count=25;
-					var h=(count*this.charHeight+5)+'px';
+					var h=(30+count*this.charHeight+5)+'px';
 					
 					var w=350+'px';
 					if (fld.dlgwidth) w=fld.dlgwidth;

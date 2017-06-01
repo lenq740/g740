@@ -628,6 +628,7 @@ define(
 					}
 					this.doG740Repaint({});
 					var bestPanel=this.getBestPanel();
+					
 					if (bestPanel && bestPanel.doG740Focus) {
 						g740.execDelay.go({
 							delay: 200,
@@ -810,9 +811,9 @@ define(
 						var objPanel=lst[i];
 						if (!objPanel) continue;
 						if (!objPanelFocus && objPanel.isFocusOnShow) objPanelFocus=objPanel;
-						if (!objPanelTree && objPanel.declaredClass=='g740.Tree') objPanelTree=objPanel;
-						if (!objPanelGrid && objPanel.declaredClass=='g740.Grid') objPanelGrid=objPanel;
-						if (!objPanelFields && objPanel.declaredClass=='g740.SimpleFields') objPanelFields=objPanel;
+						if (!objPanelTree && objPanel.isG740Tree) objPanelTree=objPanel;
+						if (!objPanelGrid && objPanel.isG740Grid) objPanelGrid=objPanel;
+						if (!objPanelFields && objPanel.isG740Fields) objPanelFields=objPanel;
 						if (!objPanelFirst) objPanelFirst=objPanel;
 					}
 					if (objPanelFocus) return objPanelFocus;

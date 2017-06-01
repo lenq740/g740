@@ -11,7 +11,8 @@ define(
 			'g740.Grid',
 			[dojox.grid.DataGrid, g740._PanelAbstract],
 			{
-			    objRowSet: null,
+			    isG740Grid: true,
+				objRowSet: null,
 			    g740structure: null,
 			    objActionOnDblClick: null,
 			    constructor: function (para, domElement) {

@@ -449,6 +449,7 @@ define(
 					}
 					if (name=='readOnly') {
 						if (this.domNodeInput) {
+							this.domNodeInput.readOnly=value;
 							this._readOnly=value;
 							if (value) {
 								if (!dojo.hasClass(this.domNodeInput, 'dijitTextBoxReadOnly')) dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');

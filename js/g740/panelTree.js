@@ -11,6 +11,7 @@ define(
 			'g740.Tree',
 			[g740._PanelAbstract, dijit.Tree],
 			{
+				isG740Tree: true,
 				objRowSet: null,
 				objForm: null,
 				isTreeMenuMode: false,
@@ -359,29 +360,41 @@ define(
 
 				_onContainerKeydown: function(e){
 					if (e && e.type=='keydown' && this.objRowSet && !this.objRowSet.isObjectDestroed) {
-						// Esc
 						if (e.keyCode==27) {
+							// Esc
 							this.objRowSet.undoUnsavedChanges();
 							dojo.stopEvent(e);
 							return true;
 						}
-						// Ctrl+Del
 						if (e.ctrlKey && e.keyCode==46) {
+							// Ctrl+Del
 							this.objRowSet.execConfirmDelete();
 							dojo.stopEvent(e);
 							return true;
 						}
-						// Ins, Ctrl+Ins
 						if (e.keyCode==45) {
+							// Ins, Ctrl+Ins
 							this.objRowSet.exec({requestName: 'append'});
 							dojo.stopEvent(e);
 							return true;
 						}
-						// F2
 						if (!e.ctrlKey && e.keyCode==113) {
+							// F2
 							this.objRowSet.exec({requestName: 'save'});
 							dojo.stopEvent(e);
 							return true;
+						}
+						if (!e.ctrlKey && !e.shiftKey && e.keyCode==9) {
+							// Tab
+							dojo.stopEvent(e);
+							var objParent=this.getParent();
+							if (objParent && objParent.doG740FocusChildNext) objParent.doG740FocusChildNext();
+						}
+						if (!e.ctrlKey && e.shiftKey && e.keyCode==9) {
+							// Shift+Tab
+							dojo.stopEvent(e);
+							var objParent=this.getParent();
+							if (objParent && objParent.doG740FocusChildPrev) objParent.doG740FocusChildPrev();
 						}
 					}
 					this.inherited(arguments);
@@ -410,6 +423,9 @@ define(
 							func: this.doG740PanelHide
 						});
 					}
+					return true;
+				},
+				canFocused: function() {
 					return true;
 				}
 			}

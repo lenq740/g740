@@ -5,20 +5,20 @@ define(
 	[],
 	function() {
 		if (typeof(g740)=='undefined') g740={};
-// Класс SimpleFields
 		dojo.declare(
-			'g740.SimpleFields',
+			'g740.FieldsSimple',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
 			{
+				isG740Fields: true,
 				fields: [],
 				_childs: [],
 				title: '',
 				padding: '2px',
 				templateString: 
-					'<div class="g740-simplefields">'+
+					'<div class="g740-fieldssimple">'+
 					'<div data-dojo-attach-point="domNodeTitle"></div>'+
 					'<div data-dojo-attach-point="domNodeDivTable">'+
-					'<table class="g740-simplefields-table" data-dojo-attach-point="domNodeTable">'+
+					'<table class="g740-fieldssimple-table" data-dojo-attach-point="domNodeTable">'+
 					'</table>'+
 					'</div>'+
 					'</div>',
@@ -48,7 +48,7 @@ define(
 					this.inherited(arguments);
 				},
 				constructor: function(para, domElement) {
-					var procedureName='g740.SimpleFields.constructor';
+					var procedureName='g740.FieldsSimple.constructor';
 					this.fields={};
 					this._childs=[];
 					this.set('objForm',para.objForm);
@@ -60,7 +60,7 @@ define(
 					//console.log(this);
 				},
 				destroy: function() {
-					var procedureName='g740.SimpleFields.destroy';
+					var procedureName='g740.FieldsSimple.destroy';
 					if (this.fields) {
 						for(var i=0; i<this.fields.length; i++) this.fields[i]=null;
 						this.fields=[];
@@ -118,7 +118,7 @@ define(
 						var objTr=document.createElement('tr');
 						objTBody.appendChild(objTr);
 						var objTdCaption=document.createElement('td');
-						objTdCaption.className='g740-simplefields-td-caption';
+						objTdCaption.className='g740-fieldssimple-td-caption';
 						objTr.appendChild(objTdCaption);
 						
 						var caption='';
@@ -130,7 +130,7 @@ define(
 						objTdCaption.appendChild(objText);
 						
 						var objTdValue=document.createElement('td');
-						objTdValue.className='g740-simplefields-td-value';
+						objTdValue.className='g740-fieldssimple-td-value';
 						objTr.appendChild(objTdValue);
 						var objDiv=document.createElement('div');
 						objTdValue.appendChild(objDiv);
@@ -259,9 +259,9 @@ define(
 			}
 		);
 
-		g740.panels._builderPanelSimpleFields=function(xml, para) {
+		g740.panels._builderPanelFieldsSimple=function(xml, para) {
 			var result=null;
-			var procedureName='g740.panels._builderPanelSimpleFields';
+			var procedureName='g740.panels._builderPanelFieldsSimple';
 			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
 			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
@@ -269,7 +269,7 @@ define(
 			if (!para.rowsetName) {
 				g740.trace.goBuilder({
 					formName: para.objForm.name,
-					panelType: 'simplefields',
+					panelType: 'fields',
 					messageId: 'errorRowSetNameEmpty'
 				});
 				return null;
@@ -278,7 +278,7 @@ define(
 			if (!objRowSet) {
 				g740.trace.goBuilder({
 					formName: para.objForm.name,
-					panelType: 'simplefields',
+					panelType: 'fields',
 					rowsetName: para.rowsetName,
 					messageId: 'errorRowSetNotFoundInForm'
 				});
@@ -303,15 +303,16 @@ define(
 				fields.push(fld);
 			}
 			para.fields=fields;
-			var result=new g740.SimpleFields(para, null);
+			var result=new g740.FieldsSimple(para, null);
 			return result;
 		};
-		g740.panels.registrate('fields', g740.panels._builderPanelSimpleFields);
+		g740.panels.registrate('fields', g740.panels._builderPanelFieldsSimple);
 
 		dojo.declare(
 			'g740.Properties',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
 			{
+				isG740Fields: true,
 				_childs: [],
 				title: '',
 				templateString: '<div class="g740-properties"><table class="g740-properties-table" data-dojo-attach-point="domNodeTable"></table></div>',

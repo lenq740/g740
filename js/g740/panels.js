@@ -588,7 +588,7 @@ define(
 				return true;
             },
             createObjField: function (fld, p, domDiv) {
-                var result = null;
+				var result = null;
                 if (fld.refid) {
                     result = new g740.FieldEditor.Ref(p, domDiv);
                 }
@@ -652,6 +652,10 @@ define(
 				isG740CanChilds: false,				// Признак - класс может содержать дочерние панели
 				isG740AutoMenu: false,				// Признак - принудительно формировать контекстное меню, если оно не описанно
 
+				isG740Tree: false,					// Панель дерева
+				isG740Grid: false,					// Панель таблицы grid
+				isG740Fields: false,				// Панель списка полей
+				
 				objForm: null,
 				rowsetName: null,
 				nodeType: '',

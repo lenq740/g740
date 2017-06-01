@@ -6,6 +6,238 @@ define(
 	function() {
 		if (typeof(g740)=='undefined') g740={};
 		
+		// Контейнер, содержащий поле и метку - название поля
+		dojo.declare(
+			'g740.FieldContainer',
+			[dijit._Widget, dijit._TemplatedMixin],
+			{
+				g740className: 'g740.FieldContainer',	// Имя базового класса
+				objFieldEditor: null,
+				isLabelTop: false,
+				label: '',
+				isStretch: false,
+				isLayoutContainer: true,
+				left: 0,
+				templateString: '<div class="g740-fieldcontainer">'+
+					'<div class="g740-fieldcontainer-label" data-dojo-attach-point="domNodeLabel"></div>'+
+					'<div class="g740-fieldcontainer-field" data-dojo-attach-point="domNodeField">'+
+					'</div>'+
+				'</div>',
+				destroy: function() {
+					if (this.domNodeField) {
+						this.domNodeField.innerHTML='';
+					}
+					if (this.objFieldEditor) {
+						this.objFieldEditor.destroyRecursive();
+						this.objFieldEditor=null;
+					}
+					this.inherited(arguments);
+				},
+				set: function(name, value) {
+					if (name=='objFieldEditor') {
+						if (this.objFieldEditor==value) return true;
+						if (value) {
+							this.addChild(value);
+						}
+						else {
+							this.removeChild(this.objFieldEditor);
+						}
+						return true;
+					}
+					if (name=='label') {
+						this.label=value;
+						if (this.label==' ') this.label=='';
+						if (this.domNodeLabel) {
+							this.domNodeLabel.innerHTML='';
+							var domText=document.createTextNode(this.label);
+							this.domNodeLabel.appendChild(domText);
+						}
+						return true;
+					}
+					if (name=='isLabelTop') {
+						if (this.isLabelTop==value) return true;
+						this.isLabelTop=value;
+						return true;
+					}
+					if (name=='focused') {
+						if (value) this.doG740Focus();
+						return true;
+					}
+					if (name=='left') {
+						if (this.left==value) return true;
+						this.left=value;
+						if (this.domNode) {
+							dojo.style(this.domNode,'left',this.left+'px');
+						}
+					}
+					this.inherited(arguments);
+				},
+				postCreate: function() {
+					this.inherited(arguments);
+					this.render();
+				},
+				render: function() {
+					if (!this.domNode) return;
+					if (this.label) {
+						var label=this.label;
+						this.label='';
+						this.set('label',label);
+					}
+					if (this.objFieldEditor) {
+						var objFieldEditor=this.objFieldEditor;
+						this.objFieldEditor=null;
+						this.set('objFieldEditor',objFieldEditor);
+						if (this.objFieldEditor.domNode) {
+							dojo.style(this.objFieldEditor.domNode, 'width', '100%');
+						}
+					}
+				},
+				addChild: function(obj) {
+					if (obj && obj.g740className=='g740.FieldEditor') {
+						this.objFieldEditor=obj;
+						this.isStretch=false;
+						if (this.objFieldEditor.fieldDef) this.isStretch=this.objFieldEditor.fieldDef.stretch;
+						
+						if (this.domNodeField && this.objFieldEditor.domNode) {
+							this.domNodeField.innerHTML='';
+							this.domNodeField.appendChild(this.objFieldEditor.domNode);
+							dojo.style(this.domNodeField, 'width', this.objFieldEditor.getStyleWidth());
+						}
+						this._fieldWidthValue=0;
+						this._fieldHeightValue=0;
+					}
+				},
+				removeChild: function(obj) {
+					if (obj && obj==this.objFieldEditor) {
+						this.objFieldEditor=null;
+						if (this.domNodeField) this.domNodeField.innerHTML='';
+						this._fieldWidthValue=0;
+						this._fieldHeightValue=0;
+					}
+				},
+				getChildren: function() {
+					var result=[];
+					if (this.objFieldEditor) result=[this.objFieldEditor];
+					return result;
+				},
+				doResize: function() {
+					dojo.style(this.domNodeField, 'left', this.getFieldLeftPosition()+'px');
+
+					dojo.style(this.domNodeField, 'width', this.getFieldWidth()+'px');
+					dojo.style(this.domNodeField, 'height', this.getFieldHeight()+'px');
+					dojo.style(this.domNodeField, 'top', this.getFieldTopPosition()+'px');
+					dojo.style(this.domNodeField, 'left', this.getFieldLeftPosition()+'px');
+
+					dojo.style(this.domNode, 'width', this.getWidth()+'px');
+					dojo.style(this.domNode, 'height', this.getHeight()+'px');
+					dojo.style(this.domNode,'left',this.left+'px');
+				},
+				
+				getLabelWidth: function() {
+					return this.domNodeLabel.offsetWidth;
+				},
+				getLabelHeight: function() {
+					return 16;
+				},
+				
+				_fieldWidth: 0,
+				getFieldWidth: function() {
+					if (!this._fieldWidth) {
+						this._fieldWidth=0;
+						if (this.objFieldEditor) {
+							this._fieldWidth=parseInt(this.objFieldEditor.getWidth());
+							if (this.isLabelTop && this._fieldWidth<this.getLabelWidth()) this._fieldWidth=this.getLabelWidth();
+						}
+					}
+					return this._fieldWidth;
+				},
+				setFieldWidth: function(width) {
+					if (this.objFieldEditor) this.objFieldEditor.setWidth(width);
+					this._fieldWidth=0;
+				},
+				_fieldMinWidth: 0,
+				getFieldMinWidth: function() {
+					if (!this._fieldMinWidth) {
+						this._fieldMinWidth=0;
+						if (this.objFieldEditor) {
+							this._fieldMinWidth=parseInt(this.objFieldEditor.getMinWidth());
+							if (this.isLabelTop && this._fieldMinWidth<this.getLabelWidth()) this._fieldMinWidth=this.getLabelWidth();
+						}
+					}
+					return this._fieldMinWidth;
+				},
+				_fieldHeightValue: 0,
+				getFieldHeight: function() {
+					if (this._fieldHeightValue) return this._fieldHeightValue;
+					var result=20;
+					if (this.objFieldEditor) {
+						result=parseInt(this.objFieldEditor.getHeight());
+						this._fieldHeightValue=result;
+					}
+					return result;
+				},
+				getFieldLeftPosition: function() {
+					var result=0;
+					if (!this.isLabelTop) result=this.getLabelWidth()+3;
+					return result;
+				},
+				getFieldTopPosition: function() {
+					var result=0;
+					if (this.isLabelTop) result=this.getLabelHeight();
+					return result;
+				},
+				getWidth: function() {
+					var result=0;
+					if (this.isLabelTop) {
+						var result=this.getFieldWidth();
+						var labelWidth=this.getLabelWidth();
+						if (result<labelWidth) result=labelWidth;
+					}
+					else {
+						result=this.getFieldLeftPosition()+this.getFieldWidth();
+					}
+					return result;
+				},
+				getHeight: function() {
+					var labelHeight=this.getLabelHeight();
+					var result=this.getFieldTopPosition()+this.getFieldHeight();
+					if (result<labelHeight) result=labelHeight;
+					return result;
+				},
+				getMinWidth: function() {
+					var result=0;
+					if (this.isLabelTop) {
+						var result=this.getFieldMinWidth();
+						var labelWidth=this.getLabelWidth();
+						if (result<labelWidth) result=labelWidth;
+					}
+					else {
+						result=this.getFieldLeftPosition()+this.getFieldMinWidth();
+					}
+					return result;
+				},
+				
+				getVisible: function() {
+					if (this.objFieldEditor) return this.objFieldEditor.getVisible();
+					return false;
+				},
+				getReadOnly: function() {
+					if (this.objFieldEditor) return this.objFieldEditor.getReadOnly();
+					return true;
+				},
+				getRowSet: function() {
+					if (this.objFieldEditor) return this.objFieldEditor.getRowSet();
+					return null;
+				},
+				doG740Repaint: function() {
+					if (this.objFieldEditor) this.objFieldEditor.doG740Repaint();
+				},
+				doG740Focus: function() {
+					if (this.objFieldEditor) this.objFieldEditor.doG740Focus();
+				}
+			}
+		);
+		
 		// Абстрактный предок всех полей
 		dojo.declare(
 			'g740.FieldEditor',
@@ -104,34 +336,12 @@ define(
 					finally {
 					}
 				},
-				postMixInProperties: function() {
-					this.inherited(arguments);
-					var styles={};
-					var lstStyles=[];
-					if (this.style) lstStyles=this.style.split(';');
-					for(var i=0; i<lstStyles.length; i++) {
-						var item=lstStyles[i];
-						if (!item) continue;
-						var lst=item.split(':');
-						if (lst.length!=2) continue;
-						var name=dojo.string.trim(lst[0].toLowerCase());
-						styles[name]=dojo.string.trim(lst[1]);
-					}
-					var w=this.getStyleWidth();
-					if (w) {
-						styles['width']=w;
-					}
-					var style='';
-					for(var name in styles) {
-						style+=name+':'+styles[name]+';';
-					}
-					this.style=style;
-				},
 				postCreate: function() {
 					this.on('Change',this.onG740Change);
 					this.on('Focus',this.onG740Focus);
 					this.on('Blur',this.onG740Blur);
 					this.on('KeyPress',this.onG740KeyPress);
+					this.setWidth(this.getMinWidth());
 					this.inherited(arguments);
 				},
 				getActionGo: function() {
@@ -174,19 +384,36 @@ define(
 				_getButtonWidth: function() {
 					return 0;
 				},
+				
+				getMinWidth: function() {
+					var result=10;
+					if (this.fieldDef.len) {
+						result=parseInt(this.fieldDef.len*g740.config.charwidth+this._getButtonWidth()+5);
+					}
+					return result;
+				},
+				getHeight: function() {
+					var result=18;
+					return result;
+				},
+
+				_width: 0,
+				getWidth: function() {
+					if (!this._width) this._width=this.getMinWidth();
+					return this._width;
+				},
+				setWidth: function(width) {
+					if (width<this.getMinWidth()) width=this.getMinWidth();
+					this._width=width;
+					if (this.domNode) dojo.style(this.domNode, 'width', this.getStyleWidth());
+				},
+				
 				getStyleWidth: function() {
-					var w='';
-					if (this.fieldDef.width) {
-						w=this.fieldDef.width;
-					}
-					else if (this.fieldDef.len) {
-						w=parseInt(this.fieldDef.len*g740.config.charwidth+this._getButtonWidth()+5)+'px';
-					}
+					var result=this.getWidth()+'px';
 					var isStretch=false;
-					if (!w) isStretch=true;
 					if (this.fieldDef.stretch) isStretch=true;
-					if (isStretch) w='100%';
-					return w;
+					if (isStretch) result='100%';
+					return result;
 				},
 				// Блокируем обратную отписку изменений в RowSet из перерисовки
 				_repaint: {
@@ -306,6 +533,17 @@ define(
 				postCreate: function() {
 					this.inherited(arguments);
 				},
+				on: function(name, func) {
+					if (name=='Focus') {
+						if (this.focusNode) dojo.on(this.focusNode, 'focus', dojo.hitch(this, func));
+						return true;
+					}
+					if (name=='Blur') {
+						if (this.focusNode) dojo.on(this.focusNode, 'blur', dojo.hitch(this, func));
+						return true;
+					}
+					return this.inherited(arguments);
+				},
 				_onKey: function(e) {
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
@@ -328,21 +566,14 @@ define(
 						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
 					}
 				},
-				getStyleWidth: function() {
-					var w='';
-					if (this.fieldDef.width) {
-						w=this.fieldDef.width;
-					}
-					else if (this.fieldDef.len) {
-						w=parseInt(9*g740.config.charwidth+this._getButtonWidth())+'px';
-					}
-					var isStretch=false;
-					if (!w) isStretch=true;
-					if (this.fieldDef.stretch) isStretch=true;
-					if (isStretch) w='100%';
-					return w;
+				getMinWidth: function() {
+					result=parseInt(9*g740.config.charwidth+this._getButtonWidth());
+					return result;
 				},
-
+				setWidth: function(width) {
+					this._width=this.getMinWidth();
+					if (this.domNode) dojo.style(this.domNode, 'width', this.getStyleWidth());
+				},
 				_getButtonWidth: function() {
 					return 15;
 				},
@@ -450,9 +681,7 @@ define(
 					}
 				},
 				postCreate: function() {
-					var rows=4;
-					if (this.fieldDef.rows) rows=this.fieldDef.rows;
-					dojo.style(this.domNodeTextArea, 'height', rows*g740.config.charheight+'px');
+					dojo.style(this.domNodeTextArea, 'height', this.getHeight()+'px');
 					this.on('ButtonClick',this.onG740ButtonClick);
 					this.on('Blur',this.onG740Blur);
 					this.inherited(arguments);
@@ -518,6 +747,12 @@ define(
 						if (this.domNodeTextArea) this.onG740Change(this.domNodeTextArea.value);
 						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
 					}
+				},
+				getHeight: function() {
+					var rows=4;
+					if (this.fieldDef.rows) rows=this.fieldDef.rows;
+					var result=g740.config.charheight*rows;
+					return result;
 				}
 			}
 		);
@@ -553,6 +788,18 @@ define(
 					}
 					this.inherited(arguments);
 				},
+				getMinWidth: function() {
+					var result=18;
+					var caption='';
+					if (this.fieldDef) {
+						caption=this.fieldDef.name;
+						if (this.fieldDef.caption) caption=this.fieldDef.caption;
+					}
+					if (caption) {
+						result+=8+parseInt(caption.length*g740.config.charlabelwidth);
+					}
+					return result;
+				},
 				postCreate: function() {
 					this.inherited(arguments);
 					if (this.fieldDef) {
@@ -586,11 +833,11 @@ define(
 						if (value>=this.icons.length) value=this.icons.length-1;
 						if (value<0) value=0;
 						this.value=value;
-						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+this.icons[value];
+						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+g740.icons.getIconClassName(this.icons[value]);
 					}
 					if (baseType=='string') {
 						this.value=value;
-						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+value;
+						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+g740.icons.getIconClassName(value);
 					}
 				},
 				convertFromValueToTextValue: function(value) {
@@ -662,6 +909,20 @@ define(
 				},
 				getBaseType: function() {
 					return 'num';
+				},
+				setValue: function(value) {
+					if (!this.icons) return false;
+					var baseType=this.getBaseType();
+					if (baseType=='num') {
+						if (value>=this.icons.length) value=this.icons.length-1;
+						if (value<0) value=0;
+						this.value=value;
+						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+this.icons[value];
+					}
+					if (baseType=='string') {
+						this.value=value;
+						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+value;
+					}
 				}
 			}
 		);
@@ -934,6 +1195,35 @@ define(
 					}
 					this.inherited(arguments);
 				},
+				
+				_getMinWidthValue: 0,
+				getMinWidth: function() {
+					if (!this._getMinWidthValue) {
+						var result=18;
+						var n=0;
+						var lst=this.list.split(';');
+						for(var i=0; i<lst.length; i++) {
+							if (n<lst[i].length) n=lst[i].length;
+						}
+						if (n>0) {
+							result+=8+parseInt(n*g740.config.charlabelwidth);
+							this._getMinWidthValue=result;
+						}
+					}
+					return this._getMinWidthValue;
+				},
+				_getHeightValue: 0,
+				getHeight: function() {
+					if (this._getHeightValue) return this._getHeightValue;
+					var result=19;
+					var n=0;
+					var lst=this.list.split(';');
+					if (lst.length>0) {
+						result=19*lst.length;
+						this._getHeightValue=result;
+					}
+					return result;
+				},
 				destroy: function() {
 					this._radioItems=null;
 					this.inherited(arguments);
@@ -1068,16 +1358,8 @@ define(
 					}
 				},
 				_onWidgetFocus: function() {
-					var newIndex=-1;
 					if (!this._radioItems) return false;
-					for(var i=0; i<this._radioItems.length; i++) {
-						var domDivItem=this._radioItems[i];
-						if (domDivItem.getAttribute('data-value')==this.value) {
-							newIndex=i;
-							break;
-						}
-					}
-					this.setSelectedIndex(newIndex);
+					this.setSelectedIndex(0);
 				},
 				_onWidgetBlur: function() {
 					this.setSelectedIndex(-1);
@@ -1115,7 +1397,7 @@ define(
 					'<tr>'+
 						'<td>'+
 							'<div class="g740-items" data-dojo-attach-point="domNodeItems" data-dojo-attach-event="'+
-								'ondblclick: onButtonClick'+
+								'onclick: _onItemsClick'+
 							'">'+
 							'</div>'+
 						'</td>'+
@@ -1161,6 +1443,7 @@ define(
 				},
 				postCreate: function() {
 					this.render();
+					dojo.style(this.domNodeItems,'height',this.getHeight()+'px');
 					this.focusNode=this.domNodeFocused;
 					this.inherited(arguments);
 				},
@@ -1302,6 +1585,12 @@ define(
 					else {
 						dojo.stopEvent(e);
 					}
+				},
+				_onItemsClick: function(e) {
+					this.set('focused',true);
+				},
+				getHeight: function() {
+					return 60;
 				}
 			}
 		);

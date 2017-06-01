@@ -28,7 +28,7 @@
 	border:1px solid #b3b3b3;
 }
 .g740 .dijitTextBox.g740-widget-focused {
-	border:1px solid #d4464e;
+	border:1px solid #d4464e !important;
 }
 
 .g740 .dijitSelect .dijitArrowButton,

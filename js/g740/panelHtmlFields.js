@@ -20,7 +20,8 @@ define(
 			'g740.HtmlFields',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
 			{
-			    fields: [],
+			    isG740Fields: true,
+				fields: [],
 			    _childs: [],
 			    title: '',
 			    xml: null,
