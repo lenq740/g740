@@ -18,6 +18,10 @@
 	padding: 3px;
 }
 
+.g740 .dijitDateTextBox {
+	margin-top: -1px;
+}
+
 .g740 .dijitSelect .dijitButtonContents,
 .g740 .dijitSelect,
 .g740 .dijitTextBox {

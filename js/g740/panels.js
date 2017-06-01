@@ -108,20 +108,24 @@ define(
 				var objPanel=builder(xml, p);
 				
 				// Формируем ToolBar
+				if (objPanel.isG740CanToolBar) {
+					var xmlToolbar = g740.xml.findFirstOfChild(xml, { nodeName: 'toolbar' });
+					if (xmlToolbar) {
+						this.buildToolbar(xmlToolbar, objPanel);
+					}
+				}
+
 				if (objPanel.isG740BorderContainer) {
 					var xmlMenuBar = g740.xml.findFirstOfChild(xml, { nodeName: 'menubar' });
 					if (xmlMenuBar) {
 						this.buildMenuBar(xmlMenuBar, objPanel);
-					}
-					var xmlToolbar = g740.xml.findFirstOfChild(xml, { nodeName: 'toolbar' });
-					if (xmlToolbar) {
-						this.buildToolbar(xmlToolbar, objPanel);
 					}
 					var xmlButtons=g740.xml.findFirstOfChild(xml,{nodeName:'buttons'});
 					if (xmlButtons) {
 						this.buildButtons(xmlButtons, objPanel);
 					}
 				}
+
 				// Вставляем панель в родительскую панель
 				if (objParent.doG740AddChildPanel) {
 					objParent.doG740AddChildPanel(objPanel);
@@ -227,6 +231,7 @@ define(
 				p.color=g740.xml.getAttrValue(xml, 'color', '');
 				
 				var objPanelButtons=new g740.Panel(p,null);
+				objPanelButtons.isG740PanelButtons=true;
 				objPanel.addChild(objPanelButtons);
 				for(var i=0; i<requests.length; i++) {
 					var xmlRequest=requests[i];
@@ -650,6 +655,7 @@ define(
 				isG740CanShowChildsTitle: false,	// Признак - класс умеет показывать заголовки дочерних панелей (g740.PanelTab, g740.PanelAccordion)
 				isG740BorderContainer: false,		// Признак - класс умеет размещать дочерние панели по краям и центру (g740.Panel)
 				isG740CanChilds: false,				// Признак - класс может содержать дочерние панели
+				isG740CanToolBar: false,			// Признак - поддерживает ToolBar
 				isG740AutoMenu: false,				// Признак - принудительно формировать контекстное меню, если оно не описанно
 
 				isG740Tree: false,					// Панель дерева
@@ -1063,6 +1069,7 @@ define(
 			{
 				isG740BorderContainer: true,		// Класс умеет размещать дочерние панели по краям и центру
 				isG740CanChilds: true,				// Класс может содержать дочерние панели
+				isG740CanToolBar: true,				// Признак - поддерживает ToolBar
 				
 				postCreate: function() {
 					if (this.isShowTitle && this.title) {
@@ -1130,13 +1137,16 @@ define(
 				startup: function() {
 					this.inherited(arguments);
 					this._g740AutoHeight();
-					this._g740AutoWidth();
+					g740.execDelay.go({
+						delay: 50,
+						obj: this,
+						func: this.layout
+					});
 				},
 				_g740AutoHeight: function() {
 					if (this.region!='top' && this.region!='bottom') return true;
 					if (this.height) return true;
 					if (!this.domNode) return true;
-					var pos=dojo.geom.position(this.domNode, false);
 					
 					var childs=this.getChildren();
 					var h=1;
@@ -1149,32 +1159,11 @@ define(
 							break;
 						}
 						if (!objChild.domNode) continue;
-						var posChild=dojo.geom.position(objChild.domNode, false);
-						h+=posChild.h+1;
+						h+=objChild.domNode.offsetHeight;
 					}
+					if (!isTopBottomOnly) return true;
 					var p={
-						l: pos.x, t: pos.y, h: h, w: pos.w
-					};
-					this.resize(p);
-				},
-				_g740AutoWidth: function() {
-					if (this.region!='left' && this.region!='right') return true;
-					if (this.width) return true;
-					if (!this.domNode) return true;
-					var pos=dojo.geom.position(this.domNode, false);
-					
-					var childs=this.getChildren();
-					var w=1;
-					for (var i=0; i<childs.length; i++) {
-						var objChild=childs[i];
-						if (!objChild) continue;
-						if (objChild.region!='left' && objChild.region!='right') continue;
-						if (!objChild.domNode) continue;
-						var posChild=dojo.geom.position(objChild.domNode, false);
-						w+=posChild.w+1;
-					}
-					var p={
-						l: pos.x, t: pos.y, h: pos.h, w: w
+						l: this.domNode.offsetLeft, t: this.domNode.offsetTop, h: h, w: this.domNode.offsetWidth
 					};
 					this.resize(p);
 				}
@@ -1441,7 +1430,12 @@ define(
 					}
 					this.inherited(arguments);
 					if (this.defaultChildName) {
-						g740.application.doG740ShowForm({formName: this.defaultChildName});
+						g740.execDelay.go({
+							delay: 50,
+							obj: g740.application,
+							func: g740.application.doG740ShowForm,
+							para: {formName: this.defaultChildName}
+						});
 					}
 				},
 				// Блокируем кэширование дочерних элементов

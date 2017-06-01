@@ -131,6 +131,10 @@ define(
 					dojo.style(this.domNode, 'width', this.getWidth()+'px');
 					dojo.style(this.domNode, 'height', this.getHeight()+'px');
 					dojo.style(this.domNode,'left',this.left+'px');
+					if (this.isLabelTop) {
+					} else {
+						dojo.style(this.domNodeLabel,'top','1px');
+					}
 				},
 				
 				getLabelWidth: function() {
@@ -923,7 +927,11 @@ define(
 						this.value=value;
 						if (this.domNodeIcon) this.domNodeIcon.className='g740-widget-icons-icon '+value;
 					}
-				}
+				},
+				getHeight: function() {
+					var result=16;
+					return result;
+				},
 			}
 		);
 		

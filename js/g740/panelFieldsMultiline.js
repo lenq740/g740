@@ -10,6 +10,7 @@ define(
 			[g740._PanelAbstract, dijit._TemplatedMixin],
 			{
 				isG740Fields: true,
+				isG740CanToolBar: true,
 				isLayoutContainer: true,
 				lines: [],
 				columns: {},
@@ -20,12 +21,16 @@ define(
 				padding: '2px',
 				deltaH: 5,
 				deltaW: 8,
+				objToolBar: null,
+				objPanelButtons: null,
 				templateString: 
 					'<div class="g740-fieldsmultiline">'+
 					'<div data-dojo-attach-point="domNodeTitle"></div>'+
+					'<div data-dojo-attach-point="domNodeToolbar"></div>'+
 					'<div data-dojo-attach-point="domNodeDivPadding">'+
 						'<div class="g740-fieldsmultiline-body" data-dojo-attach-point="domNodeDivBody"></div>'+
 					'</div>'+
+					'<div data-dojo-attach-point="domNodeButtons"></div>'+
 					'</div>',
 				
 				set: function(name, value) {
@@ -52,7 +57,7 @@ define(
 							for (var paramName in fldNew) fld[paramName]=fldNew[paramName];
 							
 							var lineName=fld.line;
-							if (!lineName) lineName=='linename-autogen-'+lineCount;
+							if (!lineName) lineName='linename-autogen-'+lineCount;
 							var lineIndex=lineNames[lineName];
 							if (!lineIndex && lineIndex!==0) {
 								lineIndex=lineCount;
@@ -76,7 +81,6 @@ define(
 					this.set('objForm',para.objForm);
 					this.set('rowsetName',para.rowsetName);
 					if (para.nodeType) this.set('nodeType', para.nodeType);
-					this.set('fields', para.fields);
 					this.on('Focus', this.onG740Focus);
 				},
 				destroy: function() {
@@ -96,7 +100,32 @@ define(
 					}
 					this.columns={};
 					this.linesMinWidth=[];
+					
+					if (this.objToolBar) {
+						this.objToolBar.destroyRecursive();
+						this.objToolBar=null;
+					}
+					if (this.objPanelButtons) {
+						this.objPanelButtons.destroyRecursive();
+						this.objPanelButtons=null;
+					}
+					
 					this.inherited(arguments);
+				},
+				addChild(obj) {
+					if (!obj) return;
+					if (obj.g740className=='g740.Toolbar') {
+						if (this.objToolBar) this.objToolBar.destroyRecursive();
+						this.objToolBar=obj;
+						if (this.objToolBar.domNode && this.domNodeToolbar) this.domNodeToolbar.appendChild(this.objToolBar.domNode);
+					} 
+/*
+					else if (obj.isG740PanelButtons) {
+						if (this.objPanelButtons) this.objPanelButtons.destroyRecursive();
+						this.objPanelButtons=obj;
+						if (this.objPanelButtons.domNode && this.domNodeButtons) this.domNodeButtons.appendChild(this.objPanelButtons.domNode);
+					}
+*/
 				},
 				postCreate: function() {
 					this.inherited(arguments);
@@ -178,13 +207,18 @@ define(
 					}
 					dojo.style(this.domNodeDivBody,'height',top+'px');
 					g740.execDelay.go({
-						delay: 50,
+						delay: 150,
 						obj: this,
 						func: this._firstRenderPosition
 					});
 				},
 				_isRendered: false,
 				_firstRenderPosition: function() {
+					var objParent=this.getParent();
+					if (objParent && objParent.layout) {
+						objParent.layout();
+					}
+
 					// Инициализируем размеры элементов
 					for(var i=0; i<this.lines.length; i++) {
 						var line=this.lines[i];
@@ -375,6 +409,7 @@ define(
 				},
 				resize: function(size) {
 					if (!this.domNode) return false;
+					if (!size) return true;
 					dojo.style(this.domNode,'left',size.l+'px');
 					dojo.style(this.domNode,'top',size.t+'px');
 					dojo.style(this.domNode,'width',size.w+'px');
@@ -386,6 +421,8 @@ define(
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return false;
 					if (!para) para={};
+					if (this.objToolBar) this.objToolBar.doG740Repaint(para);
+					if (this.objPanelButtons) this.objPanelButtons.doG740Repaint(para);
 					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];

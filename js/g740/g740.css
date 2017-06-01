@@ -6,6 +6,26 @@ html, body {
 	overflow: hidden;
 }
 
+/* Пришло от Лёши */
+.g740 .dijitTabContainerTop-tabs .dijitTabChecked {
+    border-bottom-color: #f3f3f3;
+}
+.g740 .dijitToolbar {
+	padding-left: 1px;
+}
+.dijitToolbar .dijitToggleButton, .dijitToolbar .dijitButton, .dijitToolbar .dijitDropDownButton, .dijitToolbar .dijitComboButton {
+    margin: 1px 0px 1px 0px;
+}
+.g740 .dijitButtonText {
+    text-align: center;
+    padding: 0.2em;
+}
+.dijitToolbar .dijitButtonContents {
+    padding: 0px 2px;
+}
+
+
+
 /* Диалог */
 .g740-dialog {
 }
@@ -408,7 +428,7 @@ html, body {
 	display: inline-block;
 	overflow: hidden;
 	font-size: 12px;
-	text-align: right;
+	white-space: nowrap;
 }
 .g740-fieldcontainer .g740-fieldcontainer-field {
 	position: absolute;
