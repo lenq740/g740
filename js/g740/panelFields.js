@@ -306,7 +306,7 @@ define(
 			var result=new g740.FieldsSimple(para, null);
 			return result;
 		};
-		g740.panels.registrate('fields', g740.panels._builderPanelFieldsSimple);
+		g740.panels.registrate('fieldssimple', g740.panels._builderPanelFieldsSimple);
 
 		dojo.declare(
 			'g740.Properties',

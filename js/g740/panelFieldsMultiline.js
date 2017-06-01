@@ -373,23 +373,13 @@ define(
 						});
 					}
 				},
-				_layoutIndex: 0,
 				resize: function(size) {
 					if (!this.domNode) return false;
 					dojo.style(this.domNode,'left',size.l+'px');
 					dojo.style(this.domNode,'top',size.t+'px');
 					dojo.style(this.domNode,'width',size.w+'px');
 					dojo.style(this.domNode,'height',size.h+'px');
-					this._layoutIndex++;
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._layout
-					});
-				},
-				_layout: function() {
-					this._layoutIndex--;
-					if (this._layoutIndex==0) this.layout();
+					this.layout();
 				},
 				
 				doG740Repaint: function(para) {
@@ -555,7 +545,7 @@ define(
 			var result=new g740.FieldsMultiline(para, null);
 			return result;
 		};
-		g740.panels.registrate('multiline', g740.panels._builderPanelFieldsMultiline);
+		g740.panels.registrate('fields', g740.panels._builderPanelFieldsMultiline);
 
 		return g740;
 	}
