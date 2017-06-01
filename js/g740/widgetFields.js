@@ -137,8 +137,15 @@ define(
 					}
 				},
 				
+				_labelWidth: -1,
 				getLabelWidth: function() {
-					return this.domNodeLabel.offsetWidth;
+					if (this._labelWidth<0) 
+					if (!this.domNodeLabel.offsetParent) {
+						this._labelWidth=g740.size.getLabelWidth(this.label);
+					} else {
+						this._labelWidth=this.domNodeLabel.offsetWidth;
+					}
+					return this._labelWidth;
 				},
 				getLabelHeight: function() {
 					return 16;

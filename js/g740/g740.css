@@ -6,6 +6,16 @@ html, body {
 	overflow: hidden;
 }
 
+/* Вычисление размеров метки */
+.g740-size-label {
+	position: absolute;
+	left: -100px;
+	top: -100px;
+	display: inline-block;
+	font-size: 12px;
+	opacity: 0;
+}
+
 /* Пришло от Лёши */
 .g740 .dijitTabContainerTop-tabs .dijitTabChecked {
     border-bottom-color: #f3f3f3;
@@ -437,6 +447,7 @@ html, body {
 	display: inline-block;
 }
 
+
 /* FieldsSimple */
 .g740-fieldssimple {
 	overflow: hidden;
@@ -466,6 +477,7 @@ html, body {
 
 /* FieldsMultiline */
 .g740-fieldsmultiline {
+	box-sizing:border-box;
 }
 .g740-fieldsmultiline .g740-fieldsmultiline-body {
 	position: relative;

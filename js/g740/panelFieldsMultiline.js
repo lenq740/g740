@@ -132,6 +132,7 @@ define(
 					this.domNode.title='';
 					this.render();
 				},
+				_isRendered: false,
 				render: function() {
 					if (!this.domNodeTitle) return false;
 					if (!this.domNodeDivBody) return false;
@@ -194,6 +195,7 @@ define(
 							
 							if (lineH<h) lineH=h;
 							fld.objFC=objFC;
+							objFC.doResize();
 						}
 						if (lineH) top+=lineH+this.deltaH;
 					}
@@ -202,35 +204,12 @@ define(
 						for(var index=0; index<line.length; index++) {
 							var fld=line[index];
 							if (!fld) continue;
+							if (!fld.objFC) continue;
 							this._childs.push(fld.objFC.objFieldEditor);
 						}
 					}
 					dojo.style(this.domNodeDivBody,'height',top+'px');
-					g740.execDelay.go({
-						delay: 150,
-						obj: this,
-						func: this._firstRenderPosition
-					});
-				},
-				_isRendered: false,
-				_firstRenderPosition: function() {
-					var objParent=this.getParent();
-					if (objParent && objParent.layout) {
-						objParent.layout();
-					}
 
-					// Инициализируем размеры элементов
-					for(var i=0; i<this.lines.length; i++) {
-						var line=this.lines[i];
-						var left=this.deltaW;
-						for(var index=0; index<line.length; index++) {
-							var fld=line[index];
-							if (!fld) continue;
-							objFC=fld.objFC;
-							if (!objFC) continue;
-							objFC.doResize();
-						}
-					}
 					// Вычисляем левую позицию исходя из минимальной ширины поля
 					var isChanged=true;
 					while(isChanged) {
@@ -243,7 +222,6 @@ define(
 							this.linesMinWidth[i]=objFC.left+objFC.getMinWidth();
 						}
 					}
-
 					// Предварительная обработка strtech полей
 					for(var i=0; i<this.lines.length; i++) {
 						var line=this.lines[i];
@@ -300,7 +278,6 @@ define(
 						}
 						this._rebuildLineLeftPosition(i,{isWidth: true});
 					}
-					
 					// Проставляем левую позицию
 					for(var i=0; i<this.lines.length; i++) {
 						var line=this.lines[i];

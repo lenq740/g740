@@ -344,6 +344,21 @@ define(
 	    };
 	    g740.application.doG740StartUp();
 
+		g740.size = {
+			domLabel: null,
+			getLabelWidth: function(text) {
+				if (!g740.size.domLabel) {
+					g740.size.domLabel=document.createElement('div');
+					g740.size.domLabel.className='g740-size-label';
+					document.body.appendChild(g740.size.domLabel);
+				}
+				g740.size.domLabel.innerHTML='';
+				var domText=document.createTextNode(text);
+				g740.size.domLabel.appendChild(domText);
+				return g740.size.domLabel.offsetWidth;
+			}
+		}
+		
 	    return g740;
 	}
 );
