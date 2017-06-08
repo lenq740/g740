@@ -1085,6 +1085,10 @@ define(
 						dojo.stopEvent(e);
 					}
 				},
+				resize: function(size) {
+					if (size && size.h) size.h=parseInt(size.h);
+					this.inherited(arguments);
+				},
 				onG740Focus: function() {
 					if (!dojo.hasClass(this.domNode,'g740focused')) dojo.addClass(this.domNode,'g740focused');
 				},
