@@ -1989,6 +1989,10 @@ define(
 						if (objParent) objParent.doG740FocusChildPrev(this);
 					}
 				},
+				onG740Focus: function() {
+					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
+					return true;
+				},
 				doG740Focus: function() {
 					if (this.domTextArea) this.domTextArea.focus();
 				},
