@@ -1601,6 +1601,7 @@ define(
 					if (this.request.js_enabled) {
 						var isEnabled=g740.js_eval(obj, this.request.js_enabled, true);
 						if (!isEnabled) return false;
+						if (isEnabled=='0') return false;
 					}
 					if (this.request.name=='connect' || this.request.name=='disconnect' || this.request.name=='form') {
 						if (this.request.name=='form' && !this.request.mode) return false;
