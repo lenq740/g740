@@ -1257,6 +1257,10 @@ define(
 							if (!v && p.def) v=p.def;
 							value=g740.convertor.toG740(v, p.type);
 						}
+						if (p.notempty) {
+							if (!value) continue;
+							if (value=='0') continue;
+						}
 						if (p.result) {
 							var name=p.result;
 							if (name==1) name=paramName;

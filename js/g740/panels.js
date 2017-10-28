@@ -609,6 +609,12 @@ define(
 							if (!g740.fieldTypes[t]) t='string';
 							p.type=t;
 						}
+						if (g740.xml.isAttr(xmlParam,'js_enabled')) {
+							p.js_enabled=g740.xml.getAttrValue(xmlParam,'js_enabled','');
+						}
+						if (g740.xml.isAttr(xmlParam,'notempty')) {
+							p.notempty=g740.convertor.toJavaScript(g740.xml.getAttrValue(xmlParam,'notempty','0'),'check');
+						}
 						request.params[paramName]=p;
 					}
 					else {
