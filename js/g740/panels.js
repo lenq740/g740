@@ -1433,6 +1433,7 @@ define(
 			[dijit.layout.TabContainer, g740._PanelAbstract],
 			{
 				defaultChildName: null,
+				background: '',
 				set: function(name, value) {
 					if (name=='defaultChildName') {
 						this.defaultChildName=value;
@@ -1461,10 +1462,14 @@ define(
 					this.inherited(arguments);
 				},
 				postCreate: function() {
+					dojo.style(this.containerNode, 'background-size', 'cover');
+					dojo.style(this.containerNode, 'background-repeat', 'norepeat');
+					dojo.style(this.containerNode, 'background-position', 'center');
 					this.tablist.TabContainer=this;
 					this.tablist.on('KeyDown',function(e){
 						if (this.TabContainer && this.TabContainer.onG740KeyDown) this.TabContainer.onG740KeyDown(e);
 					});
+
 					if (this.isShowTitle && this.title) {
 						var objTitle=new g740.PanelTitle({
 							title: this.title,
@@ -1473,6 +1478,7 @@ define(
 						this.addChild(objTitle);
 					}
 					this.inherited(arguments);
+					this.doG740RepaintBackground();
 					if (this.defaultChildName) {
 						g740.execDelay.go({
 							delay: 50,
@@ -1498,7 +1504,7 @@ define(
 						dojo.stopEvent(e);
 					}
 				},
-// Отобразить экранную форму
+				// Отобразить экранную форму
 				doG740ShowForm: function(objForm) {
 					var childs=this.getChildren();
 					var addIndex=-1;
@@ -1554,6 +1560,31 @@ define(
 					return false;
 				},
 				doG740Repaint: function(para) {
+				},
+				// Отображение форового рисунка при отсутствии панелей
+				addChild: function (child,insertIndex) {
+					this.inherited(arguments);
+					this.doG740RepaintBackground();
+				},
+				removeChild: function(page) {
+					this.inherited(arguments);
+					this.doG740RepaintBackground();
+				},
+				_isBackground: false,
+				doG740RepaintBackground: function() {
+					var lst=this.getChildren();
+					if (this.background) {
+						if (lst.length==0 && !this._isBackground) {
+							dojo.style(this.containerNode, 'background-image', "url('"+this.background+"')");
+							dojo.style(this.containerNode, 'opacity', '0.3');
+							this._isBackground=true;
+						}
+						else if (this._isBackground) {
+							dojo.style(this.containerNode, 'background-image', 'inherit');
+							dojo.style(this.containerNode, 'opacity', 'inherit');
+							this._isBackground=false;
+						}
+					}
 				}
 			}
 		);
@@ -2148,6 +2179,7 @@ define(
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
 			if (g740.xml.isAttr(xml, 'form')) para.defaultChildName=g740.xml.getAttrValue(xml, 'form', '');
+			if (g740.xml.isAttr(xml, 'background')) para.background=g740.xml.getAttrValue(xml, 'background', '');
 		
 			if (g740.xml.getAttrValue(xml, 'tab', '')==1) {
 				var result=new g740.PanelTabForm(para, null);
