@@ -176,6 +176,7 @@ define(
 
 				var p = {};
 				p.region = 'top';
+				if (g740.xml.isAttr(xml,'login')) p.connectedUser=g740.xml.getAttrValue(xml,'login','');
 				var objMenuBar = new g740.MenuBar(p, null);
 				objPanel.addChild(objMenuBar);
 				for (var i = 0; i < requests.length; i++) {

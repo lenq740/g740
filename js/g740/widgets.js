@@ -1065,7 +1065,8 @@ define(
 			{
 			    g740className: 'g740.MenuBar',			// Имя базового класса
 			    isObjectDestroed: false,				// Признак - объект уничтожен
-			    constructor: function (para, domElement) {
+			    connectedUser: '',
+				constructor: function (para, domElement) {
 			        var procedureName = 'g740.MenuBar.constructor';
 			        try {
 			        }
@@ -1081,6 +1082,38 @@ define(
 			        finally {
 			        }
 			    },
+				postCreate: function() {
+					this.inherited(arguments);
+					if (this.connectedUser) {
+						var domNodeConnectedUser=document.createElement('div');
+						domNodeConnectedUser.className='connecteduser';
+						domNodeConnectedUser.setAttribute('title',g740.getMessage('disconnect'));
+						this.domNode.appendChild(domNodeConnectedUser);
+						
+						var domNodeLabel=document.createElement('div');
+						domNodeLabel.className='label';
+						var txt=document.createTextNode(this.connectedUser);
+						domNodeLabel.appendChild(txt);
+						domNodeConnectedUser.appendChild(domNodeLabel);
+
+						var domNodeExit=document.createElement('div');
+						domNodeExit.className='icon';
+						domNodeConnectedUser.appendChild(domNodeExit);
+						dojo.on(domNodeConnectedUser, 'click', function() {
+							var objOwner=this;
+							while(true) {
+								if (objOwner.className=='g740.Form') break;
+								if (!objOwner.getParent) break;
+								objOwner=objOwner.getParent();
+							}
+							g740.request.send({
+								objOwner: objOwner,
+								arrayOfRequest:['<request name="disconnect"/>'],
+								requestName: 'disconnect'
+							});
+						});
+					}
+				},
 			    doG740Repaint: function (para) {
 			        // Перерисовываем детей
 			        var lst = this.getChildren();

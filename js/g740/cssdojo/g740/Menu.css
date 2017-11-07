@@ -6,6 +6,27 @@
 	background-color: white;
 }
 
+.dijitMenuBar .connecteduser {
+	position: absolute;
+	top: 3px;
+    right: 3px;
+	cursor: pointer;
+}
+.dijitMenuBar .connecteduser .label {
+	display: inline-block;
+	padding-right: 25px;
+}
+.dijitMenuBar .connecteduser .icon {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	background-image: url('images/disconnect.png');
+	background-size: cover;
+	background-repeat: norepeat;
+	width: 16px;
+	height: 16px;
+}
+
 .g740 .dijitMenu {
 	box-shadow:2px 3px 13px rgba(0, 0, 0, 0.3);
 	-webkit-box-shadow:2px 3px 13px rgba(0, 0, 0, 0.3);

@@ -122,5 +122,7 @@
 	// edit
 	clipboardCopy: 'Копировать',
 	clipboardCut: 'Вырезать',
-	clipboardPaste: 'Вставить'
+	clipboardPaste: 'Вставить',
+	
+	disconnect: 'Выйти'
 }
