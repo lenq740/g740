@@ -211,8 +211,9 @@ define(
 			    datasource: '',				// Имя источника данных
 
 			    parentName: '',
-			    objParent: null,			// Родительский набор строк
-			    parentRowsetNodeType: null,	// Если родительский набор строк дерево, то тип узла в цепочке выделенных узлов родителя, к которому цепляемся
+			    objParent: null,				// Родительский набор строк
+				parentRowsetNodeType: null,		// Если родительский набор строк дерево, то тип узла в цепочке выделенных узлов родителя, к которому цепляемся
+				parentRowsetSyncNodeType: null,	// Тип дочерних узлов родительского набора строк, с которым синхронизировать изменения
 
 			    isFilter: false,			// Набор строк - фильтр
 			    isFilterAutoRefresh: true,	// Автоматически перечитывать дочерние источники данных по изменению значений полей фильтра
@@ -360,7 +361,7 @@ define(
 					this._focusedParentNode = null;
 					this.objDataApi = new g740.RowSetDataApi({ objRowSet: this });
 
-					var names = ['parentName', 'objParent', 'isReadOnly', 'isFilter', 'parentRowsetNodeType'];
+					var names = ['parentName', 'objParent', 'isReadOnly', 'isFilter', 'parentRowsetNodeType', 'parentRowsetSyncNodeType'];
 					for (var i = 0; i < names.length; i++) {
 						var name = names[i];
 						if (typeof (para[name]) != 'undefined') this.set(name, para[name]);
@@ -510,6 +511,14 @@ define(
 			                if (value == null) value = '';
 			                if (typeof (value) != 'string') g740.systemError(procedureName, 'errorIncorrectTypeOfValue', 'parentRowsetNodeType');
 			                this.parentRowsetNodeType = value;
+			            }
+			            return true;
+			        }
+			        if (name == 'parentRowsetSyncNodeType') {
+			            if (this.parentRowsetSyncNodeType != value) {
+			                if (value == null) value = '';
+			                if (typeof (value) != 'string') g740.systemError(procedureName, 'errorIncorrectTypeOfValue', 'parentRowsetSyncNodeType');
+			                this.parentRowsetSyncNodeType = value;
 			            }
 			            return true;
 			        }
@@ -711,8 +720,139 @@ define(
 					if (!params.objRowSet) params.objRowSet = this;
 					if (!params.parentNode) params.parentNode = this.getFocusedParentNode();
 					if (this.objForm) this.objForm.doG740Repaint(params);
+					this.doG740SyncParentRowSet(params);
 			        return true;
 			    },
+				doG740SyncParentRowSet: function(params) {
+					if (!params) return;
+					if (!params.isRowUpdate && !params.isFull) return;
+					if (params.objRowSet!=this) return;
+					
+					if (this.isTree) return;
+					if (!this.objParent) return;
+					if (!this.objParent.isTree) return;
+					if (!this.parentRowsetNodeType) return;
+					if (!this.parentRowsetSyncNodeType) return;
+					var treeNT=this.objParent.nodeTypes[this.parentRowsetSyncNodeType];
+					if (!treeNT) return;
+					var treeParentNode=this.objParent.getFocusedNode();
+					if (!treeParentNode) return;
+					if (!treeParentNode.childs) return;
+					if (treeParentNode.nodeType!=this.parentRowsetNodeType) return;
+					var nt=this.getNt();
+					if (!nt) return;
+					var lstTreeFld={};
+					var lstFld=[];
+					for(var fieldName in treeNT.fields) lstTreeFld[fieldName]=true;
+					for(var fieldName in nt.fields) {
+						if (!lstTreeFld[fieldName]) continue;
+						lstFld.push(fieldName);
+					}
+					
+					var isRefresh=false;
+					if (params.isFull) {
+						{	// Удаляем лишние узлы из this.objParent
+							var lstDel=[];
+							for(var id in treeParentNode.childs.nodes) {
+								var treeNode=treeParentNode.childs.nodes[id];
+								if (treeNode.nodeType!=this.parentRowsetSyncNodeType) continue;
+								if (!this.objTreeStorage.getNode(id)) lstDel.push(id);
+							}
+							for(var i=0; i<lstDel.length; i++) {
+								var id=lstDel[i];
+								var treeNode=this.objParent.objTreeStorage.getNode(id, treeParentNode);
+								this.objParent.objTreeStorage.removeNode(treeNode);
+								isRefresh=true;
+							}
+						}
+						{	// Добавляем недостающие узлы
+							var rootNode=this.objTreeStorage.rootNode;
+							if (rootNode.childs) for(var id in rootNode.childs.nodes) {
+								if (!this.objParent.objTreeStorage.getNode(id, treeParentNode)) {
+									var treeNode=this.objParent.objTreeStorage.appendNode(id, treeParentNode);
+									treeNode.nodeType=this.parentRowsetSyncNodeType;
+									treeNode.info={id: id};
+									if (treeNT.defaultIcon) treeNode.info['row.icon']=treeNT.defaultIcon;
+									if (treeNT.defaultFinal) treeNode.isFinal=true;
+									isRefresh=true;
+								}
+							}
+						}
+						{	// Обновляем и сортируем узлы
+							var lst=this.objTreeStorage.getChildsOrdered(this.objTreeStorage.rootNode);
+							for(var i=0; i<lst.length; i++) {
+								var node=lst[i];
+								if (!node) continue;
+								if (!node.info) continue;
+								var id=node.id;
+								var treeNode=treeParentNode.childs.nodes[node.id];
+								if (!treeNode) continue;
+								if (treeNode.nodeType!=this.parentRowsetSyncNodeType) continue;
+								for(var ii=0; ii<lstFld.length; ii++) {
+									var fieldName=lstFld[ii];
+									if (treeNode.info[fieldName+'.value']!=node.info[fieldName+'.value']) {
+										treeNode.info[fieldName+'.value']=node.info[fieldName+'.value'];
+										treeNode.info[fieldName+'.oldvalue']=node.info[fieldName+'.value'];
+										if (fieldName==treeNT.name || fieldName==treeNT.description) isRefresh=true;
+									}
+								}
+								
+								var idPrev=null;
+								var nodePrev=this.objTreeStorage.getPrevNode(node);
+								if (nodePrev) idPrev=nodePrev.id;
+								var idNext=null;
+								var nodeNext=this.objTreeStorage.getNextNode(node);
+								if (nodeNext) idNext=nodeNext.id;
+								
+								var idTreePrev=null;
+								var treeNodePrev=this.objParent.objTreeStorage.getPrevNode(treeNode);
+								if (treeNodePrev) idTreePrev=treeNodePrev.id;
+								var idTreeNext=null;
+								var treeNodeNext=this.objParent.objTreeStorage.getNextNode(treeNode);
+								if (treeNodeNext) idTreeNext=treeNodeNext.id;
+							
+								if (idPrev && idNext && (idPrev!=idTreePrev || idNext!=idTreeNext)) {
+									this.objParent.objTreeStorage.cutNode(treeNode)
+									this.objParent.objTreeStorage.pasteNode(treeNode, treeParentNode, idPrev, idNext);
+									isRefresh=true;
+								}
+								else if (idPrev && idPrev!=idTreePrev) {
+									this.objParent.objTreeStorage.cutNode(treeNode)
+									this.objParent.objTreeStorage.pasteNode(treeNode, treeParentNode, idPrev, null);
+									isRefresh=true;
+								}
+								else if (idNext && idNext!=idTreeNext) {
+									this.objParent.objTreeStorage.cutNode(treeNode)
+									this.objParent.objTreeStorage.pasteNode(treeNode, treeParentNode, null, idNext);
+									isRefresh=true;
+								}
+							}
+						}
+					}
+					else {
+						var node=params.node;
+						if (!node) node=this.getFocusedNode();
+						if (!node) return;
+						var treeNode=treeParentNode.childs.nodes[node.id];
+						if (!treeNode) return;
+						if (treeNode.nodeType!=this.parentRowsetSyncNodeType) return;
+						for(var i=0; i<lstFld.length; i++) {
+							var fieldName=lstFld[i];
+							if (treeNode.info[fieldName+'.value']!=node.info[fieldName+'.value']) {
+								treeNode.info[fieldName+'.value']=node.info[fieldName+'.value'];
+								treeNode.info[fieldName+'.oldvalue']=node.info[fieldName+'.value'];
+								if (fieldName==treeNT.name || fieldName==treeNT.description) isRefresh=true;
+							}
+						}
+					}
+					if (isRefresh) {
+						this.objParent.doG740Repaint({
+							parentNode: treeParentNode,
+							isFull: true
+						});
+					}
+				},
+				
 // Режимы работы набора строк, состояния
 // Заблокировать и очистить источник данных - обычно нужно, если неопределенная ситуация у родительского источника данных
 			    doDisable: function () {
@@ -1912,6 +2052,7 @@ define(
 					if (this.datasource == '' && this.name != '') this.datasource = this.name;
 
 					if (g740.xml.isAttr(xmlRowSet, 'parent.row.type')) this.parentRowsetNodeType = g740.xml.getAttrValue(xmlRowSet, 'parent.row.type', '');
+					if (g740.xml.isAttr(xmlRowSet, 'parent.sync.row.type')) this.parentRowsetSyncNodeType = g740.xml.getAttrValue(xmlRowSet, 'parent.sync.row.type', '');
 
 					if (g740.xml.isAttr(xmlRowSet, 'readonly')) {
 						this.isReadOnly = g740.convertor.toJavaScript(g740.xml.getAttrValue(xmlRowSet, 'readonly', '0'), 'check');
@@ -1992,6 +2133,10 @@ define(
 						if (xmlFields.nodeName == 'fields') {
 							nt.name = g740.xml.getAttrValue(xmlFields, 'name', nt.name);
 							nt.description = g740.xml.getAttrValue(xmlFields, 'description', nt.description);
+							
+							if (g740.xml.isAttr(xmlFields, 'default.icon')) nt.defaultIcon = g740.xml.getAttrValue(xmlFields, 'default.icon', '');
+							if (g740.xml.isAttr(xmlFields, 'default.final')) nt.defaultFinal = (g740.xml.getAttrValue(xmlFields, 'default.final', '')=='1');
+							
 							nt.treemenuForm = g740.xml.getAttrValue(xmlFields, 'treemenu.form', nt.treemenuForm);
 							nt.treemenuParams = g740.xml.getAttrValue(xmlFields, 'treemenu.params', nt.treemenuParams);
 						}
