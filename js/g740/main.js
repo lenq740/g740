@@ -188,7 +188,32 @@ define(
 	        objDialogLogin: null,
 	        lstModalFormDialogs: [],
 	        modalResults: {},
+			isModeLoginDialog: false,
 
+			getUrlParams: function() {
+				var result={};
+				var lst=window.location.search.substr(1).split('&');
+				for (var i=0; i<lst.length; i++) {
+					var str=lst[i];
+					var n=str.indexOf('=');
+					if (n<=0) continue;
+					var name=str.substr(0,n);
+					var value=str.substr(n+1,9999);
+					result[name]=value;
+				}
+				return result;
+			},
+			goReload: function(mode) {
+				var url=window.location.protocol+'//'+window.location.hostname+window.location.pathname;
+				if (mode) url+='?mode='+mode;
+				window.open(url, '_self');
+				return true;
+			},
+			getIsModeLoginDialog: function() {
+				if (!g740.config.dialogLogin) return false;
+				if (!g740.config.dialogLogin.isReloadBeforeLogin) return false;
+				return this.isModeLoginDialog;
+			},
 	        closeModalForm: function () {
 				var objDialog=g740.application.getModalDialog();
                 if (objDialog) objDialog.hide();
@@ -253,7 +278,7 @@ define(
 	            if (!para.formName) para.formName = g740.config.mainFormName;
 	            if (!para.G740params) para.G740params = {};
 	            if (!para.attr) para.attr = {};
-
+				
 	            if (!g740.application.objForm) return g740.application.doG740ShowApplicationForm(para);
 	            if (!g740.application.objForm.objPanelForm) return g740.application.doG740ShowApplicationForm(para);
 
@@ -308,6 +333,14 @@ define(
 					window.open(g740.config.mainFormLoginUrl, '_self');
 					return true;
 				}
+				
+				if (g740.config.dialogLogin && g740.config.dialogLogin.isReloadBeforeLogin) {
+					if (!this.getIsModeLoginDialog()) {
+						this.goReload('login');
+						return true;
+					}
+				}
+				
 	            if (g740.application.objDialogLogin && g740.application.objDialogLogin.isObjectDestroed) g740.application.objDialogLogin = null;
 	            if (g740.config.dialogLogin && !g740.application.objDialogLogin) {
 	                g740.application.clear();
@@ -328,6 +361,9 @@ define(
 	        },
 	        // Создаем контейнер g740.application.objPanel в котором будет размещена главная форма приложения
 	        doG740StartUp: function () {
+				var urlParams=this.getUrlParams();
+				if (urlParams['mode']=='login') this.isModeLoginDialog=true;
+				
 	            var mainFormDomNode = 'FormPanelMain';
 	            if (g740.config.mainFormDomNode) mainFormDomNode = g740.config.mainFormDomNode;
 	            g740.application.objPanel = new dijit.layout.BorderContainer(

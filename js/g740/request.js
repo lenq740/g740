@@ -257,7 +257,7 @@ define(
 						result=false;
 						message='';
 					}
-					if (!isDisconnected) {
+					if (!isDisconnected && !g740.application.getIsModeLoginDialog()) {
 						var isFirstOk=true;
 						if (!isError) for (var i=0; i<lst.length; i++) {
 							var xmlItem=lst[i];
@@ -308,6 +308,10 @@ define(
 					this._indexExecuted=0;
 				}
 				else {
+					if (g740.application.getIsModeLoginDialog()) {
+						g740.application.goReload('');
+						return true;
+					}
 					if (errMessage) {
 						g740.showError(errMessage, para.objOwner);
 					}
