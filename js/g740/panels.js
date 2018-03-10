@@ -1776,6 +1776,93 @@ define(
 			}
 		);
 
+// Класс PanelExtControl
+		dojo.declare(
+			'g740.PanelExtControl',
+			[g740._PanelAbstract, dijit.layout.ContentPane],
+			{
+				domIFrame: null,
+				src: '',
+				url: 'about:blank',
+				params: {},
+				constructor: function(para, domElement) {
+					this.params={};
+				},
+				destroy: function() {
+					var procedureName='g740.PanelExtControl.destroy';
+					if (this.domIFrame) this.domIFrame=null;
+					this.params={};
+					this.inherited(arguments);
+				},
+				set: function(name, value) {
+					if (name=='url') {
+						if (this.url==value) return true;
+						if (value) {
+							this.url=value;
+						}
+						else {
+							this.url='about:blank';
+						}
+						if (this.domIFrame) this.domIFrame.src=this.url;
+						return true;
+					}
+					this.inherited(arguments);
+				},
+				postCreate: function() {
+					this.domNode.style.margin='0px';
+					this.domNode.style.padding='0px';
+					this.domNode.style.borderWidth='0px';
+					this.domNode.style.overflow='hidden';
+					
+					this.domIFrame=document.createElement('iframe');
+					this.domIFrame.style.margin='0px';
+					this.domIFrame.style.padding='0px';
+					this.domIFrame.style.width='100%';
+					this.domIFrame.style.height='100%';
+					this.domIFrame.style.borderWidth='0px';
+					this.domIFrame.style.borderStyle='none';
+					this.domIFrame.border=0;
+					this.set('content',this.domIFrame);
+					this.domIFrame.src=this.url;
+					dojo.on(this.domIFrame, 'load', dojo.hitch(this, this.onLoad));
+					this.inherited(arguments);
+				},
+				onLoad: function() {
+					var para={
+						isFull: true,
+						objRowSet: this.getRowSet()
+					};
+					this.doG740Repaint(para);
+				},
+				doG740Repaint: function(para) {
+					if (!this.domIFrame) return false;
+					var domIframeWindow=this.domIFrame.contentWindow;
+					if (!domIframeWindow) return false;
+					if (!para) para={};
+					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
+					if (!domIframeWindow.document) return false;
+					if (domIframeWindow.document.readyState!='complete') return false;
+					if (!domIframeWindow.doG740Repaint) return false;
+
+					var p={};
+					for(var paraName in para) p[paraName]=para[paraName];
+					var g740params={};
+					var objRowSet=this.getRowSet();
+					if (objRowSet) {
+						g740params=objRowSet._getRequestG740params(this.params);
+					}
+					else if (this.objForm) {
+						g740params=this.objForm._getRequestG740params(this.params);
+					}
+					p.G740params=g740params;
+					
+					domIframeWindow.doG740Repaint(p);
+					return true;
+				}
+			}
+		);
+
+
 // Класс PanelImg
 		dojo.declare(
 			'g740.PanelImg',
@@ -2142,6 +2229,47 @@ define(
 			return result;
 		};
 		g740.panels.registrate('webbrowser', g740.panels._builderPanelWebBrowser);
+
+		g740.panels._builderPanelExtControl=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelExtControl';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			if (g740.xml.isAttr(xml,'url')) para.url=g740.xml.getAttrValue(xml,'url','');
+
+			var xmlParams=g740.xml.findFirstOfChild(xml, {nodeName: 'params'});
+			if (!xmlParams) xmlParams=xml;
+			var lstParam=g740.xml.findArrayOfChild(xmlParams, {nodeName:'param'});
+			var panelParams={};
+			for (var i=0; i<lstParam.length; i++) {
+				var xmlParam=lstParam[i];
+				if (!g740.xml.isXmlNode(xmlParam)) continue;
+				var paramName=g740.xml.getAttrValue(xmlParam,'name','');
+				if (!paramName) paramName=g740.xml.getAttrValue(xmlParam,'param','');
+				if (paramName=='') continue;
+				var isEnabled=g740.convertor.toJavaScript(g740.xml.getAttrValue(xmlParam,'enabled','1'),'check');
+				if (!isEnabled) continue;
+				var p={name: paramName, type:'string'};
+				if (g740.xml.isAttr(xmlParam,'value')) {
+					p.value=g740.xml.getAttrValue(xmlParam,'value','');
+				}
+				if (g740.xml.isAttr(xmlParam,'js_value')) {
+					p.js_value=g740.xml.getAttrValue(xmlParam,'js_value','');
+				}
+				if (g740.xml.isAttr(xmlParam,'type')) {
+					var t=g740.xml.getAttrValue(xmlParam,'type','');
+					if (!g740.fieldTypes[t]) t='string';
+					p.type=t;
+				}
+				panelParams[paramName]=p;
+			}
+			var result=new g740.PanelExtControl(para, null);
+			result.params=panelParams;
+			return result;
+		};
+		g740.panels.registrate('extcontrol', g740.panels._builderPanelExtControl);
 		
 		g740.panels._builderPanelImg=function(xml, para) {
 			var result=null;
