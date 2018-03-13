@@ -626,7 +626,7 @@ define(
             },
             createObjField: function (fld, p, domDiv) {
 				var result = null;
-                if (fld.refid) {
+                if (fld.refid && !fld.readonly) {
                     result = new g740.FieldEditor.Ref(p, domDiv);
                 }
                 else if (fld.type == 'string' || fld.type == 'num') {
@@ -636,7 +636,12 @@ define(
                     result = new g740.FieldEditor.Memo(p, domDiv);
                 }
                 else if (fld.type == 'date') {
-                    result = new g740.FieldEditor.Date(p, domDiv);
+					if (fld.readonly) {
+						result = new g740.FieldEditor.Ref(p, domDiv);
+					}
+					else {
+						result = new g740.FieldEditor.Date(p, domDiv);
+					}
                 }
                 else if (fld.type == 'check') {
                     result = new g740.FieldEditor.Check(p, domDiv);
