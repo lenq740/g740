@@ -636,12 +636,7 @@ define(
                     result = new g740.FieldEditor.Memo(p, domDiv);
                 }
                 else if (fld.type == 'date') {
-					if (fld.readonly) {
-						result = new g740.FieldEditor.Ref(p, domDiv);
-					}
-					else {
-						result = new g740.FieldEditor.Date(p, domDiv);
-					}
+					result = new g740.FieldEditor.Date(p, domDiv);
                 }
                 else if (fld.type == 'check') {
                     result = new g740.FieldEditor.Check(p, domDiv);
