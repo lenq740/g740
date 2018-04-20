@@ -147,7 +147,24 @@ define(
 			if (!result && defa) result=defa;
 	        return result;
 	    }
-
+		function exec(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15) {
+			var result=false;
+			try {
+				var obj=g740.js_eval_obj;
+				if (!obj) return false;
+				var f='';
+				if (obj.script && obj.script[name]) f=obj.script[name];
+				if (!f && obj.objForm && obj.objForm.script && obj.objForm.script[name]) f=obj.objForm.script[name];
+				if (typeof(f)=='function') result=f(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15);
+			}
+	        catch (e) {
+	            result = false;
+	        }
+			return result;
+		}
+		window.get=get;
+		window.exec=exec;
+		
 	    g740.execDelay = {
 	        _index: 0,
 	        _indexMax: 100000,

@@ -50,6 +50,7 @@ define(
 				g740childs: [],				// Список дочерних панелек для поддержки visible
 				
 				objDialogEditor: null,
+				script: {},
 				
 // Создание экземпляра объекта
 //	para.name
@@ -65,6 +66,7 @@ define(
 					this.objFocusedPanel=null;
 					this.g740childs=[];
 					this.modalResults={};
+					this.script={};
 					//console.log(this);
 				},
 // Уничтожение экземпляра объекта
@@ -581,7 +583,14 @@ define(
 						this.isClosable=g740.xml.getAttrValue(xmlForm, 'closable', '1')=='1';
 						if (g740.xml.isAttr(xmlForm,'width')) this.g740Width=g740.xml.getAttrValue(xmlForm, 'width', this.g740Width);
 						if (g740.xml.isAttr(xmlForm,'height')) this.g740Height=g740.xml.getAttrValue(xmlForm, 'height', this.g740Height);
-						
+
+						// Вытаскиваем скрипты, если они есть
+						var xmlScript=g740.xml.findFirstOfChild(xmlForm,{nodeName:'script'});
+						if (g740.xml.isXmlNode(xmlScript)) {
+							var script='({'+xmlScript.textContent+'})';
+							this.script=eval(script);
+						}
+
 						// Строим наборы строк
 						var xmlRowSets=g740.xml.findFirstOfChild(xmlForm, {nodeName:'rowsets'});
 						if (xmlRowSets) {
@@ -610,7 +619,7 @@ define(
 						}
 						// Строим связи между наборами строк
 						this._buildRowSetLinks();
-						
+
 						// Строим описатели запросов экранной формы
 						var xmlRequests=g740.xml.findFirstOfChild(xmlForm,{nodeName:'requests'});
 						if (!g740.xml.isXmlNode(xmlRequests)) xmlRequests=xmlForm;

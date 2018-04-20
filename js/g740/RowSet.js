@@ -314,6 +314,7 @@ define(
 
 				autoRefreshTimeout: 0,		// Задержка автоперечитки (0 - автоперечитка выключена)
 				isInActivity: false,		// Состояние бездействия (возможна автоматическая перечитка)
+				script: {},
 
 // Создание и уничтожение объекта
 // Создание экземпляра объекта
@@ -366,6 +367,7 @@ define(
 						var name = names[i];
 						if (typeof (para[name]) != 'undefined') this.set(name, para[name]);
 					}
+					this.script={};
 					//console.log(this);
 			    },
 // Уничтожение экземпляра объекта
@@ -2029,6 +2031,16 @@ define(
 					if (!g740.xml.isXmlNode(xmlRowSet)) g740.systemError(procedureName, 'errorNotXml', 'xmlRowSet');
 					if (xmlRowSet.nodeName != 'rowset') g740.systemError(procedureName, 'errorXmlNodeNotFound', 'rowset');
 					this._buildRowSetProperty(xmlRowSet);
+
+					// Вытаскиваем скрипты, если они есть
+					var xmlScript=g740.xml.findFirstOfChild(xmlRowSet,{nodeName:'script'});
+					if (g740.xml.isXmlNode(xmlScript)) {
+						var script=eval('({'+xmlScript.textContent+'})');
+						for(var name in script) {
+							this.script[name]=script[name];
+						}
+					}
+
 					this._buildSection(xmlRowSet);
 					var lstSections = g740.xml.findArrayOfChild(xmlRowSet, { nodeName: 'section' });
 					for (var i = 0; i < lstSections.length; i++) {
