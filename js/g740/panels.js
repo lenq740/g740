@@ -1299,7 +1299,26 @@ define(
 				selectChild: function(objPage) {
 					var old=this.selectedChildWidget;
 					this.inherited(arguments);
-					if (objPage.doG740Repaint) objPage.doG740Repaint({
+					if (old && old!=objPage && objPage && objPage.getChildren) {
+						lst=objPage.getChildren();
+						for (var i=0; i<lst.length; i++) {
+							var objChildPanel=lst[i];
+							if (!objChildPanel) continue;
+							if (!objChildPanel.canFocused) continue;
+							if (!objChildPanel.doG740Focus) continue;
+							if (!objChildPanel.canFocused()) continue;
+							{
+								if (objChildPanel.doG740FocusChildFirst) {
+									objChildPanel.doG740FocusChildFirst();
+								}
+								else {
+									objChildPanel.doG740Focus();
+								}
+								break;
+							}
+						}
+					}
+					if (objPage && objPage.doG740Repaint) objPage.doG740Repaint({
 						isFull: true
 					});
 				},
