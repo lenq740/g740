@@ -677,7 +677,7 @@ html, body {
 .g740tree-panel .g740tree-item-element {
 	position: relative;
 	min-height: 22px;
-	cursor: default;
+	cursor: pointer;
 }
 .g740tree-panel .g740tree-item-element.selected {
 	background-color: moccasin;
@@ -712,6 +712,7 @@ html, body {
 	float: left;
 	width: 16px;
 	height: 16px;
+	cursor: pointer;
 }
 
 .g740tree-panel .g740tree-item-text {

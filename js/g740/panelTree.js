@@ -219,6 +219,8 @@ define(
 						}));
 						dojo.on(domItemElement, 'dblclick', dojo.hitch(this, function(e){
 							var d=e.target;
+							if (dojo.hasClass(d,'g740tree-item-expander')) return;
+							if (dojo.hasClass(d,'g740tree-item-icon')) return;
 							var treeNode=null;
 							while(d) {
 								if (d.treeNode) {
