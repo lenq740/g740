@@ -643,6 +643,8 @@ define(
 					if (!para) return true;
 					if (!para.objRowSet) return true;
 					if (para.objRowSet.name!=this.rowsetName) return true;
+					if (this.objToolBar && this.objToolBar.doG740Repaint) this.objToolBar.doG740Repaint(para);
+					if (this.objPanelButtons && this.objPanelButtons.doG740Repaint) this.objPanelButtons.doG740Repaint(para);
 
 					if (para.isFull && para.parentNode) {
 						var nn=this.getNodes(para.parentNode);
