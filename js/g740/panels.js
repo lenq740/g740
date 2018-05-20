@@ -1310,6 +1310,7 @@ define(
 										h: objChild.G740HiddenHeight
 									};
 									if (objChild.resize) objChild.resize(p);
+									if (objChild.doG740Repaint) objChild.doG740Repaint({isFull: true});
 								}
 							}
 						}
