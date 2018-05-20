@@ -638,10 +638,15 @@ define(
 				},
 				convertFromValueToTextValue: function(value) {
 					var result=value;
-					if (this.fieldDef && this.fieldDef.type=='num' && this.fieldDef.dec) {
-						var result=parseFloat(result);
-						if (isNaN(result)) result=0;
-						result=result.toFixed(this.fieldDef.dec);
+					if (this.fieldDef) {
+						if (this.fieldDef.type=='num' && this.fieldDef.dec) {
+							var result=parseFloat(result);
+							if (isNaN(result)) result=0;
+							result=result.toFixed(this.fieldDef.dec);
+						}
+						else if (this.fieldDef.type=='date') {
+							result=g740.convertor.js2text(result, 'date');
+						}
 					}
 					return result;
 				},

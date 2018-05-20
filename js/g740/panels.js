@@ -635,8 +635,12 @@ define(
                 else if (fld.type == 'memo') {
                     result = new g740.FieldEditor.Memo(p, domDiv);
                 }
-                else if (fld.type == 'date') {
+                else if (fld.type == 'date' && !fld.readonly) {
 					result = new g740.FieldEditor.Date(p, domDiv);
+                }
+                else if (fld.type == 'date' && fld.readonly) {
+					p.len=10;
+					result = new g740.FieldEditor.String(p, domDiv);
                 }
                 else if (fld.type == 'check') {
                     result = new g740.FieldEditor.Check(p, domDiv);
@@ -833,7 +837,7 @@ define(
 						var objPanel=this.g740childs[i];
 						if (!objPanel) continue;
 						if (objPanel.g740className=='g740.Panel' && objPanel.objForm && objPanel.js_visible) {
-							var visible=g740.js_eval(objPanel.objForm, objPanel.js_visible, true);
+							var visible=g740.convertor.toJavaScript(g740.js_eval(objPanel.objForm, objPanel.js_visible, true),'check');
 							if (visible!=objPanel.visible) {
 								if (visible) {
 									try {
@@ -1129,6 +1133,7 @@ define(
 					}
 					this.inherited(arguments);
 				},
+
 				getBestChild: function() {
 					var result=null;
 					var childs=this.getChildren();
@@ -1236,6 +1241,96 @@ define(
 		);
 		
 
+// Класс PanelScroll - все дочерние как top, с прокруткой
+		dojo.declare(
+			'g740.PanelScroll',
+			[dijit.layout._LayoutWidget, g740._PanelAbstract],
+			{
+				isG740CanChilds: true,				// Признак - класс может содержать дочерние панели
+				postCreate: function() {
+					if (this.isShowTitle && this.title) {
+						var objTitle=new g740.PanelTitle({
+							title: this.title
+						}, null);
+						this.addChild(objTitle);
+					}
+					this.inherited(arguments);
+					dojo.style(this.domNode, 'overflow-y', 'auto');
+				},
+				_isFirstLayoutExecuted: false,
+				layout: function() {
+					if (!this.domNode) return true;
+					var w=this.domNode.clientWidth;
+					var top=0;
+					for(var i=0; i<this.g740childs.length; i++) {
+						var objChild=this.g740childs[i];
+						if (!objChild.domNode) continue;
+
+						if (objChild.g740className=='g740.Panel' && objChild.objForm && objChild.js_visible) {
+							if (!objChild.visible) continue;
+						}
+
+						var posChild=dojo.geom.position(objChild.domNode, false);
+						h=posChild.h;
+
+						var p={
+							x: 0,
+							y: top,
+							w: w,
+							h: h
+						};
+						if (objChild.resize) objChild.resize(p);
+						top+=h;
+					}
+					this._isFirstLayoutExecuted=true;
+				},
+				doG740RepaintChildsVisible: function() {
+					if (!this._isFirstLayoutExecuted) return;
+					var w=this.domNode.clientWidth;
+					for(var i=0; i<this.g740childs.length; i++) {
+						var objChild=this.g740childs[i];
+						if (!objChild.domNode) continue;
+						if (objChild.g740className=='g740.Panel' && objChild.objForm && objChild.js_visible) {
+							var visible=g740.convertor.toJavaScript(g740.js_eval(objChild.objForm, objChild.js_visible, true),'check');
+							if (visible!=objChild.visible) {
+								objChild.visible=visible;
+								if (!visible) {
+									var posChild=dojo.geom.position(objChild.domNode, false);
+									objChild.G740HiddenDisplay=dojo.style(objChild.domNode,'display');
+									objChild.G740HiddenHeight=posChild.h;
+									dojo.style(objChild.domNode,'display','none');
+									continue;
+								}
+								else {
+									dojo.style(objChild.domNode,'display',objChild.G740HiddenDisplay);
+									var p={
+										x: 0,
+										y: 0,
+										w: w,
+										h: objChild.G740HiddenHeight
+									};
+									if (objChild.resize) objChild.resize(p);
+								}
+							}
+						}
+					}
+				},
+				getChildren: function() {
+					var lst=this.inherited(arguments);
+					var result=[];
+					for (var i=0; i<lst.length; i++) {
+						var objChild=lst[i];
+						if (objChild.visible===false) {
+							continue;
+						}
+						result.push(objChild);
+					}
+					return result;
+				}
+			}
+		);
+		
+		
 // Класс PanelTab
 		dojo.declare(
 			'g740.PanelTab',
@@ -2173,6 +2268,18 @@ define(
 		};
 		g740.panels.registrate('panel', g740.panels._builderPanel);
 
+		g740.panels._builderPanelScroll=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelScroll';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			var result=new g740.PanelScroll(para, null);
+			return result;
+		};
+		g740.panels.registrate('scroll', g740.panels._builderPanelScroll);
+		
 		g740.panels._builderPanelTab=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanelTab';

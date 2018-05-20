@@ -61,7 +61,15 @@ define(
 //	Преобразование логического значения из формата G740 в JavaScript
 			_toJavaScriptCheck: function(expr) {
 				var result=false;
-				if (expr=='1') result=true;
+				var t=typeof(expr);
+				if (t=='string') {
+					result=true;
+					if (expr=='') result=false;
+					if (expr=='0') result=false;
+				}
+				else if (t=='number' || t=='boolean') {
+					result=(expr)?true:false;
+				}
 				return result;
 			},
 //	Преобразование строки из JavaScript в формат G740
