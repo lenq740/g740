@@ -1622,28 +1622,39 @@ define(
 				},
 				// Отобразить экранную форму
 				doG740ShowForm: function(objForm) {
-					var childs=this.getChildren();
-					var addIndex=-1;
-					for (var i=0; i<childs.length; i++) {
-						var objChild=childs[i];
-						if (!objChild) continue;
-						if (objChild.g740className!='g740.Form') continue;
-						if (objChild.name==objForm.name) {
-							addIndex=this.getIndexOfChild(objChild);
-							this.removeChild(objChild);
-							objChild.destroyRecursive();
+					var oldOnSelect=null;
+					if (objForm && objForm.requests && objForm.requests['onselect']) {
+						oldOnSelect=objForm.requests['onselect'];
+						delete objForm.requests['onselect'];
+					}
+					try {
+						var childs=this.getChildren();
+						var addIndex=-1;
+						for (var i=0; i<childs.length; i++) {
+							var objChild=childs[i];
+							if (!objChild) continue;
+							if (objChild.g740className!='g740.Form') continue;
+							if (objChild.name==objForm.name) {
+								addIndex=this.getIndexOfChild(objChild);
+								this.removeChild(objChild);
+								objChild.destroyRecursive();
+							}
 						}
+						objForm.closable=true;
+						objForm.onClose=this.onFormClose;
+						objForm.onHide=this.onFormHide;
+						if (addIndex>=0) {
+							this.addChild(objForm, addIndex);
+						}
+						else {
+							this.addChild(objForm);
+						}
+						
+						this.selectChild(objForm);
 					}
-					objForm.closable=true;
-					objForm.onClose=this.onFormClose;
-					objForm.onHide=this.onFormHide;
-					if (addIndex>=0) {
-						this.addChild(objForm, addIndex);
+					finally {
+						if (oldOnSelect && objForm && objForm.requests) objForm.requests['onselect']=oldOnSelect;
 					}
-					else {
-						this.addChild(objForm);
-					}
-					this.selectChild(objForm);
 				},
 				onFormClose: function() {
 					var objForm=this;
@@ -1675,6 +1686,23 @@ define(
 					}
 					return false;
 				},
+				onG740FormSelect: function(objForm) {
+					if (objForm && objForm.g740className=='g740.Form' && !objForm.isObjectDestroed && objForm.requests) {
+						if (objForm.requests['onselect']) {
+							objForm.exec({
+								requestName: 'onselect'
+							});
+						}
+					}
+				},
+				selectChild: function(objForm) {
+					var old=this.selectedChildWidget;
+					this.inherited(arguments);
+					if (objForm && this.selectedChildWidget==objForm && old!=objForm && objForm.g740className=='g740.Form' && !objForm.isObjectDestroed) {
+						this.onG740FormSelect(objForm);
+					}
+				},
+				
 				doG740Repaint: function(para) {
 				},
 				// Отображение форового рисунка при отсутствии панелей

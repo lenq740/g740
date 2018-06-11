@@ -585,7 +585,8 @@ define(
 						if (g740.xml.isAttr(xmlForm,'height')) this.g740Height=g740.xml.getAttrValue(xmlForm, 'height', this.g740Height);
 
 						// Вытаскиваем скрипты, если они есть
-						var xmlScript=g740.xml.findFirstOfChild(xmlForm,{nodeName:'script'});
+						var xmlScript=g740.xml.findFirstOfChild(xmlForm,{nodeName:'scripts'});
+						if (!g740.xml.isXmlNode(xmlScript)) xmlScript=g740.xml.findFirstOfChild(xmlForm,{nodeName:'script'});
 						if (g740.xml.isXmlNode(xmlScript)) {
 							var script='({'+xmlScript.textContent+'})';
 							this.script=eval(script);
@@ -780,6 +781,7 @@ define(
 					var requestName=g740.xml.getAttrValue(xmlRequest,'name','');
 					requestName=g740.xml.getAttrValue(xmlRequest,'request',requestName);
 					if (requestName=='close') requestName='onclose';
+					if (requestName=='select') requestName='onselect';
 						
 					var requestMode=g740.xml.getAttrValue(xmlRequest,'mode','');
 					if (requestName=='form') var requestMode=g740.xml.getAttrValue(xmlRequest,'form',requestMode);
