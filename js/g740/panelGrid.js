@@ -277,15 +277,29 @@ define(
 					var domItem = this.getRowNode(rowIndex);
 			        if (!domItem) return false;
 			        var y = this.scrollTop;
-			        var h = this.scroller.windowHeight;
+
+					var h = this.scroller.windowHeight;
+					if (h>60) {
+						var dH=0;
+						dH=parseInt(h*0.1);
+						if (dH<25) dH=25;
+						h=h-dH;
+					}
+					
+					var isScroll=false;
 					if (domItem.offsetTop < y) {
 						y=parseInt(domItem.offsetTop);
+						isScroll=true;
 					}
 			        if ((domItem.offsetTop + domItem.offsetHeight) > (y + h)) {
 			            y = parseInt(domItem.offsetTop + domItem.offsetHeight - h);
+						isScroll=true;
 			        }
-					if (y < 0) y = 0;
-					this.scrollTo(y);
+					if (y < 0) {
+						y = 0;
+						isScroll=true;
+					}
+					if (isScroll) this.scrollTo(y);
 			    },
 			    doG740SetSelectionDelay: function (para) {
 			        this.selection.clear();
