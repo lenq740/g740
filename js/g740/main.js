@@ -376,8 +376,9 @@ define(
 	            }
 	            if (g740.application.objDialogLogin) g740.application.objDialogLogin.show();
 	        },
-	        // Создаем контейнер g740.application.objPanel в котором будет размещена главная форма приложения
-	        doG740StartUp: function () {
+			go: function() {
+				dojo.addClass(document.body, 'g740');
+
 				var urlParams=this.getUrlParams();
 				if (urlParams['mode']=='login') this.isModeLoginDialog=true;
 				
@@ -392,9 +393,14 @@ define(
 					mainFormDomNode
 				);
 	            g740.application.objPanel.startup();
-	        }
-	    };
-	    g740.application.doG740StartUp();
+
+				
+				var itemAppColorScheme=g740.appColorScheme.getItem();
+				if (itemAppColorScheme)	dojo.addClass(document.body, itemAppColorScheme.className);
+				
+				g740.application.doG740ShowForm();
+			}
+		};
 
 		g740.size = {
 			domLabel: null,

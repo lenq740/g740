@@ -400,6 +400,6 @@ define(
 			var result = new g740.HtmlFields(para, null);
 	        return result;
 	    };
-	    g740.panels.registrate('html', g740.panels._builderHtmlFields);
+	    g740.panels.registrate('htmlfields', g740.panels._builderHtmlFields);
 	}
 );

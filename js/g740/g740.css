@@ -6,6 +6,23 @@ html, body {
 	overflow: hidden;
 }
 
+/* Размеры иконок */
+.g740-iconsize-small {
+	background-size: cover;
+	width: 16px;
+	height: 16px;
+}
+.g740-iconsize-medium {
+	background-size: cover;
+	width: 24px;
+	height: 24px;
+}
+.g740-iconsize-large {
+	background-size: cover;
+	width: 32px;
+	height: 32px;
+}
+
 /* Вычисление размеров метки */
 .g740-size-label {
 	position: absolute;
@@ -23,6 +40,19 @@ html, body {
 .g740 .dijitToolbar {
 	padding-left: 1px;
 }
+.g740 .dijitToolbar.g740small {
+	height: 25px;
+	margin-top: 3px;
+}
+.g740 .dijitToolbar.g740medium {
+	height: 30px;
+	margin-top: 5px;
+}
+.g740 .dijitToolbar.g740large {
+	height: 38px;
+	margin-top: 8px;
+}
+
 .dijitToolbar .dijitToggleButton, .dijitToolbar .dijitButton, .dijitToolbar .dijitDropDownButton, .dijitToolbar .dijitComboButton {
     margin: 1px 0px 1px 0px;
 }
@@ -34,6 +64,26 @@ html, body {
     padding: 0px 2px;
 }
 
+.g740 .dijitToolbar {
+    background-color: inherit;
+    border-bottom-style: none;
+}
+.g740 .dijitToolbarSeparator {
+    background-image: none;
+	width: 8px;
+}
+.g740 .dijitToolbar .dijitButtonHover,
+.g740 .dijitToolbar .dijitToggleButtonHover,
+.g740 .dijitToolbar .dijitDropDownButtonHover,
+.g740 .dijitToolbar .dijitComboButton .dijitButtonContentsHover,
+.g740 .dijitToolbar .dijitComboButton .dijitDownArrowButtonHover {
+	/* TODO: change this from Hover to Selected so that button is still highlighted while drop down is being used */
+    background-color: white;
+	outline: 1px solid white;
+}
+.g740 .dijitToolbar .dijitButtonNode:hover {
+	background-color: white !important;
+}
 
 
 /* Диалог */
@@ -116,10 +166,10 @@ html, body {
 	cursor: pointer;
 }
 .g740-grid-check-on {
-	background-image: url('icons/check-on.png');
+	background-image: url('icons/widget/check-on.png');
 }
 .g740-grid-check-off {
-	background-image: url('icons/check-off.png');
+	background-image: url('icons/widget/check-off.png');
 }
 .g740-grid-icons {
 	display: block;
@@ -161,7 +211,7 @@ html, body {
 	width: 23px;
 	height: 19px;
 	background-color: #F6F6F6;
-	background-image: url('icons/btnfieldeditor.png');
+	background-image: url('icons/widget/btnfieldeditor.png');
 	background-repeat: norepeat;
 	cursor: pointer;
 }
@@ -172,7 +222,7 @@ html, body {
 	width: 23px;
 	height: 19px;
 	background-color: #F6F6F6;
-	background-image: url('icons/btnfieldclear.png');
+	background-image: url('icons/widget/btnfieldclear.png');
 	background-repeat: norepeat;
 	cursor: pointer;
 }
@@ -317,10 +367,10 @@ html, body {
 	cursor: pointer;
 }
 .g740-widget-icons .check-on {
-	background-image: url('icons/check-on.png');
+	background-image: url('icons/widget/check-on.png');
 }
 .g740-widget-icons .check-off {
-	background-image: url('icons/check-off.png');
+	background-image: url('icons/widget/check-off.png');
 }
 .g740-widget-icons .g740-widget-icons-label {
 	position: absolute;
@@ -366,12 +416,12 @@ html, body {
 	cursor: pointer;
 }
 .g740-radiogroupbox .check-off  .g740-radio-icon{
-	background-image: url('icons/radiobutton-off.png');
+	background-image: url('icons/widget/radiobutton-off.png');
 	width: 16px;
 	height: 16px;
 }
 .g740-radiogroupbox .check-on .g740-radio-icon{
-	background-image: url('icons/radiobutton-on.png');
+	background-image: url('icons/widget/radiobutton-on.png');
 	width: 16px;
 	height: 16px;
 }
@@ -454,7 +504,7 @@ html, body {
 	bottom: 1px;
 	opacity: 0.1;
 	background-repeat: no-repeat;
-	background-image: url('icons/btnfieldexpand.png');
+	background-image: url('icons/widget/btnfieldexpand.png');
 	cursor: pointer;
 	background-color: #F6F6F6;
 }
@@ -464,19 +514,16 @@ html, body {
 
 /* PanelTitle */
 .g74-paneltitle {
-	font-size: 12px;
+	font-size: 20px;
 	font-weight: normal;
 
-	background-color: #F3F3F3;
-	padding: 2px 2px 2px 8px;
-	border-width: 0px !important;
-	line-height: 14px !important;
-	height: 15px !important;
-	border-top-width: 0px !important;
-	border-bottom-width: 1px !important;
-	border-style: solid !important;
-	border-color: lightgray !important;
+	padding: 2px;
+	line-height: 25px !important;
+	height: 28px !important;
 	margin-bottom: 1px;
+	
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 /* FieldContainer */
@@ -612,19 +659,19 @@ html, body {
 }
 .g740-paginator .btn-first{
 	float: left;
-	background-image: url('icons/paginator-first.png');
+	background-image: url('icons/widget/paginator-first.png');
 }
 .g740-paginator .btn-prev{
 	float: left;
-	background-image: url('icons/paginator-prev.png');
+	background-image: url('icons/widget/paginator-prev.png');
 }
 .g740-paginator .btn-next{
 	float: left;
-	background-image: url('icons/paginator-next.png');
+	background-image: url('icons/widget/paginator-next.png');
 }
 .g740-paginator .btn-last{
 	float: left;
-	background-image: url('icons/paginator-last.png');
+	background-image: url('icons/widget/paginator-last.png');
 }
 
 .g740-paginator .pages{
@@ -650,14 +697,20 @@ html, body {
 	outline-width: 1px;
 }
 
-/* G740Tree */
+
+/* PanelTree */
 .g740tree-panel {
 	overflow-x: hidden;
+}
+.g740tree-panel .g740tree-paddingtop {
+	height: 5px;
 }
 .g740tree-panel .g740-focused {
 	position: absolute;
 	height: 0px;
 	width: 0px;
+	left: 0px;
+	top: 0px;
 	opacity: 0;
 	z-index: -1;
 }
@@ -670,14 +723,19 @@ html, body {
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	-webkit-user-select: none;
+	padding-left: 5px;
+	padding-right: 5px;
 }
-.g740tree-panel .g740tree-item-childs {
-	margin-left: 20px;
-}
+
 .g740tree-panel .g740tree-item-element {
 	position: relative;
-	min-height: 22px;
+	height: 26px;
 	cursor: pointer;
+	white-space: nowrap;
+	overflow: hiden;
+}
+.g740tree-panel.focused .g740tree-item-element:hover {
+	background-color: moccasin;
 }
 .g740tree-panel .g740tree-item-element.selected {
 	background-color: moccasin;
@@ -686,13 +744,15 @@ html, body {
 	background-color: orange;
 	color: white;
 }
+
 .g740tree-panel .g740tree-item-expander {
-	position: absolute;
-	top: 1px;
-	left: 0px;
-	float: left;
-	width: 18px;
-	height: 18px;
+	display: inline-block;
+	width: 16px;
+	height: 26px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	margin-left: 5px;
 }
 .g740tree-panel .g740tree-item-expander.g740tree-item-expander-plus {
 	background-image: url('cssdojo/g740/images/treeExpand_plus.gif');
@@ -706,24 +766,367 @@ html, body {
 	background-image: url('cssdojo/g740/images/treeExpand_leaf.gif');
 }
 .g740tree-panel .g740tree-item-icon {
-	position: absolute;
-	top: 3px;
-	left: 22px;
-	float: left;
+	display: inline-block;
 	width: 16px;
-	height: 16px;
+	height: 26px;
 	cursor: pointer;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
 }
-
 .g740tree-panel .g740tree-item-text {
 	display: inline-block;
-	line-height: 20px;
-	margin-left: 45px;
+	height: 26px;
+	line-height: 24px;
 	overflow: hidden;
     white-space: nowrap;
+	margin-left: 8px;
+}
+
+.g740tree-panel.g740medium .g740tree-item-element {
+	height: 30px;
+}
+.g740tree-panel.g740medium .g740tree-item-expander {
+	width: 16px;
+	height: 30px;
+}
+.g740tree-panel.g740medium .g740tree-item-icon {
+	width: 24px;
+	height: 30px;
+}
+.g740tree-panel.g740medium .g740tree-item-text {
+	font-size: 16px;
+	line-height: 28px;
+	height: 30px;
+}
+
+.g740tree-panel.g740large .g740tree-item-element {
+	height: 42px;
+}
+.g740tree-panel.g740large .g740tree-item-expander {
+	width: 16px;
+	height: 42px;
+}
+.g740tree-panel.g740large .g740tree-item-icon {
+	width: 36px;
+	height: 42px;
+}
+.g740tree-panel.g740large .g740tree-item-text {
+	font-size: 18px;
+	line-height: 38px;
+	height: 42px;
+}
+
+.g740tree-panel.treemenu {
+}
+
+.g740tree-panel.treemenu .g740tree-item-element {
+	background-color: white;
+}
+.g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	width: 16px;
+	position: center;
+	background-repeat: no-repeat;
+	background-color: inherit;
+}
+.g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-plus {
+	background-image: url('icons/widget/treemenucollapsed.png');
+}
+.g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-minus {
+	background-image: url('icons/widget/treemenuexpanded.png');
+}
+.g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-final {
+	background-image: none;
+	width: 0px;
+}
+.g740tree-panel.treemenu .g740tree-item-icon {
+	margin-left: 5px;
+}
+.g740tree-panel.treemenu.g740small .g740tree-item-text {
+	font-size: 13px;
+	line-height: 28px;
+	height: 30px;
+}
+.g740tree-panel.treemenu.g740medium .g740tree-item-text {
+	font-size: 13px;
+	line-height: 28px;
+	height: 30px;
+}
+.g740tree-panel.treemenu.g740large .g740tree-item-text {
+	font-size: 13px;
+	line-height: 28px;
+	height: 30px;
+}
+
+.g740tree-panel.treemenu.focused .g740tree-item-element.selected {
+	background-color: inherit;
+	color: inherit;
+}
+.g740tree-panel.treemenu .g740tree-item-element.selected {
+	background-color: inherit;
+	color: inherit;
+}
+
+.g740tree-panel.treemenu.focused .g740tree-item-element.selected:hover {
+	background-color: moccasin;
+}
+.g740tree-panel.treemenu .g740tree-item-element.selected:hover {
+	background-color: moccasin;
+}
+
+/* выдвижная панель */
+.g740expander-panel {
+	overflow: visible;
+	z-index: 100;
+}
+.g740expander-panel .g740expander-lockscreen{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+
+	background-color: lightgray;
+	z-index:9999;
+	opacity:0;
+	
+}
+.g740expander-panel.expanded .g740expander-lockscreen{
+	position: fixed;
+	z-index:0;
+}
+
+.g740expander-panel .g740expander-body{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+.g740expander-panel.region-left .g740expander-body{
+	left: 0px;
+	box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.region-right .g740expander-body{
+	right: 0px;
+	box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.region-top .g740expander-body{
+	top: 0px;
+	box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.region-bottom .g740expander-body{
+	bottom: 0px;
+	box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
 }
 
 
+.g740expander-panel .g740expander-bodymax {
+	position: absolute;
+}
+.g740expander-panel.region-left .g740expander-bodymax {
+	left: 0px;
+	height: 100%;
+}
+.g740expander-panel.region-right .g740expander-bodymax {
+	right: 0px;
+	height: 100%;
+}
+.g740expander-panel.region-top .g740expander-bodymax {
+	top: 0px;
+	width: 100%;
+}
+.g740expander-panel.region-bottom .g740expander-bodymax {
+	bottom: 0px;
+	width: 100%;
+}
+
+.g740expander-panel .g740expander-icon {
+	position: absolute;
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 0px;
+	height: 0px;
+}
+.g740expander-panel.mainmenu .g740expander-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 25px;
+	background-image: url('icons/widget/cmdburgeroff.png');
+	cursor: pointer;
+}
+.g740expander-panel.mainmenu.region-left .g740expander-icon {
+	top: 15px;
+	box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.mainmenu.region-left.collapsed .g740expander-icon {
+	right: -15px;
+	transition: 0.6s;
+}
+.g740expander-panel.mainmenu.region-left.expanded .g740expander-icon {
+	right: 5px;
+	transition: 0.6s;
+}
+
+.g740expander-panel.mainmenu.region-right .g740expander-icon {
+	top: 15px;
+	box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.mainmenu.region-right.collapsed .g740expander-icon {
+	left: -15px;
+	transition: 0.6s;
+}
+.g740expander-panel.mainmenu.region-right.expanded .g740expander-icon {
+	left: 5px;
+	transition: 0.6s;
+}
+
+.g740expander-panel.mainmenu.region-top .g740expander-icon {
+	right: 15px;
+	box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.mainmenu.region-top.collapsed .g740expander-icon {
+	bottom: -15px;
+	transition: 0.6s;
+}
+.g740expander-panel.mainmenu.region-top.expanded .g740expander-icon {
+	bottom: 5px;
+	transition: 0.6s;
+}
+
+.g740expander-panel.mainmenu.region-bottom .g740expander-icon {
+	right: 15px;
+	box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-webkit-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+	-moz-box-shadow:-3px 3px 4px 1px rgba(0,0,0,0.47);
+}
+.g740expander-panel.mainmenu.region-bottom.collapsed .g740expander-icon {
+	top: -15px;
+	transition: 0.6s;
+}
+.g740expander-panel.mainmenu.region-bottom.expanded .g740expander-icon {
+	top: 5px;
+	transition: 0.6s;
+}
+
+/* Панель HTML */
+.g740html-panel {
+	overflow: hidden;
+}
+.g740html-panel .g740html-label{
+	white-space: nowrap;
+}
+.g740html-panel.g740small .g740html-label{
+	margin: 5px;
+	font-size: 16px;
+}
+.g740html-panel.g740medium .g740html-label{
+	margin: 8px;
+	font-size: 18px;
+}
+.g740html-panel.g740large .g740html-label{
+	margin: 10px;
+	font-size: 24px;
+}
+.g740html-panel.mainmenu {
+	cursor: pointer;
+}
+.g740html-panel.mainmenu .g740html-label{
+	text-align: center;
+	margin-top: 15px;
+}
+.g740html-panel.title .connecteduser {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    cursor: pointer;
+}
+.g740html-panel.title .connecteduser .label {
+    display: inline-block;
+    padding-right: 25px;
+}
+.g740html-panel.title .connecteduser .icon {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    background-image: url('icons/widget/disconnect.png');
+    background-size: cover;
+    background-repeat: norepeat;
+    width: 16px;
+    height: 16px;
+}
+
+/* g740.PanelMultiTabsForm */
+.g740-panelmultitabsform .g74-multitabs {
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items{
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem{
+	position: relative;
+	display: block;
+	float: left;
+	cursor: pointer;
+
+	padding-left: 5px;
+    padding-right: 5px;
+	margin-right: 15px;
+	
+	font-size: 14px;
+    color: #8bc4ea;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+	height: 46px;
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem span{
+	display: block;
+	margin-top: 18px;
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem .btnclose{
+	display: block;
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	background-image: url('icons/widget/blackclose.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	top: 3px;
+	right: -10px;
+	opacity: 0;
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem.selected{
+    border-bottom: 2px solid #3498db;
+	color: #3498db;
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem.selected .btnclose{
+	opacity: 0.3;
+}
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem.selected .btnclose:hover{
+	opacity: 1;
+}
+
+
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem:hover{
+	color: #3498db;
+}
 
 /* DialogLogin */
 .g740-dialoglogin-table {

@@ -176,10 +176,6 @@ define(
 	            specread: true,
 	            speclocal: true,
 	            specnofilter: true
-	        },
-	        init: function () {
-	            this.mark.speclocal = !g740.config.markNewStyle;
-	            this.markclear.speclocal = !g740.config.markNewStyle;
 	        }
 	    };
 
@@ -885,7 +881,10 @@ define(
 					if (this.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject');
 					if (!this.isEnabled) return true;
 					if (this.isReadOnly) return true;
-					if (this.js_readonly) return g740.js_eval(this, this.js_readonly, false);
+					if (this.js_readonly) {
+						var result=g740.js_eval(this, this.js_readonly, false);
+						return result;
+					}
 					return false;
 			    },
 // Проверка текущего узла на ReadOnly

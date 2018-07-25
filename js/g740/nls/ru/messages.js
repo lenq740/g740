@@ -114,6 +114,9 @@
 	paginatorPrev: 'Предыдущая страница',
 	paginatorNext: 'Следующая страница',
 	
+	// MainMenu
+	mainMenuCaption: 'Главное меню системы',
+	
 	// сообщения трасировки
 	traceStart: 'Точка входа',
 	traceEnd: 'Точка выхода',

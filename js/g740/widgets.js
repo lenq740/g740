@@ -43,7 +43,7 @@ define(
 				}
 			}
 		);
-		
+	
 // Виджет: пагнатор
 		dojo.declare(
 			'g740.Paginator',
@@ -1133,12 +1133,14 @@ define(
 			{
 				g740className: 'g740.Toolbar',			// Имя базового класса
 				isObjectDestroed: false,				// Признак - объект уничтожен
-				constructor: function(para, domElement) {
-					var procedureName='g740.Toolbar.constructor';
-					try {
+				g740size: 'small',
+				set: function(name, value) {
+					if (name=='g740size') {
+						if (value!='large' && value!='medium' && value!='small') value=g740.config.iconSizeDefault;
+						this.g740size=value;
+						return true;
 					}
-					finally {
-					}
+					this.inherited(arguments);
 				},
 				destroy: function() {
 					var procedureName='g740.Toolbar.destroy';
@@ -1148,6 +1150,12 @@ define(
 					}
 					finally {
 					}
+				},
+				postCreate: function() {
+					this.inherited(arguments);
+					if (this.g740size=='large') dojo.addClass(this.domNode,'g740large');
+					if (this.g740size=='medium') dojo.addClass(this.domNode,'g740medium');
+					if (this.g740size=='small') dojo.addClass(this.domNode,'g740small');
 				},
 				doG740Repaint: function(para) {
 					// Перерисовываем детей
@@ -1168,15 +1176,21 @@ define(
 			{
 				g740className: 'g740.ToolbarButton',	// Имя базового класса
 				objAction: null,
+				g740size: 'small',
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
-						if (this.objAction.iconClass) this.set('iconClass',this.objAction.iconClass);
+						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass(this.g740size));
 						return true;
 					}
 					if (name=='focused') {
 						if (value) if (this.focusedNode) this.focusedNode.focus();
+						return true;
+					}
+					if (name=='g740size') {
+						if (value!='large' && value!='medium') value='small';
+						this.g740size=value;
 						return true;
 					}
 					this.inherited(arguments);
@@ -1201,12 +1215,16 @@ define(
 								this.focusedNode=child;
 							}
 						}
+						if (this.showLabel) {
+							dojo.attr(this.domNode, 'title', this.label);
+						}
 					}
 					this.on('Click', this.onG740Click);
 					this.on('KeyDown', this.onG740KeyDown);
 					this.on('Focus', this.onG740Focus);
 					this.on('Blur', this.onG740Blur);
 					this.inherited(arguments);
+					
 				},
 				doG740Repaint: function(para) {
 					var isEnabled=false;
@@ -1278,11 +1296,17 @@ define(
 			{
 				g740className: 'g740.ToolbarComboButton',	// Имя базового класса
 				objAction: null,
+				g740size: 'small',
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
-						if (this.objAction.iconClass) this.set('iconClass',this.objAction.iconClass);
+						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						return true;
+					}
+					if (name=='g740size') {
+						if (value!='large' && value!='medium') value='small';
+						this.g740size=value;
 						return true;
 					}
 					this.inherited(arguments);
@@ -1512,6 +1536,7 @@ define(
 				rowsetName: '',							// Ссылка на имя набора строк
 				request: {},							// Описание запроса
 				label: '',
+				icon: 'default',
 				iconClass: '',
 				constructor: function(para) {
 					var procedureName='g740.Action.constructor';
@@ -1580,8 +1605,12 @@ define(
 						}
 						
 						this.label=label;
+						this.icon=icon;
 						this.iconClass=g740.icons.getIconClassName(icon);
-						if (!this.iconClass) this.iconClass=g740.icons.getIconClassName('default');
+						if (!this.iconClass) {
+							this.iconClass=g740.icons.getIconClassName('default');
+							this.icon='default';
+						}
 					}
 					finally {
 					}
@@ -1705,6 +1734,9 @@ define(
 						attr: this.getRequestAttr()
 					});
 					return result;
+				},
+				getIconClass: function(size) {
+					return g740.icons.getIconClassName(this.icon, size);
 				},
 				getObjRowSet: function() {
 					var result=null;

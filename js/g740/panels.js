@@ -198,6 +198,7 @@ define(
 
 				var p={};
 				p.region='top';
+				p.g740size=g740.xml.getAttrValue(xml, 'size', '');
 				var objToolbar=new g740.Toolbar(p,null);
 				objPanel.addChild(objToolbar);
 				for(var i=0; i<requests.length; i++) {
@@ -416,6 +417,7 @@ define(
 						}
 					}
 					if (objParent.g740className == 'g740.Toolbar') {
+						p.g740size=objParent.g740size;
 						var style=g740.xml.getAttrValue(xml,'style','icon');
 						if (style=='icon') p.showLabel=false;
 						if (style=='text') p.objAction.iconClass='';
@@ -1331,6 +1333,484 @@ define(
 			}
 		);
 		
+		dojo.declare(
+			'g740.PanelHTML',
+			[g740._PanelAbstract, dijit._TemplatedMixin],
+			{
+				templateString: '<div class="g740html-panel">'+
+				'</div>',
+				
+				fieldName: '',
+				backgroundColor: '',
+				fontColor: '',
+				backgroundImage: '',
+				innerHTML: '',
+				label: '',
+				g740size: '',
+				g740style: '',
+				g740login: '',
+				set: function(name, value) {
+					if (name=='fieldName') {
+						this.fieldName=value;
+						return true;
+					}
+					else if (name=='backgroundColor') {
+						this.backgroundColor=value;
+						if (this.domNode) dojo.style(this.domNode,'background-color',this.backgroundColor);
+						return true;
+					}
+					else if (name=='fontColor') {
+						this.fontColor=value;
+						if (this.domNode) dojo.style(this.domNode,'color',this.fontColor);
+						return true;
+					}
+					else if (name=='backgroundImage') {
+						this.backgroundImage=value;
+						if (this.domNode) dojo.style(this.domNode,'background-image',this.backgroundImage);
+						return true;
+					}
+					else if (name=='innerHTML') {
+						this.innerHTML=value;
+						if (this.domNode) this.domNode.innerHTML=this.innerHTML;
+						return true;
+					}
+					else if (name=='g740login') {
+						this.g740login=value;
+						return true;
+					}
+					else if (name=='g740style' || name=='g740size') {
+						if (name=='g740style') {
+							if (value=='title') this.g740style=value;
+							else if (value=='mainmenu') this.g740style=value;
+							else this.g740style='';
+						}
+						if (name=='g740size') {
+							if (value=='large') this.g740size=value;
+							else if (value=='medium') this.g740size=value;
+							else if (value=='small') this.g740size=value;
+							else this.g740size=g740.config.iconSizeDefault;
+						}
+						if (this.domNode) {
+							var className='g740html-panel';
+							if (this.g740size) className+=' g740'+this.g740size;
+							if (this.g740style) className+=' '+this.g740style;
+							this.domNode.className=className;
+						}
+						return true;
+					}
+					else if (name=='label') {
+						this._setLabel(value);
+						return true;
+					}
+					else {
+						this.inherited(arguments);
+					}
+				},
+				postCreate: function() {
+					this.inherited(arguments);
+					if (this.backgroundColor) this.set('backgroundColor', this.backgroundColor);
+					if (this.fontColor) this.set('fontColor', this.fontColor);
+					if (this.backgroundImage) this.set('backgroundImage', this.backgroundImage);
+					if (this.g740size) this.set('g740size', this.g740size);
+					if (this.g740style) this.set('g740style', this.g740style);
+
+					if (this.label) {
+						this.set('label', this.label);
+						this.innerHTML='';
+					}
+					else if (this.innerHTML) {
+						this.set('innerHTML', this.innerHTML);
+					}
+
+					if (this.g740style=='mainmenu') {
+/*
+						var domNodeIcon=document.createElement('div');
+						domNodeIcon.className='mainmenu-icon';
+						this.domNode.appendChild(domNodeIcon);
+*/
+					}
+					else if (this.g740style=='title') {
+						if (this.g740login) {
+							var domNodeConnectedUser=document.createElement('div');
+							domNodeConnectedUser.className='connecteduser';
+							domNodeConnectedUser.setAttribute('title',g740.getMessage('disconnect'));
+							this.domNode.appendChild(domNodeConnectedUser);
+							
+							var domNodeLabel=document.createElement('div');
+							domNodeLabel.className='label';
+							var txt=document.createTextNode(this.g740login);
+							domNodeLabel.appendChild(txt);
+							domNodeConnectedUser.appendChild(domNodeLabel);
+
+							var domNodeExit=document.createElement('div');
+							domNodeExit.className='icon';
+							domNodeConnectedUser.appendChild(domNodeExit);
+							dojo.on(domNodeConnectedUser, 'click', function() {
+								var objOwner=this;
+								while(true) {
+									if (objOwner.className=='g740.Form') break;
+									if (!objOwner.getParent) break;
+									objOwner=objOwner.getParent();
+								}
+								g740.request.send({
+									objOwner: objOwner,
+									arrayOfRequest:['<request name="disconnect"/>'],
+									requestName: 'disconnect'
+								});
+							});
+						}
+					}
+					dojo.attr(this.domNode,'title','');
+				},
+				_setLabel: function(label) {
+					if (!label) label='';
+					this.label=label;
+					if (this.domNode) {
+						this.domNode.innerHTML='';
+					}
+					if (!label) return;
+
+					var domLabel=document.createElement('div');
+					var className='g740html-label';
+					if (this.region=='left' || this.region=='right') {
+						className+=' vertical';
+						for(var i=0; i<label.length; i++) {
+							if (i!=0) {
+								var domLabelBr=document.createElement('br');
+								domLabel.appendChild(domLabelBr);
+							}
+							var domText=document.createTextNode(this.label.substr(i,1));
+							domLabel.appendChild(domText);
+						}
+					}
+					else {
+						var domText=document.createTextNode(this.label);
+						domLabel.appendChild(domText);
+					}
+					domLabel.className=className;
+					this.domNode.appendChild(domLabel);
+				},
+				doG740Repaint: function(para) {
+					if (!para) para={};
+					if (!this.fieldName) return true;
+					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
+					var objRowSet=this.getRowSet();
+					var value=objRowSet.getFieldProperty({fieldName: this.fieldName});
+					this.set('label',value);
+				},
+				canFocused: function() {
+					return false;
+				}
+			}
+		);
+
+		dojo.declare(
+			'g740.PanelExpander',
+			[g740._PanelAbstract, dijit._TemplatedMixin, dijit.layout._LayoutWidget],
+			{
+				isG740BorderContainer: true,		// Класс умеет размещать дочерние панели по краям и центру
+				isG740CanChilds: true,				// Класс может содержать дочерние панели
+				
+				templateString: '<div class="g740expander-panel">'+
+					'<div class="g740expander-lockscreen" data-dojo-attach-point="domNodeLockScreen"></div>'+
+					'<div class="g740expander-body" data-dojo-attach-point="domNodeBody">'+
+						'<div class="g740expander-bodymax" data-dojo-attach-point="domNodeBodyMax">'+
+							'<div class="g740expander-bodypanel" data-dojo-attach-point="domNodeBodyPanel"></div>'+
+						'</div>'+
+					'</div>'+
+					'<div class="g740expander-icon" data-dojo-attach-point="domNodeIcon"></div>'+
+				'</div>',
+				isLayoutContainer: true,
+				
+				expanded: false,
+				objPanel: null,
+				objPanelButton: null,
+				maxWidth: '350px',
+				maxHeight: '350px',
+				
+				animationSpeed: 300,
+				lockOpacityMax: 0.55,
+				
+				g740size: '',
+				g740style: '',
+				set: function(name, value) {
+					if (name=='expanded') {
+						if (value) {
+							this.panelExpand();
+						}
+						else {
+							this.panelCollapse();
+						}
+						return true;
+					}
+					else if (name=='maxWidth') {
+						this.maxWidth=value;
+						return true;
+					}
+					else if (name=='maxHeight') {
+						this.maxHeight=value;
+						return true;
+					}
+					else if (name=='lockOpacityMax') {
+						this.lockOpacityMax=value;
+						return true;
+					}
+					else if (name=='g740size') {
+						if (value=='large') this.g740size=value;
+						else if (value=='medium') this.g740size=value;
+						else if (value=='small') this.g740size=value;
+						else this.g740size=g740.config.iconSizeDefault;
+						return true;
+					}
+					else if (name=='g740style') {
+						if (value=='mainmenu') this.g740style=value;
+						else this.g740style='';
+						return true;
+					}
+					else {
+						this.inherited(arguments);
+					}
+				},
+				destroy: function() {
+					if (this.objPanelButton) {
+						this.objPanelButton.destroyRecursive();
+						this.objPanelButton=null;
+					}
+					if (this.objPanel) {
+						this.objPanel.destroyRecursive();
+						this.objPanel=null;
+					}
+					this.inherited(arguments);
+				},
+				
+				layout: function() {
+					if (this._isAnimation) return;
+					
+					if (this.region=='left' || this.region=='right') {
+						dojo.style(this.domNodeBodyMax,'width',this.maxWidth);
+						if (this.objPanelButton) {
+							dojo.style(this.objPanelButton.domNode,'width',this.domNode.offsetWidth+'px');
+						}
+					}
+					if (this.region=='top' || this.region=='bottom') {
+						dojo.style(this.domNodeBodyMax,'height',this.maxHeight);
+						if (this.objPanelButton) {
+							dojo.style(this.objPanelButton.domNode,'height',this.domNode.offsetHeight+'px');
+						}
+					}
+					if (this.objPanel) {
+						this.objPanel.resize({
+							l: 0,
+							t: 0,
+							w: this.domNodeBodyMax.offsetWidth,
+							h: this.domNodeBodyMax.offsetHeight
+						});
+					}
+				},
+				getChildren: function() {
+					var result=[];
+					if (this.objPanel) {
+						result=this.objPanel.getChildren();
+					}
+					return result;
+				},
+				addChild: function(objChild, insertIndex) {
+					var result=true;
+					if (this.objPanel) {
+						result=this.objPanel.addChild(objChild, insertIndex);
+					}
+					return result;
+				},
+				removeChild: function(objChild) {
+					var result=false;
+					if (this.objPanel)result=this.objPanel.removeChild(objChild);
+					return result;
+				},
+				postCreate: function() {
+					var appColorSchemeItem=g740.appColorScheme.getItem();
+					if (appColorSchemeItem.panelExpanderLookOpacityMax) this.lockOpacityMax=appColorSchemeItem.panelExpanderLookOpacityMax;
+					
+					this.inherited(arguments);
+					dojo.addClass(this.domNode,'collapsed');
+					//dojo.attr(this.domNode,'title',g740.getMessage('mainMenuCaption'));
+
+					if (this.region=='left') dojo.addClass(this.domNode,'region-left');
+					if (this.region=='right') dojo.addClass(this.domNode,'region-right');
+					if (this.region=='top') dojo.addClass(this.domNode,'region-top');
+					if (this.region=='bottom') dojo.addClass(this.domNode,'region-bottom');
+
+					var p={
+						style: 'width:100%;height:100%'
+					};
+					if (this.region=='left' || this.region=='right') {
+						p.design='sidebar';
+					}
+					if (this.region=='top' || this.region=='bottom') {
+						p.design='headline';
+					}
+						
+					this.objPanel=new dijit.layout.BorderContainer(p, this.domNodeBodyPanel);
+					if (this.g740style=='mainmenu') {
+						dojo.addClass(this.domNode,'mainmenu');
+						dojo.attr(this.domNodeIcon,'title',g740.getMessage('mainMenuCaption'));
+						dojo.on(this.domNodeIcon,'click',dojo.hitch(this,this.onLockScreenClick));
+						
+						var p={
+							region: this.region,
+							g740style: this.g740style,
+							g740size: this.g740size
+						};
+						if (this.region=='left' || this.region=='right') {
+							p.style='width:10px';
+						}
+						if (this.region=='top' || this.region=='bottom') {
+							p.style='height:10px';
+						}
+						
+						this.objPanelButton=new g740.PanelHTML(p, null);
+						this.objPanel.addChild(this.objPanelButton);
+						dojo.on(this.objPanelButton.domNode,'click',dojo.hitch(this,this.onButtonPanelClick));
+					}
+
+					dojo.on(this.domNodeLockScreen,'click',dojo.hitch(this,this.onLockScreenClick));
+					dojo.on(this.domNodeLockScreen,'mouseover',dojo.hitch(this,this.onMouseOver));
+					dojo.on(this.domNodeLockScreen,'mouseout',dojo.hitch(this,this.onMouseOut));
+				},
+				_isAnimation: false,
+				panelExpand: function() {
+					if (this._isAnimation) return;
+					if (this.expanded) return;
+
+					dojo.removeClass(this.domNode,'collapsed');
+					dojo.addClass(this.domNode,'expanded');
+					this._isAnimation=true;
+					
+					dojo.animateProperty({
+						node: this.domNodeLockScreen,
+						duration: this.animationSpeed,
+						properties: {
+							opacity: {start: 0, end: this.lockOpacityMax}
+						}
+					}).play();
+					
+					if (this.region=='left' || this.region=='right') {
+						dojo.animateProperty({
+							node: this.domNodeBody,
+							duration: this.animationSpeed,
+							onEnd: dojo.hitch(this, function(){
+								this._isAnimation=false;
+								this.layout();
+								this.expanded=true;
+							}),
+							properties: {
+								width: {start: this.domNode.offsetWidth, end: this.domNodeBodyMax.offsetWidth}
+							}
+						}).play();
+					}
+					else if (this.region=='top' || this.region=='bottom') {
+						dojo.animateProperty({
+							node: this.domNodeBody,
+							duration: this.animationSpeed,
+							onEnd: dojo.hitch(this, function(){
+								this._isAnimation=false;
+								this.layout();
+								this.expanded=true;
+							}),
+							properties: {
+								height: {start: this.domNode.offsetHeight, end: this.domNodeBodyMax.offsetHeight}
+							}
+						}).play();
+					}
+				},
+				panelCollapse: function(isFast) {
+					if (this._isAnimation) return;
+					if (!this.expanded) return;
+
+					var duration=this.animationSpeed;
+					if (isFast) duration=20;
+					this._isAnimation=true;
+
+					dojo.animateProperty({
+						node: this.domNodeLockScreen,
+						duration: duration,
+						properties: {
+							opacity: {start: this.lockOpacityMax, end: 0}
+						}
+					}).play();
+
+					if (this.region=='left' || this.region=='right') {
+						dojo.animateProperty({
+							node: this.domNodeBody,
+							duration: duration,
+							onEnd: dojo.hitch(this, function(){
+								this._isAnimation=false;
+								dojo.removeClass(this.domNode,'expanded');
+								dojo.addClass(this.domNode,'collapsed');
+								this.layout();
+								this.expanded=false;
+							}),
+							properties: {
+								width: {start: this.domNodeBodyMax.offsetWidth, end: this.domNode.offsetWidth}
+							}
+						}).play();
+					}
+					else if (this.region=='top' || this.region=='bottom') {
+						dojo.animateProperty({
+							node: this.domNodeBody,
+							duration: duration,
+							onEnd: dojo.hitch(this, function(){
+								this._isAnimation=false;
+								dojo.removeClass(this.domNode,'expanded');
+								dojo.addClass(this.domNode,'collapsed');
+								this.layout();
+								this.expanded=false;
+							}),
+							properties: {
+								height: {start: this.domNodeBodyMax.offsetHeight, end: this.domNode.offsetHeight}
+							}
+						}).play();
+					}
+				},
+
+				onLockScreenClick: function() {
+					if (this._isAnimation) return;
+					this.set('expanded',!this.expanded);
+				},
+				onButtonPanelClick: function() {
+					if (this._isAnimation) return;
+					this._isButtonPanelClicked=true;
+					this.set('expanded',false);
+				},
+				
+				_isButtonPanelClicked: false,
+				_isMouseOver: false,
+				_isMouseOverExpanded: false,
+				onMouseOver: function() {
+					this._isMouseOver=true;
+					this._isMouseOverExpanded=this.expanded;
+					if (this._isAnimation) return;
+					if (this._isButtonPanelClicked) return;
+					if (!this.expanded) {
+						g740.execDelay.go({
+							delay: 60,
+							obj: this,
+							func: this._onMouseOverDelay
+						});
+					}
+				},
+				onMouseOut: function() {
+					this._isMouseOver=false;
+					this._isButtonPanelClicked=false;
+				},
+				_onMouseOverDelay: function() {
+					if (!this._isMouseOver) return;
+					if (this._isMouseOverExpanded!=this.expanded) return;
+					if (this._isAnimation) return;
+					this.set('expanded', !this.expanded);
+				}
+			}
+		);
+		
 		
 // Класс PanelTab
 		dojo.declare(
@@ -1579,7 +2059,7 @@ define(
 				},
 				postCreate: function() {
 					dojo.style(this.containerNode, 'background-size', 'cover');
-					dojo.style(this.containerNode, 'background-repeat', 'norepeat');
+					dojo.style(this.containerNode, 'background-repeat', 'no-repeat');
 					dojo.style(this.containerNode, 'background-position', 'center');
 					this.tablist.TabContainer=this;
 					this.tablist.on('KeyDown',function(e){
@@ -1702,7 +2182,6 @@ define(
 						this.onG740FormSelect(objForm);
 					}
 				},
-				
 				doG740Repaint: function(para) {
 				},
 				// Отображение форового рисунка при отсутствии панелей
@@ -1809,6 +2288,336 @@ define(
 			}
 		);
 
+		dojo.declare(
+			'g740.PanelMultiTabsForm',
+			[dijit.layout.BorderContainer, g740._PanelAbstract],
+			{
+				defaultChildName: null,
+				objMultiTab: null,
+				objStackContainer: null,
+				background: '',
+				bgopacity: 0.3,
+				_isBackground: false,
+				set: function(name, value) {
+					if (name=='defaultChildName') {
+						this.defaultChildName=value;
+						return true;
+					}
+					else if (name=='background') {
+						this.background=value;
+						return true;
+					}
+					else if (name=='bgopacity') {
+						this.bgopacity=value;
+						return true;
+					}
+					this.inherited(arguments);
+				},
+				constructor: function(para, domElement) {
+					var procedureName='g740.PanelMultiTabsForm.constructor';
+					this.set('objForm', para.objForm);
+					if (this.objForm) {
+						this.objForm.objPanelForm=this;
+					}
+					this.on('Focus', this.onG740Focus);
+				},
+				destroy: function() {
+					var procedureName='g740.PanelMultiTabsForm.destroy';
+					var lst=this.getChildren();
+					for (var i=0; i<lst.length; i++) {
+						var obj=lst[i];
+						this.removeChild(obj);
+						obj.destroyRecursive();
+					}
+					if (this.objForm) this.objForm.objPanelForm=null;
+					this.objMultiTab=null;
+					this.objStackContainer=null;
+					this.inherited(arguments);
+				},
+				postCreate: function() {
+					this.inherited(arguments);
+					dojo.addClass(this.domNode,'g740-panelmultitabsform');
+					this.objMultiTab=new g740.WidgetPanelFormMultiTabs({
+						region: 'top'
+					},null);
+					this.addChild(this.objMultiTab);
+					this.objStackContainer=new dijit.layout.StackContainer({
+						region: 'center'
+					}, null);
+					this.addChild(this.objStackContainer);
+
+					dojo.style(this.objStackContainer.domNode, 'background-size', 'cover');
+					dojo.style(this.objStackContainer.domNode, 'background-repeat', 'no-repeat');
+					dojo.style(this.objStackContainer.domNode, 'background-position', 'center');
+					
+					this.objStackContainer._oldSelectChild=this.objStackContainer.selectChild;
+					this.objStackContainer.selectChild=function(objChild) {
+						var objOld=this.selectedChildWidget;
+						if (objOld==objChild) return true;
+						if (objOld && objOld.g740className=='g740.Form' && !objOld.isObjectDestroed) {
+							var objRowSet=objOld.getFocusedRowSet();
+							if (objRowSet && objRowSet.getRequestEnabled('save','') && objRowSet.getExistUnsavedChanges()) {
+								if (!objRowSet.exec({requestName:'save', sync: true})) return false;
+							}
+						}
+						this._oldSelectChild(objChild);
+						if (objChild && objChild.g740className=='g740.Form' && !objChild.isObjectDestroed && objChild.requests['onselect']) {
+							objChild.exec({
+								requestName: 'onselect'
+							});
+						}
+						return true;
+					};
+					
+					this.objStackContainer._oldRemoveChild=this.objStackContainer.removeChild;
+					this.objStackContainer.removeChild=function(objChild) {
+						if (objChild) {
+							if (objChild.g740className=='g740.Form' && !objChild.isObjectDestroed) {
+								var objRowSet=objChild.getFocusedRowSet();
+								if (objRowSet && objRowSet.getRequestEnabled('save','') && objRowSet.getExistUnsavedChanges()) {
+									if (!objRowSet.exec({requestName:'save', sync: true})) return false;
+								}
+							}
+							this._oldRemoveChild(objChild);
+						}
+						return true;
+					};
+
+					this.objStackContainer.doG740RepaintBackground=dojo.hitch(this, this.doG740RepaintBackground);
+					
+					this.objMultiTab.set('objStackContainer', this.objStackContainer);
+					this.doG740RepaintBackground();
+					
+					if (this.defaultChildName) {
+						g740.application.doG740ShowForm({formName: this.defaultChildName});
+					}
+				},
+				// Блокируем кэширование дочерних элементов
+				onG740AfterBuild: function() {
+					this.g740childs=[];
+				},
+// Отобразить экранную форму
+				doG740ShowForm: function(objForm) {
+					var procedureName='g740.PanelMultiTabsForm.doG740ShowForm';
+					if (!objForm) g740.systemError(procedureName, 'errorValueUndefined', 'objForm');
+					if (objForm.g740className!='g740.Form') g740.systemError(procedureName, 'errorIncorrectTypeOfValue', 'objForm');
+					if (objForm.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject', 'objForm');
+
+					var oldOnSelect=null;
+					if (objForm && objForm.requests && objForm.requests['onselect']) {
+						oldOnSelect=objForm.requests['onselect'];
+						delete objForm.requests['onselect'];
+					}
+					try {
+						var isCanShowForm=true;
+						var childs=this.objStackContainer.getChildren();
+						for (var i=0; i<childs.length; i++) {
+							var objChild=childs[i];
+							if (!objChild) continue;
+							if (objChild.g740className!='g740.Form') continue;
+							if (objChild.name==objForm.name) {
+								isCanShowForm=this.objStackContainer.removeChild(objChild);
+								if (isCanShowForm) objChild.destroyRecursive();
+								break;
+							}
+						}
+						if (isCanShowForm) {
+							this.objStackContainer.addChild(objForm);
+							this.objStackContainer.selectChild(objForm);
+						}
+						this.objMultiTab.doG740Repaint();
+					}
+					finally {
+						if (oldOnSelect && objForm && objForm.requests) objForm.requests['onselect']=oldOnSelect;
+					}
+				},
+				doG740Repaint: function(para) {
+				},
+				doG740RepaintBackground: function() {
+					if (!this.objStackContainer) return;
+					var lst=this.objStackContainer.getChildren();
+					if (this.background) {
+						if (lst.length==0) {
+							if (!this._isBackground) {
+								dojo.style(this.objStackContainer.domNode, 'background-image', "url('"+this.background+"')");
+								dojo.style(this.objStackContainer.domNode, 'opacity', this.bgopacity);
+								this._isBackground=true;
+							}
+						}
+						else if (this._isBackground) {
+							dojo.style(this.objStackContainer.domNode, 'background-image', 'inherit');
+							dojo.style(this.objStackContainer.domNode, 'opacity', '1');
+							this._isBackground=false;
+						}
+					}
+					this.layout();
+				}
+			}
+		);
+		dojo.declare(
+			'g740.WidgetPanelFormMultiTabs',
+			[dijit._Widget, dijit._TemplatedMixin],
+			{
+				templateString: '<div class="g74-multitabs">'+
+					'<div class="g74-multitabs-items" data-dojo-attach-point="domNodeItems"></div>'+
+				'</div>',
+				objStackContainer: null,
+				
+				destroy: function() {
+					this.objStackContainer=null;
+					this.inherited(arguments);
+				},
+				set: function(name, value) {
+					if (name=='objStackContainer') {
+						this.objStackContainer=value;
+						return true;
+					}
+					this.inherited(arguments);
+				},
+				
+				doG740Repaint: function(para) {
+					// Начитываем список существующих закладок
+					var lstDiv={};
+					for(var domChild=this.domNodeItems.firstChild; domChild; domChild=domChild.nextSibling) {
+						if (domChild.tagName!='DIV') continue;
+						var name=dojo.attr(domChild,'data-name');
+						lstDiv[name]=domChild;
+					}
+					
+					var lstChilds=[];
+					var selectedForm=null;
+					if (this.objStackContainer) {
+						lstChilds=this.objStackContainer.getChildren();
+						selectedForm=this.objStackContainer.selectedChildWidget;
+					}
+					
+					// Начитываем список экранных форм
+					var lstForms={};
+					for (var i=0; i<lstChilds.length; i++) {
+						var objChildForm=lstChilds[i];
+						if (!objChildForm) continue;
+						lstForms[objChildForm.name]=objChildForm;
+					}
+					// Уничтожаем лишние закладки
+					var lstRemove=[];
+					for(var name in lstDiv) {
+						if (!lstForms[name]) lstRemove.push(name);
+					}
+					for (var i=0; i<lstRemove.length; i++) {
+						var name=lstRemove[i];
+						var objChild=lstDiv[name];
+						objChild.parentNode.removeChild(objChild);
+						delete lstDiv[name];
+					}
+					delete lstRemove;
+					// Добавляем отсутствующие закладки
+					for (var i=0; i<lstChilds.length; i++) {
+						var objChildForm=lstChilds[i];
+						if (!objChildForm) continue;
+						var name=objChildForm.name;
+						if (!lstDiv[name]) {
+							var domChild=this.doCreateTabDiv(objChildForm);
+							this.domNodeItems.appendChild(domChild);
+							lstDiv[name]=domChild;
+						}
+					}
+					
+					// Сортируем элементы
+					if (lstChilds.length>1) {
+						var objFormPred=lstChilds[lstChilds.length-1];
+						var name=objFormPred.name;
+						var domPred=lstDiv[name];
+						for (var i=lstChilds.length-2; i>=0; i--) {
+							var objFormChild=lstChilds[i];
+							var name=objFormChild.name;
+							var domChild=lstDiv[name];
+							this.domNodeItems.insertBefore(domChild, domPred);
+							domPred=domChild;
+						}
+					}
+
+					// Отмечаем текущий элемент
+					for(var name in lstDiv) {
+						var objChild=lstDiv[name];
+						var objChildForm=lstForms[name];
+						if (objChildForm==selectedForm) {
+							if (!dojo.hasClass(objChild,'selected')) dojo.addClass(objChild,'selected');
+						}
+						else {
+							if (dojo.hasClass(objChild,'selected')) dojo.removeClass(objChild,'selected');
+						}
+					}
+					
+					if (this.objStackContainer && this.objStackContainer.doG740RepaintBackground) {
+						this.objStackContainer.doG740RepaintBackground();
+					}
+				},
+				doCreateTabDiv: function(objChildForm) {
+					var procedureName='g740.WidgetPanelMultiFormTabs.doCreateTabDiv';
+					if (!objChildForm) g740.systemError(procedureName, 'errorValueUndefined', 'objChildForm');
+					if (objChildForm.g740className!='g740.Form') g740.systemError(procedureName, 'errorIncorrectTypeOfValue', 'objChildForm');
+					if (objChildForm.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject', 'objChildForm');
+
+					var result=document.createElement('div');
+					dojo.attr(result,'data-name',objChildForm.name);
+					
+					var domSpan=document.createElement('span');
+					var txt=document.createTextNode(objChildForm.title);
+					domSpan.appendChild(txt);
+					result.appendChild(domSpan);
+					
+					var domClose=document.createElement('div');
+					dojo.addClass(domClose,'btnclose');
+					dojo.on(domClose,'click',dojo.hitch(this,function(e) {
+						var domNode=e.target;
+						while(domNode) {
+							if (dojo.hasClass(domNode,'tabitem')) break;
+							domNode=domNode.parentNode;
+						}
+						var name=dojo.attr(domNode,'data-name');
+						this.onRemoveChild(name);
+					}));
+					result.appendChild(domClose);
+					
+					dojo.addClass(result,'tabitem');
+					dojo.on(result,'click',dojo.hitch(this,function(e) {
+						var domNode=e.target;
+						while(domNode) {
+							if (dojo.hasClass(domNode,'tabitem')) break;
+							domNode=domNode.parentNode;
+						}
+						var name=dojo.attr(domNode,'data-name');
+						this.onSelectChild(name);
+					}));
+					return result;
+				},
+				onSelectChild: function(name) {
+					if (!this.objStackContainer) return;
+					lstChilds=this.objStackContainer.getChildren();
+					for(var i=0; i<lstChilds.length; i++) {
+						var objChild=lstChilds[i];
+						if (!objChild) continue;
+						if (objChild.name==name) {
+							this.objStackContainer.selectChild(objChild);
+							this.doG740Repaint();
+							break;
+						}
+					}
+				},
+				onRemoveChild: function(name) {
+					if (!this.objStackContainer) return;
+					var selectedForm=this.objStackContainer.selectedChildWidget;
+					if (selectedForm && selectedForm.name==name) {
+						if (this.objStackContainer.removeChild(selectedForm)) {
+							selectedForm.destroyRecursive();
+						}
+						this.doG740Repaint();
+					}
+				}
+			}
+		);
+
+		
 // Класс PanelWebBrowser
 		dojo.declare(
 			'g740.PanelWebBrowser',
@@ -2308,7 +3117,30 @@ define(
 			return result;
 		};
 		g740.panels.registrate('scroll', g740.panels._builderPanelScroll);
-		
+
+		g740.panels._builderPanelExpander=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelExpander';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+
+			if (g740.xml.getAttrValue(xml, 'maxwidth', '')) para.maxWidth=g740.xml.getAttrValue(xml, 'maxwidth', '');
+			if (g740.xml.getAttrValue(xml, 'maxheight', '')) para.maxWidth=g740.xml.getAttrValue(xml, 'maxheight', '');
+			if (g740.xml.getAttrValue(xml, 'style', '')) para.g740style=g740.xml.getAttrValue(xml, 'style', '');
+			if (g740.xml.getAttrValue(xml, 'size', '')) para.g740size=g740.xml.getAttrValue(xml, 'size', '');
+
+			if (!para.region) {
+				para.region='left';
+				para.style='width:150px';
+			}
+			
+			var result=new g740.PanelExpander(para, null);
+			return result;
+		};
+		g740.panels.registrate('expander', g740.panels._builderPanelExpander);
+
 		g740.panels._builderPanelTab=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanelTab';
@@ -2441,6 +3273,29 @@ define(
 		};
 		g740.panels.registrate('img', g740.panels._builderPanelImg);
 
+		g740.panels._builderPanelHTML=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelHTML';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+
+			if (g740.xml.isAttr(xml,'field')) para.fieldName=g740.xml.getAttrValue(xml,'field','');
+			if (g740.xml.isAttr(xml,'bgcolor')) para.backgroundColor=g740.xml.getAttrValue(xml,'bgcolor','');
+			if (g740.xml.isAttr(xml,'color')) para.fontColor=g740.xml.getAttrValue(xml,'color','');
+			if (g740.xml.isAttr(xml,'bgimage')) para.backgroundImage=g740.xml.getAttrValue(xml,'bgimage','');
+			if (g740.xml.isAttr(xml,'caption')) para.label=g740.xml.getAttrValue(xml,'caption','');
+			if (g740.xml.isAttr(xml,'size')) para.g740size=g740.xml.getAttrValue(xml,'size','');
+			if (g740.xml.isAttr(xml,'style')) para.g740style=g740.xml.getAttrValue(xml,'style','');
+			if (g740.xml.isAttr(xml,'login')) para.g740login=g740.xml.getAttrValue(xml,'login','');
+			var txt=dojo.trim(xml.textContent);
+			if (txt!='') para.innerHTML=txt;
+			var result=new g740.PanelHTML(para, null);
+			return result;
+		};
+		g740.panels.registrate('html', g740.panels._builderPanelHTML);
+		
 		g740.panels._builderPanelMemo=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanelMemo';
@@ -2464,9 +3319,11 @@ define(
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
 			if (g740.xml.isAttr(xml, 'form')) para.defaultChildName=g740.xml.getAttrValue(xml, 'form', '');
 			if (g740.xml.isAttr(xml, 'background')) para.background=g740.xml.getAttrValue(xml, 'background', '');
+			if (g740.xml.isAttr(xml, 'bgopacity')) para.bgopacity=g740.xml.getAttrValue(xml, 'bgopacity', '0.3');
 		
 			if (g740.xml.getAttrValue(xml, 'tab', '')==1) {
-				var result=new g740.PanelTabForm(para, null);
+				var result=new g740.PanelMultiTabsForm(para, null);
+				//var result=new g740.PanelTabForm(para, null);
 			} 
 			else {
 				var result=new g740.PanelSingleForm(para, null);

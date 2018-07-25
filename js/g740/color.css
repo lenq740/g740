@@ -104,7 +104,7 @@ app-color-black
 	color: white;
 }
 .g740.app-color-black .g740-dialog .dijitDialogCloseIcon {
-	background-image: url('icons/close.png') !important;
+	background-image: url('icons/widget/close.png') !important;
 }
 
 /* g740._ListAbstract */
@@ -112,6 +112,47 @@ app-color-black
     background-color: #6e6e6e;
 	color: white;
 }
+
+/* g740.HtmlPanel */
+.g740.app-color-black .g740html-panel.title{
+	background-color: #535353;
+	color: white;
+}
+.g740.app-color-black .g740html-panel.mainmenu{
+	background-color: #535353;
+	color: white;
+}
+
+/* g740.PanelExpander */
+.g740.app-color-black .g740expander-panel .g740html-panel.mainmenu{
+	background-color: #535353;
+	color: white;
+}
+.g740.app-color-black .g740expander-panel.mainmenu .g740expander-icon {
+	background-color: #6e6e6e;
+}
+
+/* g740.TreeMenu */
+.g740.app-color-black .g740tree-panel.treemenu{
+	font-family: helvetica;
+	background-color: white;
+	color: black;
+}
+.g740.app-color-black .g740tree-panel.treemenu .g740tree-item-element{
+	background-color: white;
+	color: black;
+}
+.g740.app-color-black .g740tree-panel.treemenu .g740tree-item-element:hover {
+	background-color: #6e6e6e !important;
+	color: white;
+}
+.g740.app-color-black .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-plus {
+	background-image: url('icons/widget/treemenuwhitecollapsed.png');
+}
+.g740.app-color-black .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-minus {
+	background-image: url('icons/widget/treemenuwhiteexpanded.png');
+}
+
 
 /*--------------------------------------------------------------------
 app-color-red
@@ -154,11 +195,146 @@ app-color-red
 	color: white;
 }
 .g740.app-color-red .g740-dialog .dijitDialogCloseIcon {
-	background-image: url('icons/close.png') !important;
+	background-image: url('icons/widget/close.png') !important;
 }
 
 /* g740._ListAbstract */
 .g740.app-color-red .g740-list .g740-list-items .g740-list-item.selected{
     background-color: #e5525b;
 	color: white;
+}
+
+/* g740.HtmlPanel */
+.g740.app-color-red .g740html-panel.title{
+	background-color: #d4464e;
+	color: white;
+}
+.g740.app-color-red .g740html-panel.mainmenu{
+	background-color: #d4464e;
+	color: white;
+}
+
+/* g740.PanelExpander */
+.g740.app-color-red .g740expander-panel .g740html-panel.mainmenu{
+	background-color: #d4464e;
+	color: white;
+}
+.g740.app-color-red .g740expander-panel.mainmenu .g740expander-icon {
+	background-color: #e5525b;
+}
+
+/* g740.TreeMenu */
+.g740.app-color-red .g740tree-panel.treemenu{
+	font-family: helvetica;
+	background-color: white;
+	color: black;
+}
+.g740.app-color-red .g740tree-panel.treemenu .g740tree-item-element{
+	background-color: white;
+	color: black;
+}
+.g740.app-color-red .g740tree-panel.treemenu .g740tree-item-element:hover {
+	background-color: #e5525b !important;
+	color: white;
+}
+.g740.app-color-red .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-plus {
+	background-image: url('icons/widget/treemenuwhitecollapsed.png');
+}
+.g740.app-color-red .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-minus {
+	background-image: url('icons/widget/treemenuwhiteexpanded.png');
+}
+
+
+/*--------------------------------------------------------------------
+app-color-cti
+--------------------------------------------------------------------*/
+/* MenuBar è Menu*/
+.app-color-cti .dijitMenuBar {
+	background-color: #778899;
+	border-color: #778899 !important;
+	color: white;
+}
+.app-color-cti .dijitMenuBar .dijitMenuItemHover {
+	background-color: #778899;
+	color: white;
+}
+.app-color-cti .dijitMenuBar .dijitMenuItemActive {
+	background-color: #778899;
+	color: white;
+}
+.app-color-cti .dijitMenuBar .dijitMenuItemSelected {
+	background-color: #778899;
+	color: white;
+}
+.app-color-cti .dijitMenuBar .dijitPopupMenuItemFocused {
+	background-color: #778899;
+	color: white;
+}
+
+.app-color-cti .dijitMenuItemSelected {
+	background-color: #778899;
+	color: white;
+}
+
+/* g740.Dialog */
+.app-color-cti .g740-dialog .g740-dialog-title {
+	font-family: sans-serif !important;
+	font-size: 14px !important;
+	font-weight: normal !important;
+	background-image: none;
+	background-color: #778899;
+	color: white;
+}
+.app-color-cti .g740-dialog .dijitDialogCloseIcon {
+	background-image: url('icons/widget/close.png') !important;
+}
+
+/* g740._ListAbstract */
+.app-color-cti .g740-list .g740-list-items .g740-list-item.selected{
+    background-color: #778899;
+	color: white;
+}
+
+/* g740.HtmlPanel */
+.app-color-cti .g740html-panel.title{
+}
+.app-color-cti .g740html-panel.title .connecteduser .icon {
+	background-image: url('icons/widget/disconnect-dark.png');
+}
+
+/* g740.PanelExpander */
+.app-color-cti .g740expander-panel .g740html-panel.mainmenu{
+	background-color: #015367;
+	color: white;
+}
+.app-color-cti .g740expander-panel.mainmenu .g740expander-icon {
+	background-color: #206676;
+}
+
+
+/* g740.TreeMenu */
+.app-color-cti .g740expander-panel .g740expander-lockscreen{
+	background-color: white;
+}
+.app-color-cti .g740tree-panel.treemenu{
+	font-family: helvetica;
+	background-color: #206676;
+	color: white;
+}
+.app-color-cti .g740tree-panel.treemenu .g740tree-item-element{
+	background-color: #206676;
+	color: white;
+}
+.app-color-cti .g740tree-panel.treemenu .g740tree-item-element:hover {
+	background-color: #38B2CE !important;
+}
+.app-color-cti .g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-plus {
+	background-image: url('icons/widget/treemenuwhitecollapsed.png');
+}
+.app-color-cti .g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-minus {
+	background-image: url('icons/widget/treemenuwhiteexpanded.png');
+}
+
+.app-color-cti .g740tree-panel.treemenu.g740medium .g740tree-item-text {
+	line-height: 32px;
 }
