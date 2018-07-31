@@ -1,22 +1,22 @@
-.g740 .dojoxGridRowSelected {
+.g740 .dojoxGridMasterView .dojoxGridRowSelected {
 	background-color: moccasin !important;
 }
-.g740 .g740-grid-focused .dojoxGridRowSelected {
+.g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected {
 	background-color: orange !important;
 }
-.g740 .g740-grid-focused .dojoxGridRowEditing {
+.g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowEditing {
 	background-color: orange !important;
 }
-.g740 .g740-grid-focused .dojoxGridRowEditing .dojoxGridCell{
+.g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowEditing .dojoxGridCell{
 	background-color: orange !important;
 }
-.g740 .g740-grid-focused  .dojoxGridCell.dojoxGridCellFocus {
+.g740 .g740-grid-focused  .dojoxGridMasterView .dojoxGridCell.dojoxGridCellFocus {
 	background-color: darkorange !important;
 }
-.g740 .g740-grid-focused .dojoxGridRowSelected .dojoxGridCell{
+.g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell{
 	color: white;
 }
-.g740 .g740-grid-focused .dojoxGridRowSelected .dojoxGridCell input{
+.g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell input{
 	color: black;
 }
 .g740 .dojoxGridRowSetDisabled .dojoxGridScrollbox {
@@ -27,10 +27,10 @@
 }
 
 .g740 .dojoxGrid {
-	background-color: #e9e9e9;
+	background-color: white;
 	font-family: inherit;
 	font-size: inherit;
-	border: 1px solid transparent;
+	border: 1px solid #F0F0F0;
 }
 .g740 .dojoxGrid.g740-grid-focused {
 	border: 1px solid #d4464e;
@@ -73,24 +73,24 @@
 /* header */
 
 .g740 .dojoxGridHeader {
-	background-color:  #e9e9e9;
+	background-color:  white;
 }
 
 .g740 .dojoxGridHeader .dojoxGridCell { 
 	background: none;
-	background-color: #F3F3F3 !important;
+	background-color: white !important;
 	border-width: 1px;
 	padding-bottom: 0px;
 	border-color: transparent #ACA899 #919191 transparent;
-	color: #000 !important;
+
+    color: #adadad !important;
+	text-transform: uppercase;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	text-align: center !important;
 }
 
-.g740 .dojoxGridHeader .dojoxGridCellOver {
-	color: #000 !important;
-}
-.g740 .g740-grid-focused   .dojoxGridHeader .dojoxGridCell.dojoxGridCellFocus {
-	background-color: #F3F3F3 !important;
-}
+
 .g740 .dojoxGridHeader .dojoxGridCellFocus {
 }
 .g740 .dojoxGridArrowButtonChar {
@@ -98,7 +98,7 @@
 	display: none;
 }
 .g740 .dojoxGridArrowButtonNode {
-	display: block !important;
+	/*display: block !important;*/
 	padding-left: 0px;
 	float: right;
 	background:url("images/spriteArrows.png") no-repeat left center;

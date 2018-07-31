@@ -1121,11 +1121,15 @@ define(
 				},
 				postCreateBeforeChilds: function() {
 					if (this.padding && this.padding!='0px') {
-						var objSeparatorTop=new g740.PanelSeparator({
-							height: this.padding,
-							region: 'top'
-						},null);
-						this.addChild(objSeparatorTop);
+						if (this.isShowTitle && this.title) {
+						}
+						else {
+							var objSeparatorTop=new g740.PanelSeparator({
+								height: this.padding,
+								region: 'top'
+							},null);
+							this.addChild(objSeparatorTop);
+						}
 
 						var objSeparatorBottom=new g740.PanelSeparator({
 							height: this.padding,
@@ -1532,7 +1536,6 @@ define(
 				lockOpacityMax: 0.55,
 				
 				g740size: '',
-				g740style: '',
 				set: function(name, value) {
 					if (name=='expanded') {
 						if (value) {
@@ -1560,11 +1563,6 @@ define(
 						else if (value=='medium') this.g740size=value;
 						else if (value=='small') this.g740size=value;
 						else this.g740size=g740.config.iconSizeDefault;
-						return true;
-					}
-					else if (name=='g740style') {
-						if (value=='mainmenu') this.g740style=value;
-						else this.g740style='';
 						return true;
 					}
 					else {
@@ -1632,7 +1630,6 @@ define(
 					
 					this.inherited(arguments);
 					dojo.addClass(this.domNode,'collapsed');
-					//dojo.attr(this.domNode,'title',g740.getMessage('mainMenuCaption'));
 
 					if (this.region=='left') dojo.addClass(this.domNode,'region-left');
 					if (this.region=='right') dojo.addClass(this.domNode,'region-right');
@@ -1650,27 +1647,6 @@ define(
 					}
 						
 					this.objPanel=new dijit.layout.BorderContainer(p, this.domNodeBodyPanel);
-					if (this.g740style=='mainmenu') {
-						dojo.addClass(this.domNode,'mainmenu');
-						dojo.attr(this.domNodeIcon,'title',g740.getMessage('mainMenuCaption'));
-						dojo.on(this.domNodeIcon,'click',dojo.hitch(this,this.onLockScreenClick));
-						
-						var p={
-							region: this.region,
-							g740style: this.g740style,
-							g740size: this.g740size
-						};
-						if (this.region=='left' || this.region=='right') {
-							p.style='width:10px';
-						}
-						if (this.region=='top' || this.region=='bottom') {
-							p.style='height:10px';
-						}
-						
-						this.objPanelButton=new g740.PanelHTML(p, null);
-						this.objPanel.addChild(this.objPanelButton);
-						dojo.on(this.objPanelButton.domNode,'click',dojo.hitch(this,this.onButtonPanelClick));
-					}
 
 					dojo.on(this.domNodeLockScreen,'click',dojo.hitch(this,this.onLockScreenClick));
 					dojo.on(this.domNodeLockScreen,'mouseover',dojo.hitch(this,this.onMouseOver));
@@ -2454,6 +2430,8 @@ define(
 				}
 			}
 		);
+
+
 		dojo.declare(
 			'g740.WidgetPanelFormMultiTabs',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -2616,6 +2594,324 @@ define(
 				}
 			}
 		);
+
+		dojo.declare(
+			'g740.WidgetFormContainerTreeMenu',
+			[g740.PanelExpander],
+			{
+				objTreeMenu: null,
+				destroy: function() {
+					var procedureName='g740.WidgetFormContainerTreeMenu.destroy';
+					if (this.objTreeMenu) {
+						this.objTreeMenu.destroyRecursive();
+						this.objTreeMenu=null;
+					}
+					this.inherited(arguments);
+				},
+				postCreate: function() {
+					var procedureName='g740.WidgetFormContainerTreeMenu.postCreate';
+					this.inherited(arguments);
+					
+					dojo.addClass(this.domNode,'mainmenu');
+					dojo.attr(this.domNodeIcon,'title',g740.getMessage('mainMenuCaption'));
+					dojo.on(this.domNodeIcon,'click',dojo.hitch(this,this.onLockScreenClick));
+					
+					var p={
+						region: this.region,
+						g740style: 'mainmenu',
+						g740size: this.g740size
+					};
+					if (this.region=='left' || this.region=='right') {
+						p.style='width:10px';
+					}
+					if (this.region=='top' || this.region=='bottom') {
+						p.style='height:10px';
+					}
+					
+					this.objPanelButton=new g740.PanelHTML(p, null);
+					this.objPanel.addChild(this.objPanelButton);
+					dojo.on(this.objPanelButton.domNode,'click',dojo.hitch(this,this.onButtonPanelClick));
+
+					var p={
+						region: 'center',
+						objForm: this.objForm,
+						rowsetName: this.rowsetName,
+						g740size: this.g740size
+					};
+					if (this.title) {
+						p.title=this.title;
+						p.isShowTitle=true;
+					}
+					this.objTreeMenu=new g740.TreeMenu(p, null);
+					this.addChild(this.objTreeMenu);
+				}
+			}
+		);
+
+		dojo.declare(
+			'g740.PanelFormContainer',
+			[dijit.layout.BorderContainer, g740._PanelAbstract],
+			{
+				defaultChildName: null,
+				objStackContainer: null,
+				objMultiTab: null,
+				design: 'sidebar',
+
+				g740size: g740.config.iconSizeDefault,
+				objTreeMenu: null,
+				treeMenuAlign: 'left',
+				treeMenuWidth: '38px',
+				treeMenuHeight: '38px',
+				treeMenuMaxWidth: '400px',
+				treeMenuMaxHeight: '400px',
+				treeMenuCaption: '',
+				
+				background: '',
+				bgopacity: 0.3,
+				bgsize: 'cover',
+				_isBackground: false,
+				set: function(name, value) {
+					if (name=='defaultChildName') {
+						this.defaultChildName=value;
+						return true;
+					}
+					else if (name=='background') {
+						this.background=value;
+						return true;
+					}
+					else if (name=='bgopacity') {
+						this.bgopacity=value;
+						return true;
+					}
+					else if (name=='bgsize') {
+						this.bgsize=value;
+						return true;
+					}
+					else if (name=='g740size') {
+						if (value=='large') this.g740size=value;
+						else if (value=='medium') this.g740size=value;
+						else if (value=='small') this.g740size=value;
+						else this.g740size=g740.config.iconSizeDefault;
+						return true;
+					}
+					else if (name=='treeMenuAlign') {
+						if (value=='left') this.treeMenuAlign=value;
+						else if (value=='right') this.treeMenuAlign=value;
+						else if (value=='top') this.treeMenuAlign=value;
+						else if (value=='bottom') this.treeMenuAlign=value;
+						else this.treeMenuAlign='left';
+						return true;
+					}
+					else if (name=='treeMenuWidth') {
+						this.treeMenuWidth=value;
+						return true;
+					}
+					else if (name=='treeMenuHeight') {
+						this.treeMenuHeight=value;
+						return true;
+					}
+					else if (name=='treeMenuMaxWidth') {
+						this.treeMenuMaxWidth=value;
+						return true;
+					}
+					else if (name=='treeMenuMaxHeight') {
+						this.treeMenuMaxHeight=value;
+						return true;
+					}
+					else if (name=='treeMenuCaption') {
+						this.treeMenuCaption=value;
+						return true;
+					}
+					this.inherited(arguments);
+				},
+				constructor: function(para, domElement) {
+					var procedureName='g740.PanelFormContainer.constructor';
+					this.set('objForm', para.objForm);
+					if (this.objForm) {
+						this.objForm.objPanelForm=this;
+					}
+					this.on('Focus', this.onG740Focus);
+				},
+				destroy: function() {
+					var procedureName='g740.PanelFormContainer.destroy';
+					var lst=this.getChildren();
+					for (var i=0; i<lst.length; i++) {
+						var obj=lst[i];
+						this.removeChild(obj);
+						obj.destroyRecursive();
+					}
+					if (this.objForm) this.objForm.objPanelForm=null;
+					this.objMultiTab=null;
+					this.objTreeMenu=null;
+					this.objStackContainer=null;
+					this.inherited(arguments);
+				},
+				postCreate: function() {
+					this.inherited(arguments);
+					dojo.addClass(this.domNode,'g740-panelmultitabsform');
+
+					var p={
+						objForm: this.objForm,
+						rowsetName: this.rowsetName,
+						region: this.treeMenuAlign
+					};
+					if (this.treeMenuAlign=='left' || this.treeMenuAlign=='right') {
+						p.style='width: 38px';
+						if (this.treeMenuWidth) p.style='width:'+this.treeMenuWidth;
+						if (this.treeMenuMaxWidth) p.maxWidth=this.treeMenuMaxWidth;
+					}
+					else if (this.treeMenuAlign=='top' || this.treeMenuAlign=='bottom') {
+						p.style='height: 38px';
+						if (this.treeMenuHeight) p.style='height:'+this.treeMenuHeight;
+						if (this.treeMenuMaxHeight) p.maxHeight=this.treeMenuMaxHeight;
+					}
+					if (this.treeMenuCaption) p.title=this.treeMenuCaption;
+					if (this.g740size) p.g740size=this.g740size;
+						
+					this.objTreeMenu=new g740.WidgetFormContainerTreeMenu(p, null);
+					this.addChild(this.objTreeMenu);
+
+					
+					var p={
+						region: this.treeMenuAlign
+					};
+					if (this.treeMenuAlign=='left' || this.treeMenuAlign=='right') {
+						p.style='width:5px';
+					}
+					else if (this.treeMenuAlign=='top' || this.treeMenuAlign=='bottom') {
+						p.style='height:5px';
+					}
+					var panelSplitter=new dijit.layout.BorderContainer(p, null);
+					this.addChild(panelSplitter);
+					
+					
+					this.objMultiTab=new g740.WidgetPanelFormMultiTabs({
+						region: 'top'
+					},null);
+					this.addChild(this.objMultiTab);
+					this.objStackContainer=new dijit.layout.StackContainer({
+						region: 'center'
+					}, null);
+					this.addChild(this.objStackContainer);
+
+					dojo.style(this.objStackContainer.domNode, 'background-size', this.bgsize);
+					dojo.style(this.objStackContainer.domNode, 'background-repeat', 'no-repeat');
+					dojo.style(this.objStackContainer.domNode, 'background-position', 'center');
+					
+					this.objStackContainer._oldSelectChild=this.objStackContainer.selectChild;
+					this.objStackContainer.selectChild=function(objChild) {
+						var objOld=this.selectedChildWidget;
+						if (objOld==objChild) return true;
+						if (objOld && objOld.g740className=='g740.Form' && !objOld.isObjectDestroed) {
+							var objRowSet=objOld.getFocusedRowSet();
+							if (objRowSet && objRowSet.getRequestEnabled('save','') && objRowSet.getExistUnsavedChanges()) {
+								if (!objRowSet.exec({requestName:'save', sync: true})) return false;
+							}
+						}
+						this._oldSelectChild(objChild);
+						if (objChild && objChild.g740className=='g740.Form' && !objChild.isObjectDestroed && objChild.requests['onselect']) {
+							objChild.exec({
+								requestName: 'onselect'
+							});
+						}
+						return true;
+					};
+					
+					this.objStackContainer._oldRemoveChild=this.objStackContainer.removeChild;
+					this.objStackContainer.removeChild=function(objChild) {
+						if (objChild) {
+							if (objChild.g740className=='g740.Form' && !objChild.isObjectDestroed) {
+								var objRowSet=objChild.getFocusedRowSet();
+								if (objRowSet && objRowSet.getRequestEnabled('save','') && objRowSet.getExistUnsavedChanges()) {
+									if (!objRowSet.exec({requestName:'save', sync: true})) return false;
+								}
+							}
+							this._oldRemoveChild(objChild);
+						}
+						return true;
+					};
+
+					this.objStackContainer.doG740RepaintBackground=dojo.hitch(this, this.doG740RepaintBackground);
+					
+					this.objMultiTab.set('objStackContainer', this.objStackContainer);
+					this.doG740RepaintBackground();
+					
+					if (this.defaultChildName) {
+						g740.application.doG740ShowForm({formName: this.defaultChildName});
+					}
+				},
+				// Блокируем кэширование дочерних элементов
+				onG740AfterBuild: function() {
+					this.g740childs=[];
+				},
+// Отобразить экранную форму
+				doG740ShowForm: function(objForm) {
+					var procedureName='g740.PanelFormContainer.doG740ShowForm';
+					if (!objForm) g740.systemError(procedureName, 'errorValueUndefined', 'objForm');
+					if (objForm.g740className!='g740.Form') g740.systemError(procedureName, 'errorIncorrectTypeOfValue', 'objForm');
+					if (objForm.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject', 'objForm');
+
+					var oldOnSelect=null;
+					if (objForm && objForm.requests && objForm.requests['onselect']) {
+						oldOnSelect=objForm.requests['onselect'];
+						delete objForm.requests['onselect'];
+					}
+					try {
+						var isCanShowForm=true;
+						var childs=this.objStackContainer.getChildren();
+						for (var i=0; i<childs.length; i++) {
+							var objChild=childs[i];
+							if (!objChild) continue;
+							if (objChild.g740className!='g740.Form') continue;
+							if (objChild.name==objForm.name) {
+								isCanShowForm=this.objStackContainer.removeChild(objChild);
+								if (isCanShowForm) objChild.destroyRecursive();
+								break;
+							}
+						}
+						if (isCanShowForm) {
+							this.objStackContainer.addChild(objForm);
+							this.objStackContainer.selectChild(objForm);
+						}
+						this.objMultiTab.doG740Repaint();
+					}
+					finally {
+						if (oldOnSelect && objForm && objForm.requests) objForm.requests['onselect']=oldOnSelect;
+					}
+				},
+				doG740Repaint: function(para) {
+					if (this.objTreeMenu) {
+						this.objTreeMenu.doG740Repaint(para);
+					}
+				},
+				doG740RepaintBackground: function() {
+					if (!this.objStackContainer) return;
+					var lst=this.objStackContainer.getChildren();
+					if (this.background) {
+						if (lst.length==0) {
+							if (!this._isBackground) {
+								dojo.style(this.objStackContainer.domNode, 'background-image', "url('"+this.background+"')");
+								dojo.style(this.objStackContainer.domNode, 'opacity', this.bgopacity);
+								this._isBackground=true;
+							}
+						}
+						else if (this._isBackground) {
+							dojo.style(this.objStackContainer.domNode, 'background-image', 'inherit');
+							dojo.style(this.objStackContainer.domNode, 'opacity', '1');
+							this._isBackground=false;
+						}
+					}
+					this.layout();
+				}
+			}
+		);
+
+
+
+
+
+
+
 
 		
 // Класс PanelWebBrowser
@@ -3128,7 +3424,6 @@ define(
 
 			if (g740.xml.getAttrValue(xml, 'maxwidth', '')) para.maxWidth=g740.xml.getAttrValue(xml, 'maxwidth', '');
 			if (g740.xml.getAttrValue(xml, 'maxheight', '')) para.maxWidth=g740.xml.getAttrValue(xml, 'maxheight', '');
-			if (g740.xml.getAttrValue(xml, 'style', '')) para.g740style=g740.xml.getAttrValue(xml, 'style', '');
 			if (g740.xml.getAttrValue(xml, 'size', '')) para.g740size=g740.xml.getAttrValue(xml, 'size', '');
 
 			if (!para.region) {
@@ -3320,14 +3615,26 @@ define(
 			if (g740.xml.isAttr(xml, 'form')) para.defaultChildName=g740.xml.getAttrValue(xml, 'form', '');
 			if (g740.xml.isAttr(xml, 'background')) para.background=g740.xml.getAttrValue(xml, 'background', '');
 			if (g740.xml.isAttr(xml, 'bgopacity')) para.bgopacity=g740.xml.getAttrValue(xml, 'bgopacity', '0.3');
+			if (g740.xml.isAttr(xml, 'bgsize')) para.bgsize=g740.xml.getAttrValue(xml, 'bgsize', 'cover');
+
+			
+			if (g740.xml.isAttr(xml, 'size')) para.g740size=g740.xml.getAttrValue(xml, 'size', '');
+			if (g740.xml.isAttr(xml, 'menu.align')) para.treeMenuAlign=g740.xml.getAttrValue(xml, 'menu.align', 'left');
+			if (g740.xml.isAttr(xml, 'menu.width')) para.treeMenuWidth=g740.xml.getAttrValue(xml, 'menu.width', '');
+			if (g740.xml.isAttr(xml, 'menu.height')) para.treeMenuHeight=g740.xml.getAttrValue(xml, 'menu.height', '');
+			if (g740.xml.isAttr(xml, 'menu.maxwidth')) para.treeMenuMaxWidth=g740.xml.getAttrValue(xml, 'menu.maxwidth', '');
+			if (g740.xml.isAttr(xml, 'menu.maxheight')) para.treeMenuMaxHeight=g740.xml.getAttrValue(xml, 'menu.maxheight', '');
+			if (g740.xml.isAttr(xml, 'menu.caption')) para.treeMenuCaption=g740.xml.getAttrValue(xml, 'menu.caption', '');
+			var result=new g740.PanelFormContainer(para, null);
 		
+/*
 			if (g740.xml.getAttrValue(xml, 'tab', '')==1) {
-				var result=new g740.PanelMultiTabsForm(para, null);
-				//var result=new g740.PanelTabForm(para, null);
+				var result=new g740.PanelTabForm(para, null);
 			} 
 			else {
 				var result=new g740.PanelSingleForm(para, null);
 			}
+*/
 			return result;
 		};
 		g740.panels.registrate('form', g740.panels._builderPanelForm);

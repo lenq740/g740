@@ -743,9 +743,6 @@ define(
 					this.inherited(arguments);
 					dojo.addClass(this.domNode,'treemenu');
 					
-					var itemAppColorScheme=g740.appColorScheme.getItem();
-					if (itemAppColorScheme.panelTreeMenuWhiteIcons) dojo.addClass(this.domNode,'g740-whiteicons');
-					
 					g740.execDelay.go({
 						delay: 500,
 						obj: this,

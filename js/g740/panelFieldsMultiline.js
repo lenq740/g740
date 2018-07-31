@@ -138,9 +138,6 @@ define(
 					if (!this.domNodeTitle) return false;
 					if (!this.domNodeDivBody) return false;
 					
-					dojo.style(this.domNodeDivPadding, 'padding-top', this.padding);
-					dojo.style(this.domNodeDivPadding, 'padding-bottom', this.padding);
-					
 					this.domNodeTitle.innerHTML='';
 					if (this.title && this.isShowTitle) {
 						objDiv=document.createElement('div');
@@ -149,6 +146,10 @@ define(
 						objDiv.appendChild(objText);
 						this.domNodeTitle.appendChild(objDiv);
 					}
+					else {
+						dojo.style(this.domNodeDivPadding, 'padding-top', this.padding);
+					}
+					dojo.style(this.domNodeDivPadding, 'padding-bottom', this.padding);
 
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];

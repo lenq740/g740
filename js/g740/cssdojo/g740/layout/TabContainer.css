@@ -11,7 +11,7 @@
 }
 
 .g740 .dijitTab {
-	background-color: #DDDDDD;
+	background-color: transparent;
 	margin-top: 3px;
 	padding-top: 0px !important;
 	height: 20px;
@@ -46,7 +46,7 @@
 .g740 .dijitTabChecked {
 	/* the selected tab (with or without hover) */
 	background: none !important;
-	background-color: #F3F3F3 !important;
+	background-color: transparent;
 	color: black !important;
 	border-top-width: 2px !important;
 	border-top-color: #d4464e !important;
@@ -87,6 +87,9 @@
 	/* make sure tabs w/close button and w/out close button are same height, even w/small (<12px) font */
 	min-height: 12px;
 	display: inline-block;
+}
+.g740 .dijitTab .tabLabel:focus {
+	outline: none;
 }
 
 /* Nested Tabs */

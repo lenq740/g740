@@ -160,10 +160,10 @@ define(
 					className: 'app-color-red',
 					panelExpanderLookOpacityMax: 0.55
 				},
-				cti: {
-					className: 'app-color-cti',
-					panelTreeMenuWhiteIcons: true,
-					panelExpanderLookOpacityMax: 0.01
+				m: {
+					className: 'app-color-m',
+					panelTreeMenuWhiteIcons: false,
+					panelExpanderLookOpacityMax: 0.55
 				}
 			},
 			getItem: function() {

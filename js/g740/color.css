@@ -244,97 +244,185 @@ app-color-red
 	background-image: url('icons/widget/treemenuwhiteexpanded.png');
 }
 
-
 /*--------------------------------------------------------------------
-app-color-cti
+app-color-m
+!!!!!!!
+color.romanuke.com/tsvetovaya-palitra-1874
+#101e5a - темный фон заголовка окна приложения, темный цвет шрифтов заголовков
+#5d80b6 - фон заголовка модальгого окна, цвет рамок выделения
+#acbdd3 - цвет фона выделения текущей строки - разделить на несколько оттенков
+  #dce1e9 - светлее
+  #859abe - темнее
+#f7f8f9 - белый
+#cbc6c3 - светлокоричневый
 --------------------------------------------------------------------*/
-/* MenuBar и Menu*/
-.app-color-cti .dijitMenuBar {
-	background-color: #778899;
-	border-color: #778899 !important;
+.g740.app-color-m .dojoxGridMasterView .dojoxGridRowSelected {
+	background-color: #dce1e9 !important;
+}
+.g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected {
+	background-color: #acbdd3 !important;
+}
+.g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowEditing {
+	background-color: #acbdd3 !important;
+}
+.g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowEditing .dojoxGridCell{
+	background-color: #acbdd3 !important;
+}
+.g740.app-color-m .g740-grid-focused  .dojoxGridMasterView .dojoxGridCell.dojoxGridCellFocus {
+	background-color: #859abe !important;
+}
+.g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell{
 	color: white;
 }
-.app-color-cti .dijitMenuBar .dijitMenuItemHover {
-	background-color: #778899;
-	color: white;
+.g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell input{
+	color: black;
 }
-.app-color-cti .dijitMenuBar .dijitMenuItemActive {
-	background-color: #778899;
-	color: white;
+
+.g740.app-color-m .g740tree-panel.focused .g740tree-item-element:hover {
+	background-color: #dce1e9;
 }
-.app-color-cti .dijitMenuBar .dijitMenuItemSelected {
-	background-color: #778899;
-	color: white;
+.g740.app-color-m .g740tree-panel .g740tree-item-element.selected {
+	background-color: #dce1e9;
 }
-.app-color-cti .dijitMenuBar .dijitPopupMenuItemFocused {
-	background-color: #778899;
+.g740.app-color-m .g740tree-panel.focused .g740tree-item-element.selected {
+	background-color: #acbdd3;
 	color: white;
 }
 
-.app-color-cti .dijitMenuItemSelected {
-	background-color: #778899;
+
+.g740.app-color-m .g740focused .dijitButtonNode {
+    border-color: #859abe;
+}
+.g740.app-color-m .g740-widget-text .g740-widget-input:focus {
+	border-color: #859abe;
+}
+.g740.app-color-m .g740-widget-reflist.g740-widget-focused .g740-items {
+	border-color: #859abe;
+}
+.g740.app-color-m .g740-list .g740-list-input:focus {
+	border-color: #859abe;
+}
+.g740.app-color-m .g740-widget-icons.g740-widget-focused {
+	border-color: #859abe;
+}
+.g740.app-color-m .g740-radiogroupbox .g740-radio-item.g740-widget-focused {
+	border-color: #859abe;
+}
+.g740.app-color-m .g740-paginator .pages .item.current {
+	outline-color: #859abe;
+}
+.g740.app-color-m  textarea:focus {
+	border-color: #859abe;
+}
+.g740.app-color-m .dojoxGrid.g740-grid-focused {
+	border: 1px solid #859abe;
+}
+.g740.app-color-m .dijitTextBox.g740-widget-focused {
+	border:1px solid #859abe !important;
+}
+.g740.app-color-m .dijitTabChecked {
+	border-top-color: #859abe !important;
+}
+
+/* оттенок черезполосицы в grid */
+.g740.app-color-m .dojoxGridRowOdd {
+    background-color: #f7f8f9;
+}
+
+.g740.app-color-m .dojoxGridHeader .dojoxGridCell {
+	background-color: #f7f8f9 !important;
+	color: #101e5a !important;
+}
+
+.g740.app-color-m .g74-paneltitle {
+	color: #5d80b6;
+}
+
+/* MenuBar и Menu*/
+.g740.app-color-m .dijitMenuBar {
+	background-color: #6e6e6e;
+	border-color: #6e6e6e !important;
+	color: white;
+}
+.g740.app-color-m .dijitMenuBar .dijitMenuItemHover {
+	background-color: #acbdd3;
+	color: white;
+}
+.g740.app-color-m .dijitMenuBar .dijitMenuItemActive {
+	background-color: #acbdd3;
+	color: white;
+}
+.g740.app-color-m .dijitMenuBar .dijitMenuItemSelected {
+	background-color: #acbdd3;
+	color: white;
+}
+.g740.app-color-m .dijitMenuBar .dijitPopupMenuItemFocused {
+	background-color: #acbdd3;
+	color: white;
+}
+.g740.app-color-m .dijitMenuItemSelected {
+	background-color: #acbdd3;
 	color: white;
 }
 
 /* g740.Dialog */
-.app-color-cti .g740-dialog .g740-dialog-title {
-	font-family: sans-serif !important;
-	font-size: 14px !important;
-	font-weight: normal !important;
-	background-image: none;
-	background-color: #778899;
+.g740.app-color-m .g740-dialog .g740-dialog-title {
+	background-color: #5d80b6;
 	color: white;
 }
-.app-color-cti .g740-dialog .dijitDialogCloseIcon {
+.g740.app-color-m .g740-dialog .dijitDialogCloseIcon {
 	background-image: url('icons/widget/close.png') !important;
 }
 
+/* g740.panelmultitabsform */
+.g740.app-color-m .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem {
+	color: #cbc6c3;
+}
+.g740.app-color-m .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem.selected {
+    border-bottom: 2px solid #5d80b6;
+    color: #5d80b6;
+}
+
+
 /* g740._ListAbstract */
-.app-color-cti .g740-list .g740-list-items .g740-list-item.selected{
-    background-color: #778899;
+.g740.app-color-m .g740-list .g740-list-items .g740-list-item.selected{
+    background-color: #859abe;
 	color: white;
 }
 
 /* g740.HtmlPanel */
-.app-color-cti .g740html-panel.title{
+.g740.app-color-m .g740html-panel.title{
+	background-color: #535353;
+	color: white;
 }
-.app-color-cti .g740html-panel.title .connecteduser .icon {
-	background-image: url('icons/widget/disconnect-dark.png');
+.g740.app-color-m .g740html-panel.mainmenu{
+	background-color: #535353;
+	color: white;
 }
 
 /* g740.PanelExpander */
-.app-color-cti .g740expander-panel .g740html-panel.mainmenu{
-	background-color: #015367;
+.g740.app-color-m .g740expander-panel .g740html-panel.mainmenu{
+	background-color: #cbc6c3;
 	color: white;
 }
-.app-color-cti .g740expander-panel.mainmenu .g740expander-icon {
-	background-color: #206676;
-}
-
 
 /* g740.TreeMenu */
-.app-color-cti .g740expander-panel .g740expander-lockscreen{
-	background-color: white;
-}
-.app-color-cti .g740tree-panel.treemenu{
+.g740.app-color-m .g740tree-panel.treemenu{
 	font-family: helvetica;
-	background-color: #206676;
-	color: white;
+	background-color: #f7f8f9;
+	color: black;
 }
-.app-color-cti .g740tree-panel.treemenu .g740tree-item-element{
-	background-color: #206676;
-	color: white;
+.g740.app-color-m .g740tree-panel.treemenu .g740tree-item-element{
+	background-color: #f7f8f9 !important;
+	color: black !important;
 }
-.app-color-cti .g740tree-panel.treemenu .g740tree-item-element:hover {
-	background-color: #38B2CE !important;
+.g740.app-color-m .g740tree-panel.treemenu .g740tree-item-element:hover {
+	background-color: #acbdd3 !important;
+	color: white !important;
 }
-.app-color-cti .g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-plus {
+.g740.app-color-m .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-plus {
 	background-image: url('icons/widget/treemenuwhitecollapsed.png');
 }
-.app-color-cti .g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-minus {
+.g740.app-color-m .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-minus {
 	background-image: url('icons/widget/treemenuwhiteexpanded.png');
-}
-
-.app-color-cti .g740tree-panel.treemenu.g740medium .g740tree-item-text {
-	line-height: 32px;
 }
