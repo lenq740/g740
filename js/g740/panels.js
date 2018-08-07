@@ -2644,6 +2644,13 @@ define(
 					}
 					this.objTreeMenu=new g740.TreeMenu(p, null);
 					this.addChild(this.objTreeMenu);
+					//dojo.attr(this.domNode,'title','Главное меню');
+				},
+				onMouseOver: function() {
+					dojo.addClass(this.domNode,'hover');
+				},
+				onMouseOut: function() {
+					dojo.removeClass(this.domNode,'hover');
 				}
 			}
 		);
@@ -2669,7 +2676,11 @@ define(
 				background: '',
 				bgopacity: 0.3,
 				bgsize: 'cover',
+				
+				isExpandOnEmpty: true,	// автоматически раскрывать objTreeMenu если список форм пуст
+				
 				_isBackground: false,
+				_isExpandedOnEmptyFirst: false,
 				set: function(name, value) {
 					if (name=='defaultChildName') {
 						this.defaultChildName=value;
@@ -2887,19 +2898,28 @@ define(
 				doG740RepaintBackground: function() {
 					if (!this.objStackContainer) return;
 					var lst=this.objStackContainer.getChildren();
-					if (this.background) {
-						if (lst.length==0) {
-							if (!this._isBackground) {
-								dojo.style(this.objStackContainer.domNode, 'background-image', "url('"+this.background+"')");
-								dojo.style(this.objStackContainer.domNode, 'opacity', this.bgopacity);
-								this._isBackground=true;
-							}
+					if (lst.length==0) {
+						if (this.background && !this._isBackground) {
+							dojo.style(this.objStackContainer.domNode, 'background-image', "url('"+this.background+"')");
+							dojo.style(this.objStackContainer.domNode, 'opacity', this.bgopacity);
+							this._isBackground=true;
 						}
-						else if (this._isBackground) {
+						if (this.isExpandOnEmpty && this.objTreeMenu && !this._isExpandedOnEmptyFirst) {
+							g740.execDelay.go({
+								delay: 300,
+								obj: this.objTreeMenu,
+								func: this.objTreeMenu.panelExpand
+							});
+							this._isExpandedOnEmptyFirst=true;
+						}
+					}
+					else {
+						if (this.background && this._isBackground) {
 							dojo.style(this.objStackContainer.domNode, 'background-image', 'inherit');
 							dojo.style(this.objStackContainer.domNode, 'opacity', '1');
 							this._isBackground=false;
 						}
+						this._isExpandedOnEmptyFirst=false;
 					}
 					this.layout();
 				}
@@ -2922,7 +2942,9 @@ define(
 				domIFrame: null,
 				src: '',
 				url: '',
+				jsUrl: '',
 				fieldName: '',
+				isNoScript: false,
 				params: {},
 				constructor: function(para, domElement) {
 					this.params={};
@@ -2935,17 +2957,21 @@ define(
 				},
 				set: function(name, value) {
 					if (name=='url') {
-						if (this.url==value) return true;
-						if (value) {
-							this.url=value;
-						}
-						else {
-							this.url='';
-						}
+						this.url=value;
+						if (!this.url) this.url='';
 						return true;
 					}
-					if (name=='fieldName') {
+					else if (name=='jsUrl') {
+						this.jsUrl=value;
+						if (!this.jsUrl) this.jsUrl='';
+						return true;
+					}
+					else if (name=='fieldName') {
 						this.fieldName=value;
+						return true;
+					}
+					else if (name=='isNoScript') {
+						this.isNoScript=value;
 						return true;
 					}
 					this.inherited(arguments);
@@ -2964,6 +2990,7 @@ define(
 					this.domIFrame.style.borderWidth='0px';
 					this.domIFrame.style.borderStyle='none';
 					this.domIFrame.border=0;
+					if (this.isNoScript) dojo.attr(this.domIFrame,'sandbox','');
 					this.set('content',this.domIFrame);
 					this.inherited(arguments);
 					this.doG740Repaint();
@@ -2979,6 +3006,12 @@ define(
 						var fields=objRowSet.getFields(node);
 						if (!fields[this.fieldName]) return false;
 						var url=objRowSet.getFieldProperty({fieldName: this.fieldName});
+					}
+					else if (this.jsUrl) {
+						var url=this.url;
+						var obj=this.getRowSet();
+						if (!obj) obj=this.objForm;
+						if (obj) var url=g740.js_eval(obj, this.jsUrl, this.url);
 					}
 					else {
 						var url=this.url;
@@ -3478,7 +3511,9 @@ define(
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
 			if (g740.xml.isAttr(xml,'url')) para.url=g740.xml.getAttrValue(xml,'url','');
+			if (g740.xml.isAttr(xml,'js_url')) para.jsUrl=g740.xml.getAttrValue(xml,'js_url','');
 			if (g740.xml.isAttr(xml,'field')) para.fieldName=g740.xml.getAttrValue(xml,'field','');
+			if (g740.xml.getAttrValue(xml,'noscript','')==1) para.isNoScript=true;
 
 			var xmlParams=g740.xml.findFirstOfChild(xml, {nodeName: 'params'});
 			if (!xmlParams) xmlParams=xml;

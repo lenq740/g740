@@ -62,7 +62,7 @@
 	errorIncorrectRowIndex: 'Некорректный номер строки',
 	errorRowIdNotFound: 'Не найдена строка с этим id',
 	errorRowIdNotUnique: 'Значение id строки не уникально',
-
+	
 	// Dialog confirm
 	messageBtnOk: 'OK',
 	messageBtnCancel: 'Отмена',

@@ -395,15 +395,21 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	background-color: #535353;
 	color: white;
 }
-.g740.app-color-m .g740html-panel.mainmenu{
-	background-color: #535353;
-	color: white;
-}
-
 /* g740.PanelExpander */
 .g740.app-color-m .g740expander-panel .g740html-panel.mainmenu{
 	background-color: #cbc6c3;
-	color: white;
+	transition-duration: 0.2s;
+	transition-property: background-color;
+}
+.g740.app-color-m .g740expander-panel.hover .g740html-panel.mainmenu{
+	background-color: #859abe;
+	transition-duration: 0.2s;
+	transition-property: background-color;
+}
+.g740.app-color-m .g740expander-panel.expanded .g740html-panel.mainmenu{
+	background-color: #859abe;
+	transition-duration: 0.2s;
+	transition-property: background-color;
 }
 
 /* g740.TreeMenu */
