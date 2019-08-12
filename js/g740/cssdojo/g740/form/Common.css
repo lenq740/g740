@@ -12,6 +12,7 @@
 
 .g740 .dijitInputContainer input {
 	margin: 0 0.1em;
+	height: 16px;
 }
 
 .g740 .dijitTextArea {

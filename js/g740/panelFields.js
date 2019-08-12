@@ -1,38 +1,56 @@
-//-----------------------------------------------------------------------------
-// Панели Fields
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
 		if (typeof(g740)=='undefined') g740={};
 		dojo.declare(
-			'g740.FieldsSimple',
+			'g740.PanelFields',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
 			{
 				isG740Fields: true,
 				isG740Clipboard: true,
-				fields: [],
+				isG740CanToolBar: true,
+				isG740CanButtons: true,
+				isLayoutContainer: true,
+				lines: [],
+				columns: {},
+				linesMinWidth: [],
 				_childs: [],
 				title: '',
+				isLabelTop: false,
 				padding: '2px',
+				deltaH: 5,
+				deltaW: 8,
+				objToolBar: null,
+				objPanelButtons: null,
 				templateString: 
-					'<div class="g740-fieldssimple">'+
+					'<div class="g740-fieldsmultiline">'+
 					'<div data-dojo-attach-point="domNodeTitle"></div>'+
-					'<div data-dojo-attach-point="domNodeDivTable">'+
-					'<table class="g740-fieldssimple-table" data-dojo-attach-point="domNodeTable">'+
-					'</table>'+
+					'<div data-dojo-attach-point="domNodeToolbar"></div>'+
+					'<div data-dojo-attach-point="domNodeDivPadding">'+
+						'<div class="g740-fieldsmultiline-body" data-dojo-attach-point="domNodeDivBody"></div>'+
 					'</div>'+
+					'<div data-dojo-attach-point="domNodeButtons"></div>'+
 					'</div>',
 				
 				set: function(name, value) {
 					if (name=='fields' && value) {
-						this.fields=[];
+						this.lines=[];
+						this.columns={};
 						var objRowSet=this.getRowSet();
 						if (!objRowSet) return false;
 						if (!value) return false;
 						if (typeof(value)!='object') return false;
 						if (!value.length) return false;
 						var rowsetFields=objRowSet.getFieldsByNodeType(this.nodeType);
+						
+						var lineNames={};
+						var lineCount=0;
 						for(var i=0; i<value.length; i++) {
 							var fldNew=value[i];
 							if (!fldNew) continue;
@@ -42,29 +60,39 @@ define(
 							var fld={};
 							for (var paramName in fldRowSet) fld[paramName]=fldRowSet[paramName];
 							for (var paramName in fldNew) fld[paramName]=fldNew[paramName];
-							this.fields.push(fld);
+							
+							var lineName=fld.line;
+							if (!lineName) lineName='linename-autogen-'+lineCount;
+							var lineIndex=lineNames[lineName];
+							if (!lineIndex && lineIndex!==0) {
+								lineIndex=lineCount;
+								lineCount++;
+								if (!fld.column) fld.column='columnname-autogen-first';
+								lineNames[lineName]=lineIndex;
+								this.lines[lineIndex]=[];
+							}
+							if (fld.column) this.columns[fld.column]=0;
+							var fields=this.lines[lineIndex];
+							fields.push(fld);
 						}
 						return true;
 					}
 					this.inherited(arguments);
 				},
 				constructor: function(para, domElement) {
-					var procedureName='g740.FieldsSimple.constructor';
-					this.fields={};
+					var procedureName='g740.PanelFields.constructor';
+					this.lines=[];
 					this._childs=[];
 					this.set('objForm',para.objForm);
 					this.set('rowsetName',para.rowsetName);
 					if (para.nodeType) this.set('nodeType', para.nodeType);
-					this.set('fields', para.fields);
-					
 					this.on('Focus', this.onG740Focus);
-					//console.log(this);
 				},
 				destroy: function() {
-					var procedureName='g740.FieldsSimple.destroy';
-					if (this.fields) {
-						for(var i=0; i<this.fields.length; i++) this.fields[i]=null;
-						this.fields=[];
+					var procedureName='g740.PanelFields.destroy';
+					if (this.lines) {
+						for(var i=0; i<this.lines.length; i++) this.lines[i]=null;
+						this.lines=[];
 					}
 					if (this._childs) {
 						for(var i=0; i<this._childs.length; i++) {
@@ -75,20 +103,42 @@ define(
 						}
 						this._childs=[];
 					}
+					this.columns={};
+					this.linesMinWidth=[];
+					
+					if (this.objToolBar) {
+						this.objToolBar.destroyRecursive();
+						this.objToolBar=null;
+					}
+					if (this.objPanelButtons) {
+						this.objPanelButtons.destroyRecursive();
+						this.objPanelButtons=null;
+					}
+					
 					this.inherited(arguments);
+				},
+				addChild: function(obj) {
+					if (!obj) return;
+					if (obj.g740className=='g740.Toolbar') {
+						if (this.objToolBar) this.objToolBar.destroyRecursive();
+						this.objToolBar=obj;
+						if (this.objToolBar.domNode && this.domNodeToolbar) this.domNodeToolbar.appendChild(this.objToolBar.domNode);
+					} 
+					else if (obj.isG740PanelButtons) {
+						if (this.objPanelButtons) this.objPanelButtons.destroyRecursive();
+						this.objPanelButtons=obj;
+						if (this.objPanelButtons.domNode && this.domNodeButtons) this.domNodeButtons.appendChild(this.objPanelButtons.domNode);
+					}
 				},
 				postCreate: function() {
 					this.inherited(arguments);
 					this.domNode.title='';
 					this.render();
 				},
+				_isRendered: false,
 				render: function() {
 					if (!this.domNodeTitle) return false;
-					if (!this.domNodeDivTable) return false;
-					if (!this.domNodeTable) return false;
-					
-					dojo.style(this.domNodeDivTable, 'padding-top', this.padding);
-					dojo.style(this.domNodeDivTable, 'padding-bottom', this.padding);
+					if (!this.domNodeDivBody) return false;
 					
 					this.domNodeTitle.innerHTML='';
 					if (this.title && this.isShowTitle) {
@@ -98,6 +148,10 @@ define(
 						objDiv.appendChild(objText);
 						this.domNodeTitle.appendChild(objDiv);
 					}
+					else {
+						dojo.style(this.domNodeDivPadding, 'padding-top', this.padding);
+					}
+					dojo.style(this.domNodeDivPadding, 'padding-bottom', this.padding);
 
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];
@@ -106,57 +160,260 @@ define(
 						this._childs[i]=null;
 					}
 					this._childs=[];
+					this.linesMinWidth=[];
 					
-					var lst=[];
-					for(var i=0; i<this.domNodeTable.childNodes.length; i++) lst.push(this.domNodeTable.childNodes[i]);
-					for(var i=0; i<lst.length; i++) this.domNodeTable.removeChild(lst[i]);
-					var objTBody=document.createElement('tbody');
-					this.domNodeTable.appendChild(objTBody);
-					
-					for(var i=0; i<this.fields.length; i++) {
-						var fld=this.fields[i];
-						if (!fld) continue;
-						var objTr=document.createElement('tr');
-						objTBody.appendChild(objTr);
-						var objTdCaption=document.createElement('td');
-						objTdCaption.className='g740-fieldssimple-td-caption';
-						objTr.appendChild(objTdCaption);
-						
-						var caption='';
-						if (fld.type!='check') {
-							caption=fld.caption;
-							if (!caption) caption=fld.name;
+					this.domNodeDivBody.innerHTML='';
+					var top=0;
+					for(var i=0; i<this.lines.length; i++) {
+						this.linesMinWidth[i]=0;
+						var line=this.lines[i];
+						var lineH=0;
+						for(var index=0; index<line.length; index++) {
+							var fld=line[index];
+							var p={
+								objForm: this.objForm,
+								objPanel: this,
+								rowsetName: this.rowsetName,
+								fieldName: fld.name,
+								fieldDef: fld,
+								nodeType: this.nodeType
+							};
+							var objFieldEditor=g740.panels.createObjField(fld, p, null);
+							var label=fld.name;
+							if (fld.caption) label=fld.caption;
+							if (fld.type=='check' || fld.type=='icons') label='';
+							var objFC=new g740.FieldContainer({
+								isLabelTop: this.isLabelTop,
+								label: label,
+								objFieldEditor: objFieldEditor,
+								style: 'opacity:0'
+							}, null);
+							if (fld.stretch) {
+								fld.stretch=false;
+								objFC.isStretch=true;
+							}
+							this.domNodeDivBody.appendChild(objFC.domNode);
+							var h=objFC.getHeight();
+							dojo.style(objFC.domNode,'position','absolute');
+							dojo.style(objFC.domNode,'top',top+'px');
+							
+							if (lineH<h) lineH=h;
+							fld.objFC=objFC;
+							objFC.doResize();
 						}
-						var objText=document.createTextNode(caption);
-						objTdCaption.appendChild(objText);
-						
-						var objTdValue=document.createElement('td');
-						objTdValue.className='g740-fieldssimple-td-value';
-						objTr.appendChild(objTdValue);
-						var objDiv=document.createElement('div');
-						objTdValue.appendChild(objDiv);
-						
-						var p={
-							objForm: this.objForm,
-							objPanel: this,
-							rowsetName: this.rowsetName,
-							fieldName: fld.name,
-							fieldDef: fld,
-							nodeType: this.nodeType
-                        };
-                        var objEditor = g740.panels.createObjField(fld, p, objDiv);
-                        this._childs.push(objEditor);
+						if (lineH) top+=lineH+this.deltaH;
 					}
+					for(var i=0; i<this.lines.length; i++) {
+						var line=this.lines[i];
+						for(var index=0; index<line.length; index++) {
+							var fld=line[index];
+							if (!fld) continue;
+							if (!fld.objFC) continue;
+							this._childs.push(fld.objFC.objFieldEditor);
+						}
+					}
+					dojo.style(this.domNodeDivBody,'height',top+'px');
+
+					// Вычисляем левую позицию исходя из минимальной ширины поля
+					var isChanged=true;
+					while(isChanged) {
+						isChanged=false;
+						for(var i=0; i<this.lines.length; i++) {
+							var line=this.lines[i];
+							if (this._rebuildLineLeftPosition(i,{isMinWidth: true})) isChanged=true;
+							var fldLast=line[line.length-1];
+							objFC=fldLast.objFC;
+							this.linesMinWidth[i]=objFC.left+objFC.getMinWidth();
+						}
+					}
+					// Предварительная обработка strtech полей
+					for(var i=0; i<this.lines.length; i++) {
+						var line=this.lines[i];
+						
+						// разбиваем строку на колонки
+						var columns=[];
+						var lst=[];
+						columns.push(lst);
+						for(var index=0; index<line.length; index++) {
+							var fld=line[index];
+							if (!fld) continue;
+							objFC=fld.objFC;
+							if (!objFC) continue;
+							if (fld.column) {
+								var lst=columns[columns.length-1];
+								if (lst.length>0) columns.push([]);
+							}
+							var lst=columns[columns.length-1];
+							lst.push(fld);
+						}
+						
+						// все колонки, кроме последней, выравниваем по stretch
+						for(var index=0; index<columns.length-1; index++) {
+							var lst=columns[index];
+							if (lst.length==0) continue;
+							var countStretch=0;
+							for (var j=0; j<lst.length; j++) {
+								var fld=lst[j];
+								objFC=fld.objFC;
+								if (objFC.isStretch) countStretch++;
+							}
+							if (countStretch==0) continue;
+							
+							var fld=lst[lst.length-1];
+							objFC=fld.objFC;
+							var x0=objFC.left+objFC.getMinWidth()+this.deltaW;
+							var lst1=columns[index+1];
+							var fld1=lst1[0];
+							objFC1=fld1.objFC;
+							var x1=objFC1.left;
+							var delta=x1-x0;
+							
+							for (var j=0; j<lst.length; j++) {
+								var fld=lst[j];
+								objFC=fld.objFC;
+								if (!objFC.isStretch) continue;
+								objFC.isStretch=false;
+								var w=objFC.getFieldMinWidth();
+								var deltaW=parseInt(delta/countStretch);
+								objFC.setFieldWidth(w+deltaW);
+								delta-=deltaW;
+								countStretch--;
+							}
+						}
+						this._rebuildLineLeftPosition(i,{isWidth: true});
+					}
+					// Проставляем левую позицию
+					for(var i=0; i<this.lines.length; i++) {
+						var line=this.lines[i];
+						var left=this.deltaW;
+						for(var index=0; index<line.length; index++) {
+							var fld=line[index];
+							if (!fld) continue;
+							objFC=fld.objFC;
+							if (!objFC) continue;
+							var left=objFC.left;
+							objFC.left=0;
+							objFC.set('left', left);
+						}
+					}
+					// Делаем элементы видимыми
+					for(var i=0; i<this.lines.length; i++) {
+						var line=this.lines[i];
+						var left=this.deltaW;
+						for(var index=0; index<line.length; index++) {
+							var fld=line[index];
+							if (!fld) continue;
+							objFC=fld.objFC;
+							if (!objFC) continue;
+							dojo.style(objFC.domNode,'opacity','1');
+						}
+					}
+					this._isRendered=true;
+					this.layout();
+				},
+				// пересчет левых позиций элементов для строки
+				_rebuildLineLeftPosition: function(lineIndex, params) {
+					if (!params) params={};
+					var result=false;
+					if (!this.lines) return result;
+					var line=this.lines[lineIndex];
+					if (!line) return result;
+					var left=this.deltaW;
+					for(var i=0; i<line.length; i++) {
+						var fld=line[i];
+						if (!fld) continue;
+						objFC=fld.objFC;
+						if (!objFC) continue;
+						if (fld.column) {
+							var fldColumnLeftPosition=left+objFC.getFieldLeftPosition();
+							if (this.columns[fld.column]<fldColumnLeftPosition) {
+								this.columns[fld.column]=fldColumnLeftPosition;
+								result=true;
+							}
+							if (this.columns[fld.column]>fldColumnLeftPosition) {
+								left=this.columns[fld.column]-objFC.getFieldLeftPosition();
+							}
+						}
+						if (objFC.left!=left) {
+							result=true;
+							if (params.isGo) {
+								objFC.set('left', left);
+							} else {
+								objFC.left=left;
+							}
+						}
+
+						var w=0;
+						if (params.isMinWidth) w=objFC.getMinWidth();
+						else if (params.isWidth) w=objFC.getWidth();
+						if (w) left+=w+this.deltaW;
+					}
+					return result;
+				},
+				
+				layout: function() {
+					if (!this._isRendered) return true;
+					if (this.objPanelButtons) this.objPanelButtons.resize();
+					var panelWidth=this.domNode.clientWidth-this.deltaW;
+
+					for(var i=0; i<this.lines.length; i++) {
+						var line=this.lines[i];
+						
+						// Находим список stretch полей
+						var lst=[];
+						for(var index=0; index<line.length; index++) {
+							var fld=line[index];
+							if (!fld) continue;
+							objFC=fld.objFC;
+							if (!objFC) continue;
+							if (objFC.isStretch) lst.push(fld);
+						}
+						if (lst.length==0) continue;
+						var lineMinWidth=this.linesMinWidth[i];
+						var lineWidth=panelWidth;
+						if (lineWidth<lineMinWidth) lineWidth=lineMinWidth;
+						var delta=lineWidth-lineMinWidth;
+						var countStretch=lst.length;
+						for (var j=0; j<lst.length; j++) {
+							var fld=lst[j];
+							objFC=fld.objFC;
+							var w=objFC.getFieldMinWidth();
+							var deltaW=parseInt(delta/countStretch);
+							objFC.setFieldWidth(w+deltaW);
+							delta-=deltaW;
+							countStretch--;
+						}
+						this._rebuildLineLeftPosition(i,{
+							isWidth: true,
+							isGo: true
+						});
+					}
+				},
+				resize: function(size) {
+					if (!this.domNode) return false;
+					if (!size) return true;
+					dojo.style(this.domNode,'left',size.l+'px');
+					dojo.style(this.domNode,'top',size.t+'px');
+					dojo.style(this.domNode,'width',size.w+'px');
+					dojo.style(this.domNode,'height',size.h+'px');
+					this.layout();
 				},
 				doG740Repaint: function(para) {
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return false;
 					if (!para) para={};
+					if (this.objToolBar) this.objToolBar.doG740Repaint(para);
+					if (this.objPanelButtons) this.objPanelButtons.doG740Repaint(para);
 					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];
 						if (!obj) continue;
-						if (obj.doG740Repaint) obj.doG740Repaint();
+						if (obj.fieldDef && obj.fieldDef.objFC) {
+							if (obj.fieldDef.objFC.doG740Repaint) obj.fieldDef.objFC.doG740Repaint();
+						}
+						else {
+							if (obj.doG740Repaint) obj.doG740Repaint();
+						}
 					}
 				},
 				onG740Focus: function() {
@@ -260,9 +517,9 @@ define(
 			}
 		);
 
-		g740.panels._builderPanelFieldsSimple=function(xml, para) {
+		g740.panels._builderPanelFields=function(xml, para) {
 			var result=null;
-			var procedureName='g740.panels._builderPanelFieldsSimple';
+			var procedureName='g740.panels._builderPanelFields';
 			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
 			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
@@ -270,7 +527,7 @@ define(
 			if (!para.rowsetName) {
 				g740.trace.goBuilder({
 					formName: para.objForm.name,
-					panelType: 'fields',
+					panelType: 'multiline',
 					messageId: 'errorRowSetNameEmpty'
 				});
 				return null;
@@ -279,7 +536,7 @@ define(
 			if (!objRowSet) {
 				g740.trace.goBuilder({
 					formName: para.objForm.name,
-					panelType: 'fields',
+					panelType: 'multiline',
 					rowsetName: para.rowsetName,
 					messageId: 'errorRowSetNotFoundInForm'
 				});
@@ -294,6 +551,9 @@ define(
 			for(var i=0; i<lst.length; i++) {
 				var xmlField=lst[i];
 				var fld=g740.panels.buildFldDef(xmlField);
+				if (g740.xml.isAttr(xmlField,'line')) fld.line=g740.xml.getAttrValue(xmlField,'line','');
+				if (g740.xml.isAttr(xmlField,'column')) fld.column=g740.xml.getAttrValue(xmlField,'column','');
+				
 				if (!fld.name) continue;
 				if (!fld.visible) continue;
 				var fldRowSet=rowsetFields[fld.name];
@@ -304,234 +564,12 @@ define(
 				fields.push(fld);
 			}
 			para.fields=fields;
-			var result=new g740.FieldsSimple(para, null);
+			if (g740.xml.getAttrValue(xml,'captionup','0')=='1') para.isLabelTop=true;
+			var result=new g740.PanelFields(para, null);
 			return result;
 		};
-		g740.panels.registrate('fieldssimple', g740.panels._builderPanelFieldsSimple);
+		g740.panels.registrate('fields', g740.panels._builderPanelFields);
 
-		dojo.declare(
-			'g740.Properties',
-			[g740._PanelAbstract, dijit._TemplatedMixin],
-			{
-				isG740Fields: true,
-				_childs: [],
-				title: '',
-				templateString: '<div class="g740-properties"><table class="g740-properties-table" data-dojo-attach-point="domNodeTable"></table></div>',
-				constructor: function(para, domElement) {
-					var procedureName='g740.Properties.constructor';
-					this.fields={};
-					this._childs=[];
-					this.set('objForm',para.objForm);
-					this.set('rowsetName',para.rowsetName);
-					
-					this.on('Focus', this.onG740Focus);
-					//console.log(this);
-				},
-				destroy: function() {
-					var procedureName='g740.Properties.destroy';
-					if (this._childs) {
-						for(var i=0; i<this._childs.length; i++) {
-							var obj=this._childs[i];
-							if (!obj) continue;
-							obj.destroyRecursive();
-							this._childs[i]=null;
-						}
-						this._childs=[];
-					}
-					this.inherited(arguments);
-				},
-				render: function() {
-					if (!this.domNodeTable) return false;
-
-					for(var i=0; i<this._childs.length; i++) {
-						var obj=this._childs[i];
-						if (!obj) continue;
-						obj.destroyRecursive();
-						this._childs[i]=null;
-					}
-					this._childs=[];
-					
-					var lst=[];
-					for(var i=0; i<this.domNodeTable.childNodes.length; i++) lst.push(this.domNodeTable.childNodes[i]);
-					for(var i=0; i<lst.length; i++) this.domNodeTable.removeChild(lst[i]);
-					
-					var objTBody=document.createElement('tbody');
-					this.domNodeTable.appendChild(objTBody);
-
-					if (this.title && this.isShowTitle) {
-						var objTr=document.createElement('tr');
-						objTBody.appendChild(objTr);
-						var objTd=document.createElement('td');
-						objTd.colSpan=3;
-						objTd.className='g740-properties-td-title';
-						objTr.appendChild(objTd);
-						objDiv=document.createElement('div');
-						objDiv.className='g74-paneltitle';
-						objTd.appendChild(objDiv);
-						var objText=document.createTextNode(this.title);
-						objDiv.appendChild(objText);
-					}
-					
-					var objRowSet=this.getRowSet();
-					if (!objRowSet) return false;
-					
-					var nodes=objRowSet.objTreeStorage.getChildsOrdered(objRowSet.objTreeStorage.rootNode);
-					for(var i=0; i<nodes.length; i++) {
-						var node=nodes[i];
-						if (!node) continue;
-						var row=node.info;
-						if (!row) continue;
-						
-						var objTr=document.createElement('tr');
-						objTBody.appendChild(objTr);
-						var objTdCaption=document.createElement('td');
-						objTdCaption.className='g740-properties-td-caption';
-						objTr.appendChild(objTdCaption);
-						var caption=row['caption.value'];
-						if (!caption) caption=row['name.value'];
-						var objText=document.createTextNode(caption);
-						objTdCaption.appendChild(objText);
-						
-						var objTdValue=document.createElement('td');
-						objTdValue.className='g740-properties-td-value';
-						objTr.appendChild(objTdValue);
-						var objDiv=document.createElement('div');
-						objTdValue.appendChild(objDiv);
-						
-						var fld={
-							name: 'value',
-							type: row['type.value'],
-							stretch: 1
-						}
-						if (!fld.type) fld.type='string';
-						var p={
-							objForm: this.objForm,
-							rowsetName: this.rowsetName,
-							fieldName: 'value',
-							rowId: node.id,
-							fieldDef: fld,
-							isSaveOnChange: true,
-							value: row['value.value'],
-							readOnly: objRowSet.getReadOnly() || row['row.readonly']==1
-						};
-						if (fld.type=='ref') {
-							fld.name='rname';
-							fld.type='string';
-							fld.refid='rid';
-							p.fieldName='rname';
-							p.value=row['rname.value'];
-                        } 
-                        var objEditor = g740.panels.createObjField(fld, p, objDiv);
-                        this._childs.push(objEditor);
-
-						var objTdUnit=document.createElement('td');
-						objTdUnit.className='g740-properties-td-unit';
-						objTr.appendChild(objTdUnit);
-						var objDiv=document.createElement('div');
-						objTdUnit.appendChild(objDiv);
-						
-						if (row['units.value']) {
-							var fld={
-								name: 'unit',
-								type: 'list',
-								len: '20',
-								list: row['units.value'],
-								stretch: false
-							}
-							var p={
-								objForm: this.objForm,
-								rowsetName: this.rowsetName,
-								fieldName: 'unit',
-								rowId: node.id,
-								fieldDef: fld,
-								value: row['unit.value']
-							};
-							var objEditor=new g740.FieldEditor.List(p, objDiv);
-							this._childs.push(objEditor);
-						}
-						
-					}
-				},
-				focus: function() {
-					if (this.domNode) this.domNode.focus();
-				},
-				doG740Repaint: function(para) {
-					var objRowSet=this.getRowSet();
-					if (!objRowSet) return false;
-					if (!para) para={};
-					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
-					if (para.isFull) {
-						this.render();
-						return true;
-					}
-					if (para.isRowUpdate) {
-						var rowId=objRowSet.getFocusedId();
-						for(var i=0; i<this._childs.length; i++) {
-							var obj=this._childs[i];
-							if (!obj) continue;
-							if (obj.rowId==rowId) {
-								if (obj.doG740Repaint) obj.doG740Repaint();
-							}
-						}
-					}
-				},
-				onG740Focus: function() {
-					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
-					return true;
-				}
-			}
-		);
-
-		g740.panels._builderPanelProperties=function(xml, para) {
-			var result=null;
-			var procedureName='g740.panels._builderPanelProperties';
-			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
-			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
-			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
-			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
-			if (!para.rowsetName) {
-				g740.trace.goBuilder({
-					formName: para.objForm.name,
-					panelType: 'properties',
-					messageId: 'errorRowSetNameEmpty'
-				});
-				return null;
-			}
-			var objRowSet=para.objForm.rowsets[para.rowsetName];
-			if (!objRowSet) {
-				g740.trace.goBuilder({
-					formName: para.objForm.name,
-					panelType: 'properties',
-					rowsetName: para.rowsetName,
-					messageId: 'errorRowSetNotFoundInForm'
-				});
-				return null;
-			}
-			
-			// Проверяем в наборе строк наличие требуемых для корректной работы панели полей
-			var fields=objRowSet.getFields('');
-			var names=['name','caption','type','value','rid','rname'];
-			var isErrorInFieldName=false;
-			for (var i=0; i<names.length; i++) {
-				var fieldName=names[i];
-				if (!fields[fieldName]) {
-					g740.trace.goBuilder({
-						formName: para.objForm.name,
-						panelType: 'properties',
-						rowsetName: para.rowsetName,
-						fieldName: fieldName,
-						messageId: 'errorNotFoundFieldName'
-					});
-					isErrorInFieldName=true;
-				}
-			}
-			if (isErrorInFieldName) return null;
-			
-			var result=new g740.Properties(para, null);
-			return result;
-		};
-		g740.panels.registrate('properties', g740.panels._builderPanelProperties);
-		
 		return g740;
 	}
 );

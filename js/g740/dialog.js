@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-// Виджеты для использования в панелях
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -232,14 +235,22 @@ define(
 							var value=objForm.modalResults[name];
 							g740.application.modalResults[name]=value;
 						}
-						this._execOnAfterClose();
 					}
+					
 					var objParentForm=this.attr.objForm;
+                    if (this.attr.onClose) {
+						g740.execDelay.go({
+							delay: 100,
+                            func: this.attr.onClose,
+							para: g740.application.modalResults
+						});
+					}
 					this.attr={};
 					this.inherited(arguments);
 					
 					if (objParentForm && objParentForm.objFocusedPanel && objParentForm.objFocusedPanel.doG740Focus) {
 						objParentForm.objFocusedPanel.doG740Focus();
+						objParentForm.continueExecListOfRequest();
 					}
 				},
 				show: function() {
@@ -247,33 +258,11 @@ define(
 					g740.application.lstModalFormDialogs.push(this);
 					this.doG740Resize();
 				},
-				_execOnAfterClose: function() {
-					if (!this.attr || !this.attr.objForm || !this.attr.onafterclose) return true;
-					var objForm=this.attr.objForm;
-					for(var i=0; i<this.attr.onafterclose.length; i++) {
-						var rr=this.attr.onafterclose[i];
-						var obj=objForm;
-						if (rr.rowset) {
-							if (objForm.rowsets[rr.rowset]) obj=objForm.rowsets[rr.rowset];
-						}
-						if (!obj.getRequestEnabled(rr.name, rr.mode)) continue;
-						var p=obj._getRequestG740params(rr.params);
-						obj.exec({
-							requestName: rr.name,
-							requestMode: rr.mode,
-							sync: true,
-							G740params: p
-						});
-					}
-					return true;
-				},
 				canHide: function() {
 					var objForm=this.getObjForm();
 					if (!objForm) return true;
 					if (objForm.isObjectDestroed) return true;
-					var r=objForm.requests['onclose'];
-					if (!r) return true;
-					var result=objForm.execByFullName('onclose');
+					var result=objForm.execEventOnClose();
 					return result;
 				},
 				onG740Hide: function() {
@@ -305,6 +294,7 @@ define(
 				fieldName: null,						// Имя поля
 				nodeType: '',							// Тип узла
 				domNodeOwner: null,						// dom узел, относительно которого размещать диалог
+				posDomNodeOwner: null,					// координаты domNodeOwner
 				objOwner: null,							// dojo объект, из которого вызван диалог
 				fieldDef: null,
 				filter: '',
@@ -334,6 +324,7 @@ define(
 					}
 					if (name=='domNodeOwner') {
 						this.domNodeOwner=value;
+						this.posDomNodeOwner=dojo.geom.position(this.domNodeOwner, false);
 						return true;
 					}
 					if (name=='objOwner') {
@@ -353,6 +344,7 @@ define(
 						this._oldObjDialogEditor=null;
 						this.objForm=null;
 						this.domNodeOwner=null;
+						this.posDomNodeOwner=null;
 						this.objOwner=null;
 						this.isObjectDestroed=true;
 						this.inherited(arguments);
@@ -367,7 +359,8 @@ define(
 				getSize: function() {
 					var result=this.inherited(arguments);
 					if (this.domNodeOwner && this.objForm && this.objForm.domNode) {
-						var posOwner=dojo.geom.position(this.domNodeOwner, false);
+						var posOwner=this.posDomNodeOwner;
+						if (this.domNodeOwner.clientWidth>0) var posOwner=dojo.geom.position(this.domNodeOwner, false);
 						var posBody={
 							x: 0,
 							y: 0,
@@ -421,6 +414,181 @@ define(
 						}
 					}
 					this.destroyRecursive();
+				}
+			}
+		);
+
+// Диалог редактора: календарь
+		dojo.declare(
+			'g740.DialogEditorDate',
+			g740.DialogEditorAbstract,
+			{
+				domNodeInput: null,
+				objCalendar: null,
+				destroy: function() {
+					this.domNodeInput=null;
+					this.objCalendar=null;
+					this.inherited(arguments);
+				},
+				build: function() {
+					var procedureName='g740.DialogEditorDate.build';
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return null;
+					var fields=objRowSet.getFieldsByNodeType(this.nodeType);
+					var fld=fields[this.fieldName];
+					if (!fld) return null;
+					var objPanelTop=new dijit.layout.BorderContainer({
+							region: 'top',
+							style: 'height:25px'
+						},
+						null
+					);
+					this.addChild(objPanelTop);
+					
+					this.domNodeInput=document.createElement('input');
+					dojo.addClass(this.domNodeInput,'g740-dialogdate-input');
+					
+					objPanelTop.domNode.appendChild(this.domNodeInput);
+					dojo.on(this.domNodeInput, 'keydown', dojo.hitch(this, this.onKeyDown));
+					
+					var value=objRowSet.getFieldProperty({fieldName: fld.name});
+					var text=g740.convertor.js2text(value,'date');
+					if (this.filter) {
+						value=g740.convertor.text2js(this.filter, 'date');
+						if (value!=null) {
+							text=g740.convertor.js2text(value,'date');
+						}
+						else {
+							text=this.filter;
+						}
+					}
+					this.domNodeInput.value=text;
+					this.domNodeInput.focus();
+
+					this.objCalendar=new dijit.Calendar({
+							region: 'center',
+							value: value
+						}, 
+						null
+					);
+					this.objCalendar.on('Change',dojo.lang.hitch(this,this.onCalendarChange));
+					this.objCalendar.on('KeyDown',dojo.lang.hitch(this,this.onKeyDown));
+					this.objCalendar.on('DblClick',dojo.lang.hitch(this,this.onCalendarDblClick));
+					this.addChild(this.objCalendar);
+					
+					this.width='200px';
+					this.height='225px';
+
+					g740.execDelay.go({
+						delay: 50,
+						obj: this,
+						func: this.onAfterShow
+					});
+				},
+				onAfterShow: function() {
+					var value=this.domNodeInput.value;
+					var cursorPos=String(value).length;
+					if (this.domNodeInput.setSelectionRange) {
+						this.domNodeInput.setSelectionRange(0,cursorPos);
+					}
+					else if (this.domNodeInput.createTextRange) {
+						var range=this.domNodeInput.createTextRange();
+						range.collapse(true);
+						range.moveStart('character', 0);
+						range.moveEnd('character', cursorPos);
+						range.select();
+					}
+					this.domNodeInput.focus();
+				},
+
+				getSize: function() {
+					var result=this.inherited(arguments);
+					if (this.domNodeOwner && this.objForm && this.objForm.domNode) {
+						var posOwner=this.posDomNodeOwner;
+						if (this.domNodeOwner.clientWidth>0) var posOwner=dojo.geom.position(this.domNodeOwner, false);
+						var posBody={
+							x: 0,
+							y: 0,
+							w: document.body.clientWidth,
+							h: document.body.clientHeight
+						};
+						result.l=posOwner.x;
+						if ((result.l+result.w)>posBody.w) {
+							result.l=posOwner.x+posOwner.w-result.w;
+						}
+						result.t=posOwner.y;
+						if ((result.t+result.h)>posBody.h) {
+							result.t=posOwner.y-result.h;
+						}
+						if (result.t<5) result.t=5;
+					}
+					return result;
+				},
+				
+				isOnChange: false,
+				onCalendarChange: function(value) {
+					if (this.isOnChange) return;
+					this.isOnChange=true;
+					try {
+						var textValue=g740.convertor.js2text(value,'date');
+						if (this.domNodeInput.value && textValue && this.domNodeInput.value==textValue) {
+							this.saveAndHide(this.objCalendar.value);
+						}
+						else {
+							this.domNodeInput.value=g740.convertor.js2text(value,'date');
+							this.domNodeInput.focus();
+						}
+					}
+					finally {
+						this.isOnChange=false;
+					}
+				},
+				onCalendarDblClick: function() {
+					this.saveAndHide(this.objCalendar.value);
+				},
+				onKeyDown: function(e) {
+					if (!e.ctrlKey && e.keyCode==13) {
+						dojo.stopEvent(e);
+						if (this.objCalendar.value==null && this.domNodeInput.value!='') {
+							this.domNodeInput.value='';
+						}
+						else {
+							this.saveAndHide(this.objCalendar.value);
+						}
+					}
+					else if (!e.ctrlKey && e.keyCode==27) {
+						dojo.stopEvent(e);
+						if (this.hide) this.hide();
+					}
+					else {
+						g740.execDelay.go({
+							delay: 350,
+							obj: this,
+							func: this.onDomNodeInputChanged
+						});
+					}
+				},
+				onDomNodeInputChanged: function() {
+					if (this.isOnChange) return;
+					this.isOnChange=true;
+					try {
+						var value=dojo.trim(this.domNodeInput.value);
+						var d=g740.convertor.text2js(this.domNodeInput.value, 'date');
+						if (!d) d=null;
+						this.objCalendar.set('value',d);
+					}
+					finally {
+						this.isOnChange=false;
+					}
+				},
+				_save: function(value) {
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return null;
+					objRowSet.setFieldProperty({
+						fieldName: this.fieldName,
+						value: value
+					});
+					objRowSet.doG740Repaint({ isRowUpdate: true });
 				}
 			}
 		);
@@ -557,7 +725,8 @@ define(
 				getSize: function() {
 					var result=this.inherited(arguments);
 					if (this.domNodeOwner && this.objForm && this.objForm.domNode) {
-						var posOwner=dojo.geom.position(this.domNodeOwner, false);
+						var posOwner=this.posDomNodeOwner;
+						if (this.domNodeOwner.clientWidth>0) var posOwner=dojo.geom.position(this.domNodeOwner, false);
 						var posBody={
 							x: 0,
 							y: 0,
@@ -578,7 +747,7 @@ define(
 				},
 				doG740Resize: function() {
 					this.inherited(arguments);
-					this.objListRowSet.layout();
+					if (this.objListRowSet) this.objListRowSet.layout();
 				},
 				onG740Show: function() {
 					if (this.objListRowSet) {
@@ -679,7 +848,8 @@ define(
 				getSize: function() {
 					var result=this.inherited(arguments);
 					if (this.domNodeOwner && this.objForm && this.objForm.domNode) {
-						var posOwner=dojo.geom.position(this.domNodeOwner, false);
+						var posOwner=this.posDomNodeOwner;
+						if (this.domNodeOwner.clientWidth>0) var posOwner=dojo.geom.position(this.domNodeOwner, false);
 						var posBody={
 							x: 0,
 							y: 0,
@@ -747,7 +917,6 @@ define(
 					var fields=objRowSet.getFieldsByNodeType(this.nodeType);
 					var fld=fields[this.fieldName];
 					if (!fld) return false;
-					
 					objRefRowSet.exec({
 						requestName: 'refresh',
 						sync: true
@@ -820,7 +989,7 @@ define(
 					var objBtn=new g740.PanelButton(
 						{
 							region: 'left',
-							label: g740.getMessage('messageBrnClear'),
+							label: g740.getMessage('messageBtnClear'),
 							onClick: dojo.hitch(this, this.onBtnClearClick),
 							iconClass: g740.icons.getIconClassName('clear')
 						},
@@ -857,7 +1026,8 @@ define(
 				getSize: function() {
 					var result=this.inherited(arguments);
 					if (this.domNodeOwner && this.objForm && this.objForm.domNode) {
-						var posOwner=dojo.geom.position(this.domNodeOwner, false);
+						var posOwner=this.posDomNodeOwner;
+						if (this.domNodeOwner.clientWidth>0) var posOwner=dojo.geom.position(this.domNodeOwner, false);
 						var posBody={
 							x: 0,
 							y: 0,
@@ -1000,7 +1170,7 @@ define(
 					var objBtn=new g740.PanelButton(
 						{
 							region: 'left',
-							label: g740.getMessage('messageBrnClear'),
+							label: g740.getMessage('messageBtnClear'),
 							onClick: dojo.hitch(this, this.onBtnClearClick),
 							iconClass: g740.icons.getIconClassName('clear')
 						},
@@ -1041,7 +1211,8 @@ define(
 				getSize: function() {
 					var result=this.inherited(arguments);
 					if (this.domNodeOwner && this.objForm && this.objForm.domNode) {
-						var posOwner=dojo.geom.position(this.domNodeOwner, false);
+						var posOwner=this.posDomNodeOwner;
+						if (this.domNodeOwner.clientWidth>0) var posOwner=dojo.geom.position(this.domNodeOwner, false);
 						var posBody={
 							x: 0,
 							y: 0,
@@ -1357,7 +1528,7 @@ define(
 						{
 							design: 'headline',
 							region: 'bottom',
-							style: 'height: 30px'
+							style: 'height: 28px;padding-top: 1px'
 						},
 						null
 					);
@@ -1489,6 +1660,8 @@ define(
 				isLoginOk: false,
 				isObjectDestroed: false,
 				postCreate: function() {
+					this.inherited(arguments);
+					this.set('lockscreenopacity',g740.config.dialogLogin.loginOpacity);
 					this.render();
 				},
 				render: function() {

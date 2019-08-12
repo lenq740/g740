@@ -1,7 +1,7 @@
 /* подстраиваем общие элементы */
 .g740 {
-	font-family: Tahoma;
-	font-size: 14px;
+	font-family: Helvetica, Verdana;
+	font-size: 13px;
 }
 .g740 textarea {
 	font-family: inherit;

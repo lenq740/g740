@@ -1,8 +1,9 @@
-//-----------------------------------------------------------------------------
-// Отправка запросов на сервер и предварительная обработка ответов
-//	адрес сервера: 						g740.config.urlServer
-//	адрес phpinfo.php: 					g740.config.urlPhpInfo
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -245,7 +246,35 @@ define(
 						else {
 							if (name=='exec') {
 								var responseExec=g740.xml.getAttrValue(xmlItem,'exec','');
-								if (responseExec) lstResponseExec.push(responseExec);
+								if (responseExec) {
+									var params={};
+									var lstParams=g740.xml.findArrayOfChild(xmlItem, {nodeName:'param'});
+									for(var k=0; k<lstParams.length; k++) {
+										var xmlParam=lstParams[k];
+										if (!g740.xml.isXmlNode(xmlParam)) continue;
+										var paramName=g740.xml.getAttrValue(xmlParam,'name','');
+										if (!paramName) paramName=g740.xml.getAttrValue(xmlParam,'param','');
+										if (!paramName) continue;
+										var paramValue='';
+										if (g740.xml.isAttr(xmlParam,'value')) {
+											var paramValue=g740.xml.getAttrValue(xmlParam,'value','');
+										}
+										else {
+											var xmlValue=xmlParam.firstChild;
+											if (xmlValue && xmlValue.nodeType==3) {
+												paramValue=xmlValue.nodeValue;
+											}
+										}
+										params[paramName]={
+											name: paramName,
+											value: paramValue
+										};
+									}
+									lstResponseExec.push({
+										exec: responseExec,
+										params: params
+									});
+								}
 							}
 							if (mess) {
 								if (message) message+="\n";
@@ -280,11 +309,11 @@ define(
 								isFirstOk=false;
 							}
 						}
-						// Если ответы содержат запросы exec то последовательно выполняем их
-						if (para.objOwner.execByFullName) for (var i=0; i<lstResponseExec.length; i++) {
-							if (!para.objOwner.execByFullName(lstResponseExec[i])) {
-								result=false;
-								break;
+						if (lstResponseExec.length>0 && para.objOwner) {
+							var obj=para.objOwner;
+							if (obj.g740className=='g740.RowSet' && obj.objForm) obj=obj.objForm;
+							if (obj.execListOfRequests) {
+								obj.execListOfRequests(lstResponseExec);
 							}
 						}
 					}
@@ -313,7 +342,13 @@ define(
 						return true;
 					}
 					if (errMessage) {
-						g740.showError(errMessage, para.objOwner);
+						var isShowError=true;
+						var obj=null;
+						if (para && para.objOwner) {
+							var obj=para.objOwner;
+							if (obj.g740className=='g740.RowSet' && obj.isIgnoreRequestError) isShowError=false;
+						}
+						if (isShowError) g740.showError(errMessage, para.objOwner);
 					}
 					if (message) g740.showMessage(message, para.objOwner);
 					this._indexExecuted--;
@@ -322,22 +357,189 @@ define(
 				return result;
 			},
 			httpGet: function(url) {
-				var hiddenIFrameID = 'hiddenDownloader';
-				var iframe = document.getElementById(hiddenIFrameID);
-				if (iframe === null) {
-					iframe = document.createElement('iframe');
-					iframe.id = hiddenIFrameID;
-					iframe.style.display = 'none';
+				var hiddenIFrameID='hiddenDownloader';
+				var iframe=document.getElementById(hiddenIFrameID);
+				if (iframe===null) {
+					iframe=document.createElement('iframe');
+					iframe.id=hiddenIFrameID;
+					iframe.name=hiddenIFrameID;
+					iframe.style.display='none';
 					document.body.appendChild(iframe);
 				}
 				iframe.src=url;
-				console.log(iframe.src);
 				return true;
 			},
-			httpOpen: function(url) {
-				console.log(url);
-				window.open(url);
+			httpOpen: function(url, params) {
+				if (!params) params={};
+				if (params.windowName) {
+					if (!params.windowWidth) params.windowWidth=parseInt(window.outerWidth*0.9);
+					if (!params.windowHeight) params.windowHeight=parseInt(window.outerHeight*0.9);
+					window.open(url, params.windowName, 'centerscreen=yes, width='+params.windowWidth+', height='+params.windowHeight+', menubar=no, toolbar=no, location=no, status=no, scrollbars=yes');
+				}
+				else {
+					window.open(url);
+				}
 				return true;
+			},
+			httpPut: function(url, ext) {
+				var formName='g740-requestPut-Form'+g740.request.httpPutInfo.formNameIndex++;
+				var iframe=document.createElement('iframe');
+				iframe.id=formName+'IFrame';
+				iframe.name=formName+'IFrame';
+				iframe.style.display='none';
+				iframe.setAttribute('data-formname',formName);
+				document.body.appendChild(iframe);
+				iframe.src='about:blank';
+				dojo.on(
+					iframe,
+					'load',
+					function() {
+						g740.request.httpPutInfo.onLoaded(this);
+					}
+				);
+			
+				var domFormPut=document.createElement('form');
+				domFormPut.method='post';
+				domFormPut.target=formName+'IFrame';
+				domFormPut.enctype='multipart/form-data';
+				domFormPut.id=formName;
+				domFormPut.style.display='none';
+				document.body.appendChild(domFormPut);
+				var domInput=document.createElement('input');
+				domInput.name='sourcefile';
+				domInput.id=formName+'Input';
+				domInput.setAttribute('data-formname',formName);
+				domInput.type='file';
+				dojo.on(
+					domInput,
+					'change',
+					function() {
+						var formName=this.getAttribute('data-formname');
+						var domFormPut=document.getElementById(formName);
+						domFormPut.submit();
+						g740.request.httpPutInfo.onSubmit();
+					}
+				);
+				domFormPut.appendChild(domInput);
+				domFormPut.action=url;
+				var accept='';
+				var domInput=document.getElementById(formName+'Input');
+				if (ext) {
+					var lstExt=ext.split(';');
+					for(var i=0; i<lstExt.length; i++) {
+						var e=lstExt[i];
+						if (e=='jpg') {
+							if (accept) accept+=',';
+							accept+='image/jpeg';
+						}
+						if (e=='png') {
+							if (accept) accept+=',';
+							accept+='image/png';
+						}
+						if (e=='gif') {
+							if (accept) accept+=',';
+							accept+='image/gif';
+						}
+						if (e=='pdf') {
+							if (accept) accept+=',';
+							accept+='application/pdf';
+						}
+						if (e=='doc') {
+							if (accept) accept+=',';
+							accept+='application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+						}
+						if (e=='xls') {
+							if (accept) accept+=',';
+							accept+='application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+						}
+						if (e=='zip') {
+							if (accept) accept+=',';
+							accept+='application/zip';
+						}
+						if (e=='xml') {
+							if (accept) accept+=',';
+							accept+='text/xml';
+						}
+					}
+				}
+				domInput.setAttribute('accept',accept);
+				domInput.click();
+				g740.request.httpPutInfo.signalDialogClosed=dojo.on(
+					document.body,
+					'mousemove',
+					function() {
+						if (g740.request.httpPutInfo.signalDialogClosed) {
+							g740.request.httpPutInfo.signalDialogClosed.remove();
+							g740.request.httpPutInfo.signalDialogClosed=null;
+						}
+						g740.execDelay.go({
+							obj: g740.request.httpPutInfo,
+							func: g740.request.httpPutInfo.onDialogClosed,
+							delay: 50
+						});
+					}
+				);
+				return true;
+			},
+			httpPutInfo: {
+				formNameIndex: 1,
+				isProcessed: false,
+				
+				signalDialogClosed: null,
+				onDialogClosed: function() {
+					if (g740.request.httpPutInfo.isProcessed) return true;
+					var objForm=g740.application.getFocusedForm();
+					if (objForm && objForm.continueExecListOfRequest) {
+						objForm.fifoRequests=[];
+						objForm.continueExecListOfRequest();
+					}
+				},
+				onLoaded: function(domNode) {
+					if (!g740.request.httpPutInfo.isProcessed) return false;
+					g740.request.httpPutInfo.isProcessed=false;
+					g740.application.doLockScreenHide();
+					var isLoaded=true;
+					try {
+						if (domNode && domNode.contentWindow) {
+							var iframeDocument=domNode.contentWindow.document;
+							var message=dojo.trim(iframeDocument.body.textContent);
+							message=message.replaceAll("\n",' ');
+							message=message.replaceAll("\r",'');
+							if (message!='' && message!='ok') {
+								var objForm=g740.application.getFocusedForm();
+								g740.showError(message, objForm);
+								isLoaded=false;
+							}
+						}
+					}
+					catch(e) {
+					}
+					if (domNode) {
+						var formName=domNode.getAttribute('data-formname');
+						if (formName) {
+							var domForm=document.getElementById(formName);
+							if (domForm && domForm.parentNode) domForm.parentNode.removeChild(domForm);
+						}
+						if (domNode.parentNode) domNode.parentNode.removeChild(domNode);
+					}
+
+					
+					var objForm=g740.application.getFocusedForm();
+					if (!isLoaded && objForm) {
+						objForm.fifoRequests=[];
+					}
+					if (objForm && objForm.continueExecListOfRequest) {
+						objForm.continueExecListOfRequest();
+					}
+				},
+				onSubmit: function() {
+					if (g740.request.httpPutInfo.signalDialogClosed) {
+						g740.request.httpPutInfo.signalDialogClosed.remove();
+						g740.request.httpPutInfo.signalDialogClosed=null;
+					}
+					g740.request.httpPutInfo.isProcessed=true;
+					g740.application.doLockScreenShow();
+				}
 			}
 		}
 		return g740;

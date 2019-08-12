@@ -85,6 +85,10 @@
 
 .g740 .dijitTab .tabLabel {
 	/* make sure tabs w/close button and w/out close button are same height, even w/small (<12px) font */
+	font-size: 16px;
+	font-weight: normal;
+
+	font-family: Tahoma;
 	min-height: 12px;
 	display: inline-block;
 }

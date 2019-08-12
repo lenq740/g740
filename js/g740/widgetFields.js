@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-// Виджеты для использования в панелях
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -163,8 +166,13 @@ define(
 					return this._fieldWidth;
 				},
 				setFieldWidth: function(width) {
-					if (this.objFieldEditor) this.objFieldEditor.setWidth(width);
+					if (!this.objFieldEditor) return;
+					this.objFieldEditor.setWidth(width);
 					this._fieldWidth=0;
+					var w=this.getWidth();
+					if (this.domNode) dojo.style(this.domNode, 'width', w+'px');
+					var w=this.objFieldEditor.getWidth();
+					if (this.domNodeField) dojo.style(this.domNodeField, 'width', w+'px');
 				},
 				_fieldMinWidth: 0,
 				getFieldMinWidth: function() {
@@ -240,7 +248,18 @@ define(
 					if (this.objFieldEditor) return this.objFieldEditor.getRowSet();
 					return null;
 				},
+				_visible: true,
 				doG740Repaint: function() {
+					var visible=this.getVisible();
+					if (visible!=this._visible) {
+						if (visible) {
+							if (dojo.hasClass(this.domNode,'hidden')) dojo.removeClass(this.domNode,'hidden');
+						}
+						else {
+							if (!dojo.hasClass(this.domNode,'hidden')) dojo.addClass(this.domNode,'hidden');
+						}
+						this._visible=visible;
+					}
 					if (this.objFieldEditor) this.objFieldEditor.doG740Repaint();
 				},
 				doG740Focus: function() {
@@ -258,7 +277,6 @@ define(
 				objForm: null,
 				objRowSet: null,
 				objPanel: null,
-				objActionGo: null,
 				rowsetName: null,
 				fieldName: null,
 				nodeType: '',
@@ -337,10 +355,6 @@ define(
 						this.objRowSet=null;
 						this.fieldDef=null;
 						this._repaint=null;
-						if (this.objActionGo) {
-							this.objActionGo.destroy();
-							this.objActionGo=null;
-						}
 						this.objPanel=null;
 						this.inherited(arguments);
 					}
@@ -355,17 +369,33 @@ define(
 					this.setWidth(this.getMinWidth());
 					this.inherited(arguments);
 				},
-				getActionGo: function() {
-					if (!this.objActionGo && this.fieldDef && this.fieldDef.on && this.fieldDef.on.dblclick) {
-						var p={
-							objForm: this.objForm,
-							rowsetName: this.rowsetName,
-							request: this.fieldDef.on.dblclick
-						};
-						this.objActionGo=new g740.Action(p);
-					}
-					return this.objActionGo;
+				
+				execEventOnAction: function() {
+					if (!this.getEventOnActionEnabled()) return true;
+					if (!this.fieldDef) return true;
+					var obj=this.objRowSet;
+					if (!obj) obj=this.objForm;
+					if (!obj) return true;
+					
+					if (this._isWaitClick) return false;
+					this._isWaitClick=true;
+					var result=true;
+					if (this.fieldDef.js_onaction) result=g740.js_eval(obj, this.fieldDef.js_onaction, true);
+					if (result && this.fieldDef.evt_onaction && obj.exec) obj.exec({exec: this.fieldDef.evt_onaction});
+					g740.execDelay.go({
+						delay: 250,
+						obj: this,
+						func: this._setWaitClickToFalse
+					});
+					return true;
 				},
+				getEventOnActionEnabled: function() {
+					if (!this.fieldDef) return false;
+					if (this.fieldDef.js_onaction) return true;
+					if (this.fieldDef.evt_onaction) return true;
+					return false;
+				},
+				
 				getRowSet: function() {
 					var procedureName='g740.FieldEditor.getRowSet';
 					try {
@@ -383,6 +413,9 @@ define(
 				getReadOnly: function() {
 					if (!this.objRowSet) return true;
 					if (this.fieldDef.readonly) return true;
+					if (this.fieldDef.js_readonly) {
+						if (g740.js_eval(this.objRowSet, this.fieldDef.js_readonly, false)) return true;
+					}
 					var rowId=this.rowId;
 					if (rowId===null) rowId=this.objRowSet.getFocusedId();
 					return this.objRowSet.getFieldProperty({fieldName: this.fieldName, propertyName: 'readonly', id: rowId});
@@ -390,6 +423,9 @@ define(
 				getVisible: function() {
 					if (!this.objRowSet) return false;
 					if (this.fieldDef.visible===false) return false;
+					if (this.fieldDef.js_visible) {
+						if (!g740.js_eval(this.objRowSet, this.fieldDef.js_visible, true)) return false;
+					}
 					return this.objRowSet.getFieldProperty({fieldName: this.fieldName, propertyName: 'visible'});
 				},
 				_getButtonWidth: function() {
@@ -525,7 +561,7 @@ define(
 		
 	    // Виджет для поля даты
 		dojo.declare(
-			'g740.FieldEditor.Date',
+			'g740.FieldEditor.Date1',
 			[dijit.form.DateTextBox, g740.FieldEditor],
 			{
 				isShowNullAsEmptyString: false,
@@ -589,24 +625,35 @@ define(
 					return 15;
 				},
 				openDropDown: function() {
-					var objActionGo=this.getActionGo();
-					if (objActionGo) {
-						// предотвращаем дребезг
-						if (this._isWaitClick) return false;
-						this._isWaitClick=true;
-						if (objActionGo && objActionGo.getEnabled()) objActionGo.exec();
-						g740.execDelay.go({
-							delay: 250,
-							obj: this,
-							func: this._setWaitClickToFalse
-						});
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 						return false;
 					}
 					this.inherited(arguments);
 				},
+				doSelect: function() {
+					if (!this.focusNode) return;
+					var value=this.focusNode.value;
+					var cursorPos=String(value).length;
+					if (this.focusNode.setSelectionRange) {
+						this.focusNode.setSelectionRange(0,cursorPos);
+					}
+					else if (this.focusNode.createTextRange) {
+						var range=this.focusNode.createTextRange();
+						range.collapse(true);
+						range.moveStart('character', 0);
+						range.moveEnd('character', cursorPos);
+						range.select();
+					}
+				},
 				onG740Focus: function() {
 					if (this.domNode && !dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.addClass(this.domNode,'g740-widget-focused');
 					this.inherited(arguments);
+					g740.execDelay.go({
+						delay: 50,
+						obj: this,
+						func: this.doSelect
+					});
 				},
 				onG740Blur: function() {
 					if (this.domNode && dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.removeClass(this.domNode,'g740-widget-focused');
@@ -654,6 +701,17 @@ define(
 					if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
 				},
 				onKeyDown: function(e) {
+					var rr=null;
+					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+					if (rr) {
+						dojo.stopEvent(e);
+						if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
+						this.objForm.exec({
+							requestName: rr.name,
+							requestMode: rr.mode
+						});
+						return;
+					}
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);
@@ -679,17 +737,11 @@ define(
 							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
 						}
 					}
-					// предотвращаем дребезг
-					if (this._isWaitClick) return false;
-					this._isWaitClick=true;
 					this.domNodeInput.focus();
-					var objActionGo=this.getActionGo();
-					if (objActionGo && objActionGo.getEnabled()) objActionGo.exec();
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._setWaitClickToFalse
-					});
+					if (this.getEventOnActionEnabled()) this.execEventOnAction();
+				},
+				onClearClick: function() {
+					this.onG740Change('');
 				}
 			}
 		);
@@ -721,15 +773,14 @@ define(
 							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
 						}
 					}
-					// предотвращаем дребезг
-					if (this._isWaitClick) return false;
-					this._isWaitClick=true;
 					this.domNodeTextArea.focus();
-					var objActionGo=this.getActionGo();
-					if (objActionGo) {
-						if (!this.getReadOnly() && objActionGo.getEnabled()) objActionGo.exec();
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 					}
 					else {
+						// предотвращаем дребезг
+						if (this._isWaitClick) return false;
+						this._isWaitClick=true;
 						var objDialog=new g740.DialogEditorMemo(
 							{ 
 								objForm: this.objForm,
@@ -744,12 +795,12 @@ define(
 							}
 						);
 						objDialog.show();
+						g740.execDelay.go({
+							delay: 250,
+							obj: this,
+							func: this._setWaitClickToFalse
+						});
 					}
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._setWaitClickToFalse
-					});
 				},
 				onG740KeyPress: function(e) {
 					if (e.keyCode==13 && e.ctrlKey) {
@@ -956,6 +1007,106 @@ define(
 				},
 			}
 		);
+
+		// Виджет для поля даты
+		dojo.declare(
+			'g740.FieldEditor.Date',
+			[g740.ComboBox, g740.FieldEditor],
+			{
+				postCreate: function() {
+					this.inherited(arguments);
+				},
+
+				convertFromValueToTextValue: function(value) {
+					return g740.convertor.js2text(value,'date');
+				},
+				convertFromTextValueToValue: function(text) {
+					return g740.convertor.text2js(text,'date');
+				},
+
+				isDialogOpened: false,
+				onButtonClick: function(e) {
+					if (this.getReadOnly()) return false;
+					if (this.objRowSet && this.rowId!==null) {
+						if (this.objRowSet.getFocusedId()!=this.rowId) {
+							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
+						}
+					}
+
+					this.domNodeInput.focus();
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
+					}
+					else {
+						// предотвращаем дребезг
+						if (this._isWaitClick) return false;
+						this._isWaitClick=true;
+						
+						this.isDialogOpened=true;
+						var objDialog=new g740.DialogEditorDate(
+							{ 
+								objForm: this.objForm,
+								rowsetName: this.rowsetName,
+								fieldName: this.fieldName,
+								domNodeOwner: this.domNode,
+								filter: this.domNodeInput.value,
+								objOwner: this,
+								duration: 0,
+								draggable: false
+							}
+						);
+						objDialog.show();
+						g740.execDelay.go({
+							delay: 250,
+							obj: this,
+							func: this._setWaitClickToFalse
+						});
+					}
+				},
+				onClearClick: function() {
+					this.onG740Change('');
+				},
+				onKeyDown: function(e) {
+					var rr=null;
+					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+					if (rr) {
+						dojo.stopEvent(e);
+						this.objForm.exec({
+							requestName: rr.name,
+							requestMode: rr.mode
+						});
+						return;
+					}
+					if (e.keyCode==13 && e.ctrlKey) {
+						// Ctrl+Enter
+						dojo.stopEvent(e);
+						this.onButtonClick();
+					}
+					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
+						// Enter, Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
+					}
+					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
+					}
+				},
+				onBlur: function() {
+					if (!this.isDialogOpened && this.domNodeInput && this.domNodeInput.value!=this._value) {
+						this.domNodeInput.value=this._value;
+					}
+					this.inherited(arguments);
+				},
+				onFocus: function() {
+					this.isDialogOpened=false;
+					this.inherited(arguments);
+				}
+			}
+		);
+
+
 		
 	    // Виджет для поля List
 		dojo.declare(
@@ -1010,16 +1161,15 @@ define(
 							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
 						}
 					}
-					// предотвращаем дребезг
-					if (this._isWaitClick) return false;
-					this._isWaitClick=true;
-					this.domNodeInput.focus();
 
-					var objActionGo=this.getActionGo();
-					if (objActionGo) {
-						if (objActionGo.getEnabled()) objActionGo.exec();
+					this.domNodeInput.focus();
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 					}
 					else {
+						// предотвращаем дребезг
+						if (this._isWaitClick) return false;
+						this._isWaitClick=true;
 						var filter='';
 						if (this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
 						var objDialog=new g740.DialogEditorList(
@@ -1037,14 +1187,33 @@ define(
 							}
 						);
 						objDialog.show();
+						g740.execDelay.go({
+							delay: 250,
+							obj: this,
+							func: this._setWaitClickToFalse
+						});
 					}
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._setWaitClickToFalse
-					});
+				},
+				onClearClick: function() {
+					var objRowSet=this.getRowSet();
+					if (objRowSet && this.fieldName) {
+						objRowSet.setFieldProperty({
+							fieldName: this.fieldName,
+							value: this.convertFromTextValueToValue('')
+						});
+					}
 				},
 				onKeyDown: function(e) {
+					var rr=null;
+					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+					if (rr) {
+						dojo.stopEvent(e);
+						this.objForm.exec({
+							requestName: rr.name,
+							requestMode: rr.mode
+						});
+						return;
+					}
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);
@@ -1094,19 +1263,15 @@ define(
 							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
 						}
 					}
-					// предотвращаем дребезг
-					if (this._isWaitClick) return false;
-					this._isWaitClick=true;
+
 					this.domNodeInput.focus();
-					
-					var objActionGo=this.getActionGo();
-					if (objActionGo) {
-						this.isDialogOpened=true;
-						if (objActionGo.getEnabled()) {
-							objActionGo.exec();
-						}
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 					}
 					else {
+						// предотвращаем дребезг
+						if (this._isWaitClick) return false;
+						this._isWaitClick=true;
 						var filter='';
 						if (isFiltered) {
 							if (this.domNodeInput && this.domNodeInput.value!=this._value) filter=this.domNodeInput.value;
@@ -1129,14 +1294,54 @@ define(
 							}
 						);
 						objDialog.show();
+						g740.execDelay.go({
+							delay: 250,
+							obj: this,
+							func: this._setWaitClickToFalse
+						});
 					}
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._setWaitClickToFalse
+				},
+				onClearClick: function() {
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return false;
+					if (!this.fieldDef) return false;
+					var fields=objRowSet.getFieldsByNodeType(this.nodeType);
+					var refIdFieldName=this.fieldDef.refid;
+					if (!refIdFieldName) return false;
+					var isReadOnly=objRowSet.getFieldProperty({
+						fieldName: refIdFieldName,
+						propertyName: 'readonly'
 					});
+					if (isReadOnly) return false;
+					var row=null;
+					var node=objRowSet.getFocusedNode();
+					if (node) row=node.info;
+					if (row) {
+						for(var fieldName in fields) {
+							var fld=fields[fieldName];
+							if (!fld) continue;
+							if (!fld.refid) continue;
+							if (fld.refid!=refIdFieldName) continue;
+							row[fieldName+'.value']='';
+						}
+					}
+					objRowSet.setFieldProperty({
+						fieldName: refIdFieldName,
+						value: ''
+					});
+					objRowSet.doG740Repaint({ isRowUpdate: true });
 				},
 				onKeyDown: function(e) {
+					var rr=null;
+					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+					if (rr) {
+						dojo.stopEvent(e);
+						this.objForm.exec({
+							requestName: rr.name,
+							requestMode: rr.mode
+						});
+						return;
+					}
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);
@@ -1540,16 +1745,14 @@ define(
 							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
 						}
 					}
-					// предотвращаем дребезг
-					if (this._isWaitClick) return false;
-					this._isWaitClick=true;
 					this.domNodeFocused.focus();
-					
-					var objActionGo=this.getActionGo();
-					if (objActionGo) {
-						if (objActionGo.getEnabled()) objActionGo.exec();
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 					}
 					else {
+						// предотвращаем дребезг
+						if (this._isWaitClick) return false;
+						this._isWaitClick=true;
 						var objDialog=new g740.DialogEditorRefList(
 							{ 
 								objForm: this.objForm,
@@ -1563,12 +1766,12 @@ define(
 							}
 						);
 						objDialog.show();
+						g740.execDelay.go({
+							delay: 250,
+							obj: this,
+							func: this._setWaitClickToFalse
+						});
 					}
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._setWaitClickToFalse
-					});
 				},
 				onClearClick: function() {
 					if (!this.objRowSet) return false;
@@ -1636,16 +1839,15 @@ define(
 							if (!this.objRowSet.setFocusedId(this.rowId)) return false;
 						}
 					}
-					// предотвращаем дребезг
-					if (this._isWaitClick) return false;
-					this._isWaitClick=true;
+
 					this.domNodeFocused.focus();
-					
-					var objActionGo=this.getActionGo();
-					if (objActionGo) {
-						if (objActionGo.getEnabled()) objActionGo.exec();
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 					}
 					else {
+						// предотвращаем дребезг
+						if (this._isWaitClick) return false;
+						this._isWaitClick=true;
 						var objDialog=new g740.DialogEditorRefTree(
 							{ 
 								objForm: this.objForm,
@@ -1659,12 +1861,12 @@ define(
 							}
 						);
 						objDialog.show();
+						g740.execDelay.go({
+							delay: 250,
+							obj: this,
+							func: this._setWaitClickToFalse
+						});
 					}
-					g740.execDelay.go({
-						delay: 250,
-						obj: this,
-						func: this._setWaitClickToFalse
-					});
 				}
 			}
 		);
@@ -1699,18 +1901,9 @@ define(
 			            }
 			        }
 			        //this.domNodeInput.focus();
-			        var objActionGo = this.getActionGo();
-			        if (objActionGo) {
-						// предотвращаем дребезг
-						if (this._isWaitClick) return false;
-						this._isWaitClick=true;
-						if (objActionGo && objActionGo.getEnabled()) objActionGo.exec();
-						g740.execDelay.go({
-							delay: 250,
-							obj: this,
-							func: this._setWaitClickToFalse
-						});
-			        }
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
+					}
 			    }
 			}
 		);

@@ -10,7 +10,7 @@
 .g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowEditing .dojoxGridCell{
 	background-color: orange !important;
 }
-.g740 .g740-grid-focused  .dojoxGridMasterView .dojoxGridCell.dojoxGridCellFocus {
+.g740 .g740-grid-focused  .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell.dojoxGridCellFocus {
 	background-color: darkorange !important;
 }
 .g740 .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell{
@@ -28,8 +28,8 @@
 
 .g740 .dojoxGrid {
 	background-color: white;
-	font-family: inherit;
-	font-size: inherit;
+	font-family: Helvetica, Verdana;
+	font-size: 13px;
 	border: 1px solid #F0F0F0;
 }
 .g740 .dojoxGrid.g740-grid-focused {

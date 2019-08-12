@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-// Панель Tree - самописная версия дерева
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -13,7 +16,6 @@ define(
 				isG740Tree: true,
 				isG740CanToolBar: true,
 				isG740CanButtons: true,
-				g740size: g740.config.iconSizeDefault,
 				templateString: '<div class="g740tree-panel">'+
 					'<div data-dojo-attach-point="domNodeTitle"></div>'+
 					'<div data-dojo-attach-point="domNodeToolbar"></div>'+
@@ -29,7 +31,6 @@ define(
 				_objRowSet: null,
 				_objNodes: null,
 				_treeNodeFocused: null,
-				objActionOnDblClick: null,
 				objToolBar: null,
 				objPanelButtons: null,
 				set: function(name, value) {
@@ -37,15 +38,9 @@ define(
 						if (value) this.focusNode.focus();
 						return true;
 					}
-					if (name=='g740size') {
-						if (value!='large' && value!='medium' && value!='small') value=g740.config.iconSizeDefault;
-						this.g740size=value;
-						return true;
-					}
 					this.inherited(arguments);
 				},
 				constructor: function(para, domElement) {
-					this.objActionOnDblClick=para.objActionOnDblClick;
 					this.objTreeNodes = new g740.TreeStorage();
 				},
 				destroy: function() {
@@ -53,10 +48,6 @@ define(
 					if (this.objTreeNodes) {
 						this.objTreeNodes.destroy();
 						this.objTreeNodes = null;
-					}
-					if (this.objActionOnDblClick) {
-						this.objActionOnDblClick.destroy();
-						this.objActionOnDblClick=null;
 					}
 					if (this.objToolBar) {
 						this.objToolBar.destroyRecursive();
@@ -77,9 +68,6 @@ define(
 						this.set('focused', true);
 					}));
 					this.inherited(arguments);
-					if (this.g740size=='large') dojo.addClass(this.domNode,'g740large');
-					if (this.g740size=='medium') dojo.addClass(this.domNode,'g740medium');
-					if (this.g740size=='small') dojo.addClass(this.domNode,'g740small');
 					
 					this.domNodeTitle.innerHTML='';
 					if (this.title && this.isShowTitle) {
@@ -269,12 +257,15 @@ define(
 				},
 				_doSetFocusedNode: function(treeNode) {
 					if (this._treeNodeFocused==treeNode) return true;
+					var colorItem=g740.appColorScheme.getItem();
 					if (this._treeNodeFocused && this._treeNodeFocused.info && this._treeNodeFocused.info.domItemElement) {
 						dojo.removeClass(this._treeNodeFocused.info.domItemElement, 'selected');
+						if (colorItem.panelTreeMenuWhiteIcons) dojo.removeClass(this._treeNodeFocused.info.domItemElement, 'icons-white');
 					}
 					this._treeNodeFocused=treeNode;
 					if (this._treeNodeFocused && this._treeNodeFocused.info && this._treeNodeFocused.info.domItemElement) {
 						dojo.addClass(this._treeNodeFocused.info.domItemElement, 'selected');
+						if (colorItem.panelTreeMenuWhiteIcons) dojo.addClass(this._treeNodeFocused.info.domItemElement, 'icons-white');
 						g740.execDelay.go({
 							delay: 100,
 							obj: this,
@@ -287,6 +278,7 @@ define(
 					if (!treeNode) return;
 					if (!treeNode.info) return;
 					if (!treeNode.info.domItemElement) return;
+					if (!this.domNodeBody) return;
 					var t=this.domNodeBody.scrollTop;
 					var h=this.domNodeBody.offsetHeight*0.9;
 					var domItemElement=treeNode.info.domItemElement;
@@ -307,8 +299,6 @@ define(
 					if (!domItemElement) return false;
 					
 					var margin=18;
-					if (this.g740size=='medium') margin=21;
-					if (this.g740size=='large') margin=30;
 					var level=0;
 					for(var node=treeNode; node.parentNode; node=node.parentNode) {
 						level++;
@@ -398,7 +388,7 @@ define(
 						if (nt.fields[fieldNameDescription]) description=node.info[fieldNameDescription + '.value'];
 						if (node.info['row.icon']) icon=node.info['row.icon'];
 					}
-					if (objRowSet.getIsNodeMarked(node)) icon='mark';
+					if (objRowSet.getIsNodeMarked(node)) icon='mark-on';
 					if (isFinal || isEmpty) {
 						info.domItemExpander.className='g740tree-item-expander g740tree-item-expander-final';
 					}
@@ -421,13 +411,13 @@ define(
 					}
 					if (icon!=info.icon) {
 						info.icon=icon;
-						var iconClass=g740.icons.getIconClassName(info.icon, this.g740size);
+						var iconClass=g740.icons.getIconClassName(info.icon, 'medium');
 						if (!iconClass) {
 							if (isFinal || isEmpty) {
-								iconClass=g740.icons.getIconClassName('default', this.g740size);
+								iconClass=g740.icons.getIconClassName('default', 'medium');
 							}
 							else {
-								iconClass=g740.icons.getIconClassName('folder', this.g740size);
+								iconClass=g740.icons.getIconClassName('folder', 'medium');
 							}
 						}
 						info.domItemIcon.className='g740tree-item-icon '+iconClass;
@@ -474,15 +464,15 @@ define(
 						}
 					}
 					if (!node) return false;
-					if (node.isFinal || node.isEmpty) return;
-					if (node.childs) {
+					if (node.isFinal) return;
+					if (node.isEmpty || !node.childs) {
 						objRowSet.exec({
-							requestName: 'collapse'
+							requestName: 'expand'
 						});
 					}
 					else {
 						objRowSet.exec({
-							requestName: 'expand'
+							requestName: 'collapse'
 						});
 					}
 				},
@@ -499,8 +489,8 @@ define(
 						}
 					}
 					if (!node) return false;
-					if (this.objActionOnDblClick) {
-						this.objActionOnDblClick.exec();
+					if (this.getEventOnActionEnabled()) {
+						this.execEventOnAction();
 					}
 					else {
 						this.doNodeExpandCollapse();
@@ -584,33 +574,45 @@ define(
 							objParent.doG740FocusChildPrev(this);
 						}
 					}
-					else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==13) {
-						// Enter
-						this.doNodeDblClick();
-						dojo.stopEvent(e);
-					}
-					else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==45) {
-						// Ins
-						objRowSet.exec({
-							requestName: 'append'
-						});
-						dojo.stopEvent(e);
-					}
-					else if (e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==45) {
-						// Ctrl+Ins
-						objRowSet.exec({
-							requestName: 'append',
-							requestMode: 'into'
-						});
-						dojo.stopEvent(e);
-					}
-					else if (e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==46) {
-						// Ctrl+Del
-						objRowSet.execConfirmDelete();
-						dojo.stopEvent(e);
-					}
 					else {
-						//console.log(e);
+						var rr=null;
+						if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+						if (rr) {
+							dojo.stopEvent(e);
+							this.objForm.exec({
+								requestName: rr.name,
+								requestMode: rr.mode
+							});
+							return;
+						}
+						if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==13) {
+							// Enter
+							this.doNodeDblClick();
+							dojo.stopEvent(e);
+						}
+						else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==45) {
+							// Ins
+							objRowSet.exec({
+								requestName: 'append'
+							});
+							dojo.stopEvent(e);
+						}
+						else if (e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==45) {
+							// Ctrl+Ins
+							objRowSet.exec({
+								requestName: 'append',
+								requestMode: 'into'
+							});
+							dojo.stopEvent(e);
+						}
+						else if (e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==46) {
+							// Ctrl+Del
+							objRowSet.execConfirmDelete();
+							dojo.stopEvent(e);
+						}
+						else {
+							//console.log(e);
+						}
 					}
 				},
 				onKeyPress: function(e) {
@@ -707,28 +709,6 @@ define(
 				return null;
 			}
 			
-			var xmlRequests=g740.xml.findFirstOfChild(xml,{nodeName:'requests'});
-			if (!g740.xml.isXmlNode(xmlRequests)) xmlRequests=xml;
-			var lst=g740.xml.findArrayOfChild(xmlRequests,{nodeName:'request'});
-			for(var i=0; i<lst.length; i++) {
-				var xmlRequest=lst[i];
-				var t=g740.xml.getAttrValue(xmlRequest,'on','dblclick');
-				if (t!='dblclick') continue;
-				var request={
-					sync: true,
-					params: {}
-				}
-				g740.panels.buildRequestParams(xmlRequest, request);
-				if (!para.objActionOnDblClick) {
-					var p={
-						objForm: para.objForm
-					};
-					para.objActionOnDblClick=new g740.Action(p);
-				}
-				para.objActionOnDblClick.request=request;
-			}
-
-			para.g740size=g740.xml.getAttrValue(xml, 'size', '');
 			var objTree=new g740.Tree(para, null);
 			var result=objTree;
 			return result;
@@ -790,12 +770,23 @@ define(
 						if (!objP.getParent) break;
 						objP=objP.getParent();
 					}
-					
 					var fieldName='form';
 					if (nt.treemenuForm) fieldName=nt.treemenuForm;
 					var p={};
 					p.formName=row[fieldName+'.value'];
 					if (p.formName) {
+						
+						// предотвращаем дребезг вызванный наложением click и dblclick
+						if (this._lastFormName==p.formName) return;
+						this._lastFormName=p.formName;
+						g740.execDelay.go({
+							delay: 300,
+							obj: this,
+							func: function() {
+								this._lastFormName='';
+							}
+						});
+						
 						var G740params={};
 						var fieldName='params';
 						if (nt.treemenuParams) fieldName=nt.treemenuParams;
@@ -819,6 +810,19 @@ define(
 					}
 					else {
 						this.doNodeExpandCollapse();
+					}
+				},
+				_lastFormName: '',
+				_doSetFocusedNode: function(treeNode) {
+					if (this._treeNodeFocused==treeNode) return true;
+					this._treeNodeFocused=treeNode;
+					if (this._treeNodeFocused && this._treeNodeFocused.info && this._treeNodeFocused.info.domItemElement) {
+						g740.execDelay.go({
+							delay: 100,
+							obj: this,
+							func: this._doScrollToNode,
+							para: this._treeNodeFocused
+						});
 					}
 				}
 			}
@@ -853,28 +857,6 @@ define(
 				return null;
 			}
 			
-			var xmlRequests=g740.xml.findFirstOfChild(xml,{nodeName:'requests'});
-			if (!g740.xml.isXmlNode(xmlRequests)) xmlRequests=xml;
-			var lst=g740.xml.findArrayOfChild(xmlRequests,{nodeName:'request'});
-			for(var i=0; i<lst.length; i++) {
-				var xmlRequest=lst[i];
-				var t=g740.xml.getAttrValue(xmlRequest,'on','dblclick');
-				if (t!='dblclick') continue;
-				var request={
-					sync: true,
-					params: {}
-				}
-				g740.panels.buildRequestParams(xmlRequest, request);
-				if (!para.objActionOnDblClick) {
-					var p={
-						objForm: para.objForm
-					};
-					para.objActionOnDblClick=new g740.Action(p);
-				}
-				para.objActionOnDblClick.request=request;
-			}
-
-			para.g740size=g740.xml.getAttrValue(xml, 'size', '');
 			var objTree=new g740.TreeMenu(para, null);
 			var result=objTree;
 			return result;
@@ -1057,7 +1039,7 @@ define(
 					}
 					if (icon!=info.icon) {
 						info.icon=icon;
-						var iconClass=g740.icons.getIconClassName(info.icon, this.g740size);
+						var iconClass=g740.icons.getIconClassName(info.icon, 'medium');
 						if (!iconClass) {
 							if (isFinal || isEmpty) {
 								iconClass=g740.icons.getIconClassName('default');

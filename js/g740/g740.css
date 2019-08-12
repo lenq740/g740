@@ -1,3 +1,9 @@
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 /* CSS общего назначения */
 html, body {
 	height: 100%;
@@ -82,6 +88,13 @@ html, body {
 	background-color: white !important;
 }
 
+.g740 .dijitButton.btnstretch {
+	left: 5px;
+	right: 6px;
+}
+.g740 .dijitButton.btnstretch .dijitButtonNode{
+	width: 100%;
+}
 
 /* Диалог */
 .g740-dialog {
@@ -92,8 +105,10 @@ html, body {
 	padding-left: 5px;
 	font-size: 13px !important;
 	text-transform: uppercase;
+	margin-top: 0px !important;
+	margin-left: 0px !important;
+	margin-bottom: 0px !important;
 }
-
 .g740-dialog  .g740-dialog-lockscreen{
 	position: absolute;
 	left: 0px;
@@ -114,12 +129,13 @@ html, body {
 	border-width: 1px !important;
 }
 .g740-dialog .g740-dialogconfirm-content {
-	margin-left: 1px;
-	margin-right: 1px;
+	margin-left: 0px;
+	margin-right: 0px;
 	padding: 5px;
 	border-bottom-style: solid;
 	border-color: lightgray;
 	border-width: 1px;
+	font-size: 14px;
 }
 
 /* Убираем пустые белые блоки, разделяющие секции внутри BorderContainer */
@@ -147,9 +163,24 @@ html, body {
   
   opacity: 0.5;
 }
+.dijitDisabled .dijitIcon {
+  -webkit-filter: grayscale(100%) !important;
+  -moz-filter: grayscale(100%) !important;
+  -ms-filter: grayscale(100%) !important;
+  -o-filter: grayscale(100%) !important;
+  filter: grayscale(100%) !important;
+  filter: gray !important;
+  
+  opacity: 0.5;
+}
 
 /* grid */
 /* Высота пустой строчки Grid */
+
+.dojoxGridView {
+	margin-bottom: 100px;
+}
+
 .dojoxGridRowTable {
 	min-height: 25px !important;
 	height: 25px;
@@ -176,6 +207,27 @@ html, body {
 	margin:0 auto;
 	background-repeat: no-repeat;
 	cursor: pointer;
+}
+.g740-grid-nowrap {
+	overflow: hidden;
+	word-wrap: break-word;
+	white-space: nowrap;
+}
+
+.dojoxGrid.g740-headers-hide .dojoxGridMasterHeader {
+	display: none !important;
+}
+
+.g740 .dojoxGridColNoResize, 
+.g740 .dojoxGridColNoResize .dojoDndItemOver {
+	cursor: default !important;
+}
+
+.g740 .dojoxGrid .dojoxGridCell.g740-grid-clipboard {
+	user-select: text;
+	-ms-user-select: text; 
+    -moz-user-select: text; 
+    -webkit-user-select: text;
 }
 
 /* tree */
@@ -222,7 +274,7 @@ html, body {
 	height: 19px;
 	background-color: #F6F6F6;
 	background-image: url('icons/widget/btnfieldclear.png');
-	background-repeat: norepeat;
+	background-repeat: no-repeat;
 	cursor: pointer;
 }
 .btnfieldclear:hover {
@@ -231,6 +283,30 @@ html, body {
 
 .g740-widget-text .btnfieldeditor{
 	margin-left:-1px;
+}
+.g740-widget-text .g740-widget-td-input {
+	position: relative;
+}
+.g740-widget-text .g740-widget-td-input .btnfieldclear {
+	width: 0px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	display: none;
+}
+.g740-fieldcontainer:hover .g740-widget-text .g740-widget-td-input .btnfieldclear {
+	width: 23px;
+	display: block;
+}
+.g740-widget-text:hover  .g740-widget-td-input .btnfieldclear {
+	width: 23px;
+	display: block;
+}
+.g740-widget-text .g740-widget-td-input .btnfieldclear:hover {
+}
+.g740-widget-text .g740-widget-td-input.readonly .btnfieldclear {
+	display: none !important;
+	width: 0px !important;
 }
 
 /* g740.FieldEditor.RefList */
@@ -281,6 +357,21 @@ html, body {
 	margin-left:-1px;
 	margin-top:-1px
 }
+
+
+/* g740.DialogEditorDate */
+.g740-dialogdate-input{
+	width: 96%;
+	border-style: solid;
+	border-width: 1px;
+	border-color: lightgray;
+	margin: 2px 2px 2px 2px;
+	line-height: 18px;
+}
+.g740-dialogdate-input:focus {
+	border-color: #d4464e;
+}
+
 
 /* g740._ListAbstract */
 .g740-list {
@@ -513,22 +604,31 @@ html, body {
 
 /* PanelTitle */
 .g74-paneltitle {
-	font-size: 20px;
+	font-size: 16px;
 	font-weight: normal;
-
 	padding: 2px;
-	line-height: 25px !important;
-	height: 28px !important;
+	margin-top: 3px;
+	margin-left: 0px;
 	margin-bottom: 1px;
 	
 	overflow: hidden;
 	white-space: nowrap;
+	
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+.g74-paneltitle.g740-dialog-title {
+	margin-left: 0px;
 }
 
 /* FieldContainer */
 .g740-fieldcontainer {
 	position: relative;
 	display: inline-block;
+}
+.g740-fieldcontainer.hidden {
+	display: none;
 }
 .g740-fieldcontainer .g740-fieldcontainer-label {
 	position: absolute;
@@ -537,7 +637,12 @@ html, body {
 	display: inline-block;
 	overflow: hidden;
 	font-size: 12px;
+	line-height: 16px;
 	white-space: nowrap;
+	
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 .g740-fieldcontainer .g740-fieldcontainer-field {
 	position: absolute;
@@ -700,6 +805,7 @@ html, body {
 /* PanelTree */
 .g740tree-panel {
 	overflow-x: hidden;
+	font-family: Helvetica, Verdana;
 }
 .g740tree-panel .g740tree-paddingtop {
 	height: 5px;
@@ -723,12 +829,12 @@ html, body {
 	-khtml-user-select: none;
 	-webkit-user-select: none;
 	padding-left: 5px;
-	padding-right: 5px;
+	margin-right: 5px;
 }
 
 .g740tree-panel .g740tree-item-element {
 	position: relative;
-	height: 26px;
+	height: 25px;
 	cursor: pointer;
 	white-space: nowrap;
 	overflow: hiden;
@@ -747,7 +853,7 @@ html, body {
 .g740tree-panel .g740tree-item-expander {
 	display: inline-block;
 	width: 16px;
-	height: 26px;
+	height: 25px;
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -766,8 +872,8 @@ html, body {
 }
 .g740tree-panel .g740tree-item-icon {
 	display: inline-block;
-	width: 16px;
-	height: 26px;
+	width: 24px;
+	height: 25px;
 	cursor: pointer;
 	background-size: contain;
 	background-repeat: no-repeat;
@@ -775,52 +881,20 @@ html, body {
 }
 .g740tree-panel .g740tree-item-text {
 	display: inline-block;
-	height: 26px;
+	height: 25px;
 	line-height: 24px;
 	overflow: hidden;
     white-space: nowrap;
 	margin-left: 8px;
-}
-
-.g740tree-panel.g740medium .g740tree-item-element {
-	height: 30px;
-}
-.g740tree-panel.g740medium .g740tree-item-expander {
-	width: 16px;
-	height: 30px;
-}
-.g740tree-panel.g740medium .g740tree-item-icon {
-	width: 24px;
-	height: 30px;
-}
-.g740tree-panel.g740medium .g740tree-item-text {
-	font-size: 16px;
-	line-height: 28px;
-	height: 30px;
-}
-
-.g740tree-panel.g740large .g740tree-item-element {
-	height: 42px;
-}
-.g740tree-panel.g740large .g740tree-item-expander {
-	width: 16px;
-	height: 42px;
-}
-.g740tree-panel.g740large .g740tree-item-icon {
-	width: 36px;
-	height: 42px;
-}
-.g740tree-panel.g740large .g740tree-item-text {
-	font-size: 18px;
-	line-height: 38px;
-	height: 42px;
+	font-size: 13px;
+	margin-left: 4px;
 }
 
 .g740tree-panel.treemenu {
 }
-
 .g740tree-panel.treemenu .g740tree-item-element {
 	background-color: white;
+	height: 32px;
 }
 .g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander {
 	position: absolute;
@@ -831,6 +905,7 @@ html, body {
 	position: center;
 	background-repeat: no-repeat;
 	background-color: inherit;
+	height: 32px;
 }
 .g740tree-panel.treemenu .g740tree-item-element .g740tree-item-expander.g740tree-item-expander-plus {
 	background-image: url('icons/widget/treemenucollapsed.png');
@@ -843,24 +918,12 @@ html, body {
 	width: 0px;
 }
 .g740tree-panel.treemenu .g740tree-item-icon {
-	margin-left: 5px;
+	height: 32px;
 }
-.g740tree-panel.treemenu.g740small .g740tree-item-text {
-	font-size: 13px;
-	line-height: 28px;
-	height: 30px;
+.g740tree-panel.treemenu .g740tree-item-text {
+	line-height: 32px;
+	height: 32px;
 }
-.g740tree-panel.treemenu.g740medium .g740tree-item-text {
-	font-size: 13px;
-	line-height: 28px;
-	height: 30px;
-}
-.g740tree-panel.treemenu.g740large .g740tree-item-text {
-	font-size: 13px;
-	line-height: 28px;
-	height: 30px;
-}
-
 .g740tree-panel.treemenu.focused .g740tree-item-element.selected {
 	background-color: inherit;
 	color: inherit;
@@ -971,6 +1034,71 @@ html, body {
 	cursor: pointer;
 }
 
+.g740expander-panel.mainmenu .g740expander-multitab {
+    position: absolute;
+	z-index: 10000;
+}
+.g740expander-panel.mainmenu.region-left .g740expander-multitab {
+	width: 100%;
+	top: 60px;
+}
+.g740expander-panel.mainmenu.region-right .g740expander-multitab {
+	width: 100%;
+	top: 60px;
+}
+.g740expander-panel.mainmenu.region-top .g740expander-multitab {
+	left: 10px;
+	top: 0px;
+	height: 100%;
+}
+.g740expander-panel.mainmenu.region-bottom .g740expander-multitab {
+	left: 10px;
+	top: 0px;
+	height: 100%;
+}
+
+.g740expander-panel.mainmenu .g740expander-multitab .item {
+	display: block;
+	width: 34px;
+	height: 34px;
+	margin-bottom: 8px;
+	cursor: pointer;
+	background-color: white;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+	border-radius: 17px;
+	border-style: solid;
+	border-width: 0px;
+	border-color: lightgray;
+}
+.g740expander-panel.mainmenu.region-top .g740expander-multitab .item {
+	display: inline;
+	float: left;
+	margin-top: 5px;
+	margin-left: 0px;
+	margin-right: 8px;
+}
+.g740expander-panel.mainmenu.region-bottom .g740expander-multitab .item {
+	display: inline;
+	float: left;
+	margin-top: 5px;
+	margin-left: 0px;
+	margin-right: 8px;
+}
+
+.g740expander-panel.mainmenu .g740expander-multitab .item.selected {
+}
+.g740expander-panel.mainmenu .g740expander-multitab .item .itemicon{
+	display: block;
+	width: 24px !important;
+	height: 24px !important;
+	left: 4px;
+	top: 4px;
+	position: absolute;
+}
+
+
 /* Панель HTML */
 .g740html-panel {
 	overflow: hidden;
@@ -997,6 +1125,12 @@ html, body {
 	text-align: center;
 	margin-top: 15px;
 }
+
+.g740html-panel.title {
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
 .g740html-panel.title .connecteduser {
     position: absolute;
     bottom: 5px;
@@ -1018,7 +1152,68 @@ html, body {
     height: 16px;
 }
 
+.g740html-panel.formtitle {
+	margin-bottom: 3px;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	border-bottom-color: #F0F0F0;
+}
+.g740html-panel.formtitle .formicon{
+	position: relative;
+	float: left;
+	display: block;
+	width: 34px;
+	height: 34px;
+    margin-top: 6px;
+    margin-left: 10px;
+    margin-right: 12px;
+	background-color: black;
+	border-radius: 17px;
+}
+.g740html-panel.formtitle .formicon .itemicon{
+	display: block;
+	width: 24px !important;
+	height: 24px !important;
+	left: 4px;
+	top: 4px;
+	position: absolute;
+}
+.g740html-panel.formtitle .g740html-label{
+	font-family: Helvetica;
+	font-size: 24px;
+	line-height: 34px;
+	margin: 0px;
+	margin-left: 8px;
+	margin-top: 8px;
+	margin-bottom: 2px;
+}
+
+.g740html-panel.formtitle .closeicon{
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	right: 8px;
+	top: 11px;
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-image: url('icons/widget/blackclose.png');
+}
+
+.g740html-panel .header {
+	margin: 10px;
+	font-size: 20px;
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
 /* g740.PanelMultiTabsForm */
+.g740-panelmultitabsform .g740-panelmultitabsform-margin {
+}
+.g740-panelmultitabsform.margin-hidden .g740-panelmultitabsform-margin {
+	display: none;
+}
 .g740-panelmultitabsform .g74-multitabs {
 }
 .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items{
@@ -1032,13 +1227,18 @@ html, body {
 	padding-left: 5px;
     padding-right: 5px;
 	margin-right: 15px;
+	margin-bottom: 8px;
 	
 	font-size: 14px;
     color: #8bc4ea;
     font-weight: bold;
     text-transform: uppercase;
     border: none;
-	height: 46px;
+	height: 42px;
+	
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem span{
 	display: block;
@@ -1066,8 +1266,6 @@ html, body {
 .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem.selected .btnclose:hover{
 	opacity: 1;
 }
-
-
 .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem:hover{
 	color: #3498db;
 }
@@ -1078,4 +1276,51 @@ html, body {
 }
 .g740-dialoglogin-table td {
 	padding-bottom: 5px;
+}
+.g740-dialoglogin-table input {
+	font-size: 16px !important;
+	height: 19px !important;
+}
+
+
+.g740listhtml-panel {
+}
+.g740listhtml-panel.g740listhtml-horizontal {
+}
+.g740listhtml-panel.g740listhtml-horizontal .item{
+	float: left;
+}
+
+.g740listhtml-panel.g740listhtml-horizontal .tab .item{
+	cursor: pointer;
+    font-size: 16px;
+    line-height: 20px;
+	padding-left: 5px;
+	padding-right: 5px;
+	border-bottom-style: solid;
+	border-bottom-width: 3px;
+	border-bottom-color: transparent;
+	margin-bottom: 5px;
+	margin-left: 5px;
+	
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+.g740listhtml-panel.g740listhtml-horizontal .tab .item.current{
+	border-bottom-color: black;
+}
+
+/* Окно блокировки экрана */
+#g740-lockscreen {
+	position: fixed;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	background-color: white;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-image: url('icons/widget/execute.gif');
+	z-index: 99999;
 }

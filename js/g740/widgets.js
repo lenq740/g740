@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-// Виджеты для использования в панелях
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -277,11 +280,13 @@ define(
 				'">'+
 					'<table class="g740-widget-table" cellpadding="0px" cellspacing="0px">'+
 					'<tr>'+
-						'<td>'+
+						'<td class="g740-widget-td-input">'+
 							'<input type="text" class="g740-widget-input" '+
 							'data-dojo-attach-point="domNodeInput" data-dojo-attach-event="'+
 							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doInputChange'+
 							'"/>'+
+							'<div class="btnfieldclear" title="'+g740.getMessage('messageBtnClear')+'" '+
+							'data-dojo-attach-event="onclick: onClearClick"></div>'+
 						'</td>'+
 						'<td style="width:0px;display:none" valign="top" align="center" data-dojo-attach-point="domNodeTdButton">'+
 							'<div class="btnfieldeditor" data-dojo-attach-event="'+
@@ -301,9 +306,11 @@ define(
 						this.domNodeInput.readOnly=value;
 						if (value) {
 							dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+							dojo.addClass(this.domNodeInput.parentNode, 'readonly');
 						}
 						else {
 							dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+							dojo.removeClass(this.domNodeInput.parentNode, 'readonly');
 						}
 						return true;
 					}
@@ -324,7 +331,24 @@ define(
 					this.inherited(arguments);
 					this.focusNode=this.domNodeInput;
 				},
+				doSelect: function() {
+					if (this.domNodeInput.readOnly) return;
+					var value=this.domNodeInput.value;
+					var cursorPos=String(value).length;
+					if (this.domNodeInput.setSelectionRange) {
+						this.domNodeInput.setSelectionRange(0,cursorPos);
+					}
+					else if (this.domNodeInput.createTextRange) {
+						var range=this.domNodeInput.createTextRange();
+						range.collapse(true);
+						range.moveStart('character', 0);
+						range.moveEnd('character', cursorPos);
+						range.select();
+					}
+				},
 				onButtonClick: function() {
+				},
+				onClearClick: function() {
 				},
 				onKeyDown: function(evt) {
 				},
@@ -340,7 +364,13 @@ define(
 				onBlur: function() {
 				},
 				onFocus: function() {
+					g740.execDelay.go({
+						delay: 50,
+						obj: this,
+						func: this.doSelect
+					});
 				}
+				
 			}
 		);
 
@@ -420,11 +450,13 @@ define(
 				'">'+
 					'<table class="g740-widget-table" cellpadding="0px" cellspacing="0px">'+
 					'<tr>'+
-						'<td>'+
+						'<td class="g740-widget-td-input">'+
 							'<input type="text" class="g740-widget-input" '+
 							'data-dojo-attach-point="domNodeInput" data-dojo-attach-event="'+
 							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doInputChange'+
 							'">'+
+							'<div class="btnfieldclear" title="'+g740.getMessage('messageBtnClear')+'" '+
+							'data-dojo-attach-event="onclick: onClearClick"></div>'+
 						'</td>'+
 						'<td style="width:23px" valign="top" align="center">'+
 							'<div class="btnfieldeditor" data-dojo-attach-event="'+
@@ -452,10 +484,12 @@ define(
 							this.domNodeInput.readOnly=value;
 							this._readOnly=value;
 							if (value) {
-								if (!dojo.hasClass(this.domNodeInput, 'dijitTextBoxReadOnly')) dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+								dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+								dojo.addClass(this.domNodeInput.parentNode, 'readonly');
 							}
 							else {
-								if (dojo.hasClass(this.domNodeInput, 'dijitTextBoxReadOnly')) dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+								dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+								dojo.removeClass(this.domNodeInput.parentNode, 'readonly');
 							}
 						}
 						return true;
@@ -466,7 +500,24 @@ define(
 					this.inherited(arguments);
 					this.focusNode=this.domNodeInput;
 				},
+				doSelect: function() {
+					if (this.getReadOnly()) return;
+					var value=this.domNodeInput.value;
+					var cursorPos=String(value).length;
+					if (this.domNodeInput.setSelectionRange) {
+						this.domNodeInput.setSelectionRange(0,cursorPos);
+					}
+					else if (this.domNodeInput.createTextRange) {
+						var range=this.domNodeInput.createTextRange();
+						range.collapse(true);
+						range.moveStart('character', 0);
+						range.moveEnd('character', cursorPos);
+						range.select();
+					}
+				},
 				
+				onClearClick: function() {
+				},
 				onButtonClick: function() {
 				},
 				onKeyDown: function(e) {
@@ -488,6 +539,11 @@ define(
 				onBlur: function() {
 				},
 				onFocus: function() {
+					g740.execDelay.go({
+						delay: 50,
+						obj: this,
+						func: this.doSelect
+					});
 				}
 			}
 		);
@@ -967,7 +1023,7 @@ define(
 					if (objTreeStorage.isObjectDestroed) return result;
 					
 					if (this.isAddEmptyItem) result.push({id: '', value: '---//---'});
-					
+
 					var nodes=objTreeStorage.getChildsOrdered(objTreeStorage.rootNode);
 					var filter='';
 					if (this.filter) filter=this.filter.toLowerCase();
@@ -1227,15 +1283,24 @@ define(
 					
 				},
 				doG740Repaint: function(para) {
-					var isEnabled=false;
-					if (this.objAction) isEnabled=this.objAction.getEnabled();
+					if (!this.objAction) {
+						this.set('disabled', true);
+						return;
+					}
+					
+					var isEnabled=this.objAction.getEnabled();
 					this.set('disabled', !isEnabled);
+					if (this.objAction.request) {
+						var r=this.objAction.request;
+						if (r.js_icon) {
+							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+					}
+					
 					if (isEnabled) {
-						this.set('disabled', false);
-						if (!this.showLabel && this.objAction.label) this.set('label',this.objAction.label.toHtml());
+						this.set('label',this.objAction.getCaption().toHtml());
 					}
 					else {
-						this.set('disabled', true);
 						if (!this.showLabel) this.set('label','');
 					}
 				},
@@ -1268,6 +1333,13 @@ define(
 			g740.ToolbarButton,
 			{
 				g740className: 'g740.PanelButton',		// Имя базового класса
+				g740size: 'medium',
+				postCreate: function() {
+					this.inherited(arguments);
+					if (this.region=='top') {
+						dojo.addClass(this.domNode,'btnstretch');
+					}
+				},
 				onG740KeyDown: function(e) {
 					if (!e.ctrlKey && e.keyCode==13) {
 						dojo.stopEvent(e);
@@ -1281,12 +1353,29 @@ define(
 					if (size && size.h) size.h=parseInt(size.h);
 					this.inherited(arguments);
 				},
+				doG740Repaint: function(para) {
+					if (!this.objAction) {
+						this.set('disabled', true);
+						return;
+					}
+					
+					var isEnabled=this.objAction.getEnabled();
+					this.set('disabled', !isEnabled);
+					
+					if (this.objAction.request) {
+						var r=this.objAction.request;
+						if (r.js_icon) {
+							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+					}
+					this.set('label',this.objAction.getCaption().toHtml());
+				},
 				onG740Focus: function() {
 					if (!dojo.hasClass(this.domNode,'g740focused')) dojo.addClass(this.domNode,'g740focused');
 				},
 				onG740Blur: function() {
 					if (dojo.hasClass(this.domNode,'g740focused')) dojo.removeClass(this.domNode,'g740focused');
-				},
+				}
 			}
 		);
 
@@ -1297,6 +1386,7 @@ define(
 				g740className: 'g740.ToolbarComboButton',	// Имя базового класса
 				objAction: null,
 				g740size: 'small',
+				js_enabled: '',
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
@@ -1332,9 +1422,22 @@ define(
 					}
 				},
 				doG740Repaint: function(para) {
-					//var isEnabled=false;
-					//if (this.objAction) isEnabled=this.objAction.getEnabled();
-					//this.set('disabled', !isEnabled);
+					if (this.objAction && this.objAction.request.js_enabled) {
+						var isEnabled=false;
+						var obj=this.objAction.getObjRowSet();
+						if (!obj) obj=this.objAction.objForm;
+						if (obj) {
+							var isEnabled=g740.js_eval(obj, this.objAction.request.js_enabled, true);
+						}
+						this.set('disabled', !isEnabled);
+						if (this.objAction.request.js_icon) {
+							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+						if (this.objAction.request.js_caption) {
+							this.set('label',this.objAction.getCaption());
+						}
+					}
+					return true;
 				},
 				_onDropDownClick: function(e) {
 					if (this.dropDown) {
@@ -1387,11 +1490,17 @@ define(
 			{
 				g740className: 'g740.PopupMenuItem',
 				objAction: null,
+				g740size: 'small',
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
-						if (this.objAction.iconClass) this.set('iconClass',this.objAction.iconClass);
+						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						return true;
+					}
+					if (name=='g740size') {
+						if (value!='large' && value!='medium') value='small';
+						this.g740size=value;
 						return true;
 					}
 					this.inherited(arguments);
@@ -1417,11 +1526,17 @@ define(
 			{
 				g740className: 'g740.MenuItem',			// Имя базового класса
 				objAction: null,
+				g740size: 'small',
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
-						if (this.objAction.iconClass) this.set('iconClass',this.objAction.iconClass);
+						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						return true;
+					}
+					if (name=='g740size') {
+						if (value!='large' && value!='medium') value='small';
+						this.g740size=value;
 						return true;
 					}
 					this.inherited(arguments);
@@ -1441,6 +1556,14 @@ define(
 					var isEnabled=false;
 					if (this.objAction) isEnabled=this.objAction.getEnabled();
 					this.set('disabled', !isEnabled);
+					if (this.objAction) {
+						if (this.objAction.request.js_icon) {
+							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+						if (this.objAction.request.js_caption) {
+							this.set('label',this.objAction.getCaption());
+						}
+					}
 				},
 				onG740Click: function() {
 					if (this.objAction) return this.objAction.exec();
@@ -1455,13 +1578,19 @@ define(
 			{
 			    g740className: 'g740.PopupMenuBarItem',
 			    objAction: null,
+				g740size: 'small',
 			    set: function (name, value) {
 			        if (name == 'objAction') {
 			            this.objAction = value;
 			            if (this.objAction.label) this.set('label', this.objAction.label.toHtml());
-			            if (this.objAction.iconClass) this.set('iconClass', this.objAction.iconClass);
+			            if (this.objAction.iconClass) this.set('iconClass', this.objAction.getIconClass(this.g740size));
 			            return true;
 			        }
+					if (name=='g740size') {
+						if (value!='large' && value!='medium') value='small';
+						this.g740size=value;
+						return true;
+					}
 			        this.inherited(arguments);
 			    },
 			    destroy: function () {
@@ -1495,13 +1624,19 @@ define(
 			{
 			    g740className: 'g740.MenuBarItem',			// Имя базового класса
 			    objAction: null,
+				g740size: 'small',
 			    set: function (name, value) {
 			        if (name == 'objAction') {
 			            this.objAction = value;
 			            if (this.objAction.label) this.set('label', this.objAction.label.toHtml());
-			            if (this.objAction.iconClass) this.set('iconClass', this.objAction.iconClass);
+			            if (this.objAction.iconClass) this.set('iconClass', this.objAction.getIconClass(this.g740size));
 			            return true;
 			        }
+					if (name=='g740size') {
+						if (value!='large' && value!='medium') value='small';
+						this.g740size=value;
+						return true;
+					}
 			        this.inherited(arguments);
 			    },
 			    postCreate: function () {
@@ -1519,6 +1654,14 @@ define(
 			        var isEnabled = false;
 			        if (this.objAction) isEnabled = this.objAction.getEnabled();
 			        this.set('disabled', !isEnabled);
+					if (this.objAction) {
+						if (this.objAction.request.js_icon) {
+							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+						if (this.objAction.request.js_caption) {
+							this.set('label',this.objAction.getCaption());
+						}
+					}
 			    },
 			    onG740Click: function () {
 			        if (this.objAction) return this.objAction.exec();
@@ -1557,6 +1700,7 @@ define(
 						if (this.request.name=='result') this.rowsetName='#form';
 						if (this.request.name=='form') this.rowsetName='#form';
 						if (this.request.name=='httpget') this.rowsetName='#form';
+						if (this.request.name=='httpput') this.rowsetName='#form';
 						if (this.objForm) {
 							var fullName=this.request.name;
 							if (this.request.mode) fullName+='.'+this.request.mode;
@@ -1580,6 +1724,10 @@ define(
 								if (this.request.mode) fullName+='.'+this.request.mode;
 								var r=this.objForm.requests[fullName];
 								if (r) {
+									if (!this.request.js_caption && r.js_caption) this.request.js_caption=r.js_caption;
+									if (!this.request.js_icon && r.js_icon) this.request.js_icon=r.js_icon;
+									if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
+
 									if (!label) label=r.caption;
 									if (!icon) icon=r.icon;
 								}
@@ -1589,6 +1737,10 @@ define(
 							if (objRowSet) {
 								var r=objRowSet.getRequestForAnyNodeType(this.request.name, this.request.mode);
 								if (r) {
+									if (!this.request.js_caption && r.js_caption) this.request.js_caption=r.js_caption;
+									if (!this.request.js_icon && r.js_icon) this.request.js_icon=r.js_icon;
+									if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
+
 									if (!label) label=r.caption;
 									if (!icon) icon=r.icon;
 								}
@@ -1637,10 +1789,11 @@ define(
 						result['closable']=this.request.closable;
 						result['width']=this.request.width;
 						result['height']=this.request.height;
-						result['onclose']=this.request.onclose;
 					}
-					if (this.request.name=='httpget') {
+					if (this.request.name=='httpget' || this.request.name=='httpput') {
 						result['url']=this.request.url;
+						result['ext']=this.request.ext;
+						result['windowName']=this.request.windowName;
 					}
 					return result;
 				},
@@ -1656,6 +1809,9 @@ define(
 					}
 					
 					if (!this.objForm) return false;
+					if (this.objForm.isActionExecuted) return false;
+					if (this.objForm.fifoRequests.length>0) return false;
+					
 					var obj=this.getObjRowSet();
 					if (!obj) obj=this.objForm;
 					if (!obj) return false;
@@ -1683,60 +1839,102 @@ define(
 						}
 						return true;
 					}
-					
 					var obj=this.objForm;
 					var objRowSet=this.getObjRowSet();
-					if (objRowSet) {
-						var objFocusedRowSet=this.objForm.getFocusedRowSet();
-						if (objFocusedRowSet && objFocusedRowSet!=objRowSet && !objFocusedRowSet.isFilter && objFocusedRowSet.getExistUnsavedChanges()) {
-							if (!objFocusedRowSet.exec({requestName: 'save'})) return false;
-						}
-						obj=objRowSet;
-					}
-					if (!obj) return false;
-
-					if (this.request.save) {
-						var objFocusedRowSet=this.objForm.getFocusedRowSet();
-						if (objFocusedRowSet && !objFocusedRowSet.isFilter && objFocusedRowSet.getExistUnsavedChanges()) {
-							if (!objFocusedRowSet.exec({requestName: 'save'})) return false;
+					if (objRowSet) obj=objRowSet;
+					if (obj.getRequest) {
+						var r=obj.getRequest(this.request.name, this.request.mode);
+						if (r) {
+							if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
+							if (!this.request.lock && r.lock) this.request.lock=r.lock;
 						}
 					}
-					
-					var confirm = '';
-					if (!isNoConfirm) {
-						confirm = this.request.confirm;
-						if (!confirm && obj.getRequest) {
-							var r = obj.getRequest(this.request.name, this.request.mode);
-							if (r && r.confirm) confirm = r.confirm;
-						}
-					}
-					if (confirm) {
+					if (this.request.confirm) {
 						var objOwner=null;
 						if (this.objForm) objOwner=this.objForm.objFocusedPanel;
 						g740.showConfirm({
-							messageText: confirm,
+							messageText: this.request.confirm,
 							closeObj: this,
-							onCloseOk: this.exec,
-							closePara: true,
+							onCloseOk: this._execGo,
 							objOwner: objOwner
 						});
 						return true;
 					}
-					var G740params={};
-					if (obj._getRequestG740params) {
-						var ppp=obj._getRequestG740params(this.request.params);
-						for(var name in ppp) G740params[name]=ppp[name];
+					else {
+						this._execGo();
 					}
-					var result=obj.exec({
-						requestName: this.request.name, 
-						requestMode: this.request.mode,
-						G740params: G740params,
-						attr: this.getRequestAttr()
-					});
-					return result;
+					return true;
 				},
+				_execGo: function() {
+					if (!this.objForm) return false;
+					if (!this.getEnabled()) return false;
+					this.objForm.isActionExecuted=true;
+					try {
+						var obj=this.objForm;
+						var objRowSet=this.getObjRowSet();
+						if (objRowSet) {
+							var objFocusedRowSet=this.objForm.getFocusedRowSet();
+							if (objFocusedRowSet && objFocusedRowSet!=objRowSet && !objFocusedRowSet.isFilter && objFocusedRowSet.getExistUnsavedChanges()) {
+								if (!objFocusedRowSet.exec({requestName: 'save'})) return false;
+							}
+							obj=objRowSet;
+						}
+						if (!obj) return false;
+						if (this.request.save) {
+							var objFocusedRowSet=this.objForm.getFocusedRowSet();
+							if (objFocusedRowSet && !objFocusedRowSet.isFilter && objFocusedRowSet.getExistUnsavedChanges()) {
+								if (!objFocusedRowSet.exec({requestName: 'save'})) return false;
+							}
+						}
+						var G740params={};
+						if (obj._getRequestG740params) {
+							var ppp=obj._getRequestG740params(this.request.params);
+							for(var name in ppp) G740params[name]=ppp[name];
+						}
+						var result=obj.exec({
+							requestName: this.request.name, 
+							requestMode: this.request.mode,
+							G740params: G740params,
+							attr: this.getRequestAttr()
+						});
+					}
+					finally {
+						g740.execDelay.go({
+							obj: this,
+							func: function() {
+								if (!this.objForm) return false;
+								this.objForm.isActionExecuted=false;
+								this.objForm.doG740Repaint();
+							},
+							delay: 50
+						})
+					}
+				},
+		
 				getIconClass: function(size) {
-					return g740.icons.getIconClassName(this.icon, size);
+					var icon=this.icon;
+					if (this.request.js_icon) {
+						var obj=this.getObjRowSet();
+						if (!obj) obj=this.objForm;
+						if (obj && obj.isObjectDestroed) obj=null;
+						if (obj) {
+							icon=g740.js_eval(obj, this.request.js_icon, icon);
+						}
+					}
+					return g740.icons.getIconClassName(icon, size);
+				},
+				getCaption: function() {
+					var result=this.label;
+					if (this.request.js_caption) {
+						var obj=this.getObjRowSet();
+						if (!obj) obj=this.objForm;
+						if (obj && obj.isObjectDestroed) obj=null;
+						if (obj) {
+							result=g740.js_eval(obj, this.request.js_caption, this.label);
+						}
+					}
+					if (!result) result='';
+					return result;
 				},
 				getObjRowSet: function() {
 					var result=null;

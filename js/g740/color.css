@@ -1,3 +1,9 @@
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 .g740-color-white {
 	background-color: white !important;
 	color: black !important;
@@ -6,6 +12,34 @@
 	background-color: white !important;
 	color: #9C9C9C !important;
 }
+
+.g740-color-scheme1 {
+	background-color: #efefef !important;
+	color: black !important;
+}
+.g740-color-scheme1-readOnly {
+	background-color: #efefef !important;
+	color: #9C9C9C !important;
+}
+
+.g740-color-scheme2 {
+	background-color: #FCFBE3 !important;
+	color: black !important;
+}
+.g740-color-scheme2-readOnly {
+	background-color: #FCFBE3 !important;
+	color: #9C9C9C !important;
+}
+
+.g740-color-scheme3 {
+	background-color: #ffe0e0 !important;
+	color: black !important;
+}
+.g740-color-scheme3-readOnly {
+	background-color: #ffe0e0 !important;
+	color: #9C9C9C !important;
+}
+
 
 .g740-color-gray {
 	background-color: #efefef !important;
@@ -268,7 +302,7 @@ color.romanuke.com/tsvetovaya-palitra-1874
 .g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowEditing .dojoxGridCell{
 	background-color: #acbdd3 !important;
 }
-.g740.app-color-m .g740-grid-focused  .dojoxGridMasterView .dojoxGridCell.dojoxGridCellFocus {
+.g740.app-color-m .g740-grid-focused  .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell.dojoxGridCellFocus {
 	background-color: #859abe !important;
 }
 .g740.app-color-m .g740-grid-focused .dojoxGridMasterView .dojoxGridRowSelected .dojoxGridCell{
@@ -302,6 +336,9 @@ color.romanuke.com/tsvetovaya-palitra-1874
 .g740.app-color-m .g740-list .g740-list-input:focus {
 	border-color: #859abe;
 }
+.g740.app-color-m .g740-dialogdate-input:focus {
+	border-color: #859abe;
+}
 .g740.app-color-m .g740-widget-icons.g740-widget-focused {
 	border-color: #859abe;
 }
@@ -322,6 +359,7 @@ color.romanuke.com/tsvetovaya-palitra-1874
 }
 .g740.app-color-m .dijitTabChecked {
 	border-top-color: #859abe !important;
+	color: #5d80b6 !important;
 }
 
 /* оттенок черезполосицы в grid */
@@ -383,7 +421,6 @@ color.romanuke.com/tsvetovaya-palitra-1874
     color: #5d80b6;
 }
 
-
 /* g740._ListAbstract */
 .g740.app-color-m .g740-list .g740-list-items .g740-list-item.selected{
     background-color: #859abe;
@@ -392,12 +429,29 @@ color.romanuke.com/tsvetovaya-palitra-1874
 
 /* g740.HtmlPanel */
 .g740.app-color-m .g740html-panel.title{
-	background-color: #535353;
+	background-color: #101e5a;
 	color: white;
+	margin-bottom: 1px;
 }
+.g740.app-color-m .g740html-panel.formtitle{
+	color: black;
+}
+.g740.app-color-m .g740html-panel.formtitle .formicon{
+	background-color: #5d80b6;
+}
+.g740.app-color-m .g740html-panel.formtitle .closeicon{
+	background-image: url('icons/widget/redclose.png');
+	width: 24px;
+	height: 24px;
+}
+
+
+
 /* g740.PanelExpander */
 .g740.app-color-m .g740expander-panel .g740html-panel.mainmenu{
-	background-color: #cbc6c3;
+	background-color1: #cbc6c3;
+	background-color1: white;
+	background-color: #F0F0F0;
 	transition-duration: 0.2s;
 	transition-property: background-color;
 }
@@ -411,6 +465,15 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	transition-duration: 0.2s;
 	transition-property: background-color;
 }
+
+.g740.app-color-m .g740expander-panel.mainmenu .g740expander-multitab .item {
+	background-color: #859abe;
+}
+.g740.app-color-m .g740expander-panel.mainmenu .g740expander-multitab .item.selected {
+	background-color: #5d80b6;
+}
+
+
 
 /* g740.TreeMenu */
 .g740.app-color-m .g740tree-panel.treemenu{
@@ -431,4 +494,90 @@ color.romanuke.com/tsvetovaya-palitra-1874
 }
 .g740.app-color-m .g740tree-panel.treemenu .g740tree-item-element:hover .g740tree-item-expander.g740tree-item-expander-minus {
 	background-image: url('icons/widget/treemenuwhiteexpanded.png');
+}
+
+
+.g740.app-color-m .g740-color-scheme1 {
+	background-color: #dce1e9 !important;
+	color: black !important;
+}
+.g740.app-color-m .g740-color-scheme1-readOnly {
+	background-color: #dce1e9 !important;
+	color: black !important;
+}
+.g740.app-color-m .g740-color-scheme1 .g740-panel-memo .dijitTextBoxReadOnly {
+	background-color: #dce1e9 !important;
+	color: black !important;
+	border-width: 0px;
+}
+
+.g740.app-color-m .g740-color-scheme2 {
+	background-color: #cbc6c3 !important;
+	color: white !important;
+}
+.g740.app-color-m .g740-color-scheme2-readOnly {
+	background-color: #cbc6c3 !important;
+	color: white !important;
+}
+.g740.app-color-m .g740-color-scheme2 input{
+	color: black !important;
+}
+.g740.app-color-m .g740-color-scheme2-readOnly input{
+	color: black !important;
+}
+.g740.app-color-m .g740-color-scheme2 .g74-paneltitle {
+	color: #f7f8f9 !important;
+}
+.g740.app-color-m .g740-color-scheme2 .g740-panel-memo .dijitTextBoxReadOnly {
+	background-color: #cbc6c3 !important;
+	color: white !important;
+	border-width: 0px;
+}
+
+.g740.app-color-m .g740-color-scheme3 {
+	background-color: #5d80b6 !important;
+	color: white !important;
+}
+.g740.app-color-m .g740-color-scheme3-readOnly {
+	background-color: #5d80b6 !important;
+	color: white !important;
+}
+.g740.app-color-m .g740-color-scheme3 input{
+	color: black !important;
+}
+.g740.app-color-m .g740-color-scheme3-readOnly input{
+	color: black !important;
+}
+.g740.app-color-m .g740-color-scheme3 .g74-paneltitle {
+	color: #f7f8f9 !important;
+}
+.g740.app-color-m .g740-color-scheme3 .dijitButtonText {
+    color: black;
+}
+.g740.app-color-m .g740-color-scheme3 .g740-panel-memo .dijitTextBoxReadOnly {
+	background-color: #5d80b6 !important;
+	color: white !important;
+	border-width: 0px;
+}
+
+.g740.app-color-m .g740-color-gray {
+	background-color: #f7f8f9 !important;
+}
+.g740.app-color-m .g740-color-gray-readOnly {
+	background-color: #f7f8f9 !important;
+}
+
+.g740.app-color-m .g740-color-red {
+	background-color: red !important;
+}
+.g740.app-color-m .g740-color-red-readOnly {
+	background-color: red !important;
+}
+.g740.app-color-m .g740-color-red .g74-paneltitle {
+    color: white !important;
+}
+.g740.app-color-m .g740-color-red .g740-panel-memo .dijitTextBoxReadOnly {
+    background-color: red !important;
+    color: white !important;
+	border-width: 0px;
 }

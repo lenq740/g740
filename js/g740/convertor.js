@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-// Преобразование данных между форматом G740 и JavaScript
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -233,10 +236,32 @@ define(
 				if (expr=='') return null;
 				var result=null;
 				try {
-					var yy=expr.substr(6,4);
-					if (yy>=0 && yy<99) yy=2000+yy;
-					var mm=expr.substr(3,2);
-					var dd=expr.substr(0,2);
+					expr=dojo.trim(expr);
+					var pos=0;
+					var dd=expr.substr(pos,2).toString();
+					if (dd.length!=2) return null;
+					pos+=2;
+					var delim=expr.substr(pos,1);
+					if (delim=='.' || delim=='-' || delim=='/') pos++;
+					var mm=expr.substr(pos,2).toString();
+					if (mm.length!=2) return null;
+					pos+=2;
+					var delim=expr.substr(pos,1);
+					if (delim=='.' || delim=='-' || delim=='/') pos++;
+					var yy=expr.substr(pos,4).toString();
+					if (yy.length!=2 && yy.length!=4) return null;
+					
+					var ss=dd+mm+yy;
+					for(var i=0; i<ss.length; i++) {
+						var c=ss.substr(i,1);
+						if (c<'0') return null;
+						if (c>'9') return null;
+					}
+					
+					if (yy.length==2) {
+						yy=2000+parseInt(yy);
+					}
+
 					result=new Date(yy, mm-1, dd);
 				}
 				catch (e) {

@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-// Работа с XML
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -128,50 +131,6 @@ define(
 // Возвращает символьное представление XML узла
 			toStr: function(xmlNode) {
 				return dojox.xml.parser.innerXML(xmlNode);
-			},
-			objFromXml: function (xml, template, r) {
-				var isEmpty=(!r);
-				if (typeof(r)=='object') {
-					var isEmpty=true;
-					for(var i in r) {
-						isEmpty=false;
-						break;
-					}
-				}
-				if (isEmpty) {
-					r={};
-					for (var name in template) {
-						var templDef=template[name];
-						if (typeof(templDef)=='object') {
-							for (var attrName in templDef) {
-								templDef=templDef[attrName];
-								break;
-							}
-						}
-						if (templDef) r[name]=templDef;
-					}
-				}
-				for (var name in template) {
-					var templDef=template[name];
-					var t=typeof(templDef);
-					if (t=='string' || t=='boolean' || t=='number') {
-						if (!g740.xml.isAttr(xml, name)) continue;
-						if (t=='string') r[name]=g740.xml.getAttrValue(xml, name, '');
-						if (t=='boolean') r[name]=g740.convertor.toJavaScript(g740.xml.getAttrValue(xml, name, '0'),'check');
-						if (t=='number') r[name]=g740.convertor.toJavaScript(g740.xml.getAttrValue(xml, name, '0'),'num');
-					}
-					if (t=='object') {
-						for(var attrName in templDef) {
-							if (!g740.xml.isAttr(xml, attrName)) continue;
-							var def=templDef[attrName];
-							var t=typeof(def);
-							if (t=='string') r[name]=g740.xml.getAttrValue(xml, attrName, '');
-							if (t=='boolean') r[name]=g740.convertor.toJavaScript(g740.xml.getAttrValue(xml, attrName, '0'),'check');
-							if (t=='number') r[name]=g740.convertor.toJavaScript(g740.xml.getAttrValue(xml, attrName, '0'),'num');
-						}
-					}
-				}
-				return r;
 			}
 		};
 		g740.xml=xml;

@@ -68,7 +68,7 @@
 	messageBtnCancel: 'Отмена',
 	messageBtnYes: 'Да',
 	messageBtnNo: 'Нет',
-	messageBrnClear: 'Очистить',
+	messageBtnClear: 'Очистить',
 	messageDlgConfirmTitle: 'Вопрос',
 	messageDlgMessageTitle: 'Сообщение',
 	messageDlgErrorTitle: 'Ошибка',
@@ -85,7 +85,9 @@
 	requestDefinition: 'Построить набор строк по описанию',
 	requestRefresh: 'Перечитать',
 	requestRefreshRow: 'Обновить строку',
+	requestNavigate: 'Переместиться к строке',
 	requestSave: 'Сохранить изменения',
+	requestSet: 'Задать значение',
 	requestAppend: 'Добавить строку',
 	requestAppendBefore: 'Добавить строку перед текущей',
 	requestAppendAfter: 'Добавить строку после текущей',
@@ -105,7 +107,7 @@
 	requestUndo: 'Откатить изменения в строке',
 	requestExpand: 'Раскрыть узел дерева',
 	requestCollapse: 'Свернуть узел дерева',
-	requestMark: 'Пометить строку',
+	requestMark: 'Пометить/снять пометку',
 	requestUnMarkAll: 'Очистить все пометки',
 	
 	// Paginator

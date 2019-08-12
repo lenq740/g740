@@ -1,6 +1,9 @@
-//-----------------------------------------------------------------------------
-//	Экранная форма
-//-----------------------------------------------------------------------------
+/**
+ * G740Viewer
+ * Copyright 2017-2019 Galinsky Leonid lenq740@yandex.ru
+ * Licensed under the BSD license
+ */
+
 define(
 	[],
 	function() {
@@ -13,6 +16,8 @@ define(
 			{
 				g740className: 'g740.Form',
 				name: '',
+				controller: '',
+				icon: '',
 				isModal: false,
 				isClosable: true,
 				g740Width: '80%',
@@ -46,11 +51,24 @@ define(
 //			p.enabled
 //			p.js_enabled
 //			p.type
+//			p.notempty
+//			p.priority
 				requests: {},				// Список поддерживаемых запросов
-				g740childs: [],				// Список дочерних панелек для поддержки visible
 				
 				objDialogEditor: null,
 				script: {},
+				
+				// Обработчики событий
+				evt_onclose: '',
+				js_onclose: '',
+				evt_onshow: '',
+				js_onshow: '',
+				
+				fifoRequests: [],
+				
+				// Выполняется запрос порожденный кнопкой, нажатия других кнопок блокировать
+				isActionExecuted: false,
+				
 				
 // Создание экземпляра объекта
 //	para.name
@@ -64,9 +82,9 @@ define(
 					this.requests={};
 					if (para.name) this.name=para.name;
 					this.objFocusedPanel=null;
-					this.g740childs=[];
 					this.modalResults={};
 					this.script={};
+					this.fifoRequests=[];
 					//console.log(this);
 				},
 // Уничтожение экземпляра объекта
@@ -74,6 +92,7 @@ define(
 					var procedureName='g740.Form.destroy';
 					this.modalResults={};
 					this.isObjectDestroed=true;
+					this.fifoRequests=[];
 					this.objPanelForm=null;
 					this.objFocusedPanel=null;
 					if (this.requests) {
@@ -88,22 +107,15 @@ define(
 						this.rowsets[name]=null;
 					}
 					this.rowsets={};
-
-					if (this.g740childs) {
-						for (var i=0; i<this.g740childs.length; i++) {
-							var obj=this.g740childs[i];
-							if (obj && obj.g740className=='g740.Panel' && !obj.visible) {
-								obj.destroyRecursive();
-							}
-							this.g740childs[i]=null;
-						}
-						this.g740childs=[];
-					}
 					if (this.objDialogEditor) {
 						this.objDialogEditor.destroyRecursive();
 						this.objDialogEditor=null;
 					}
 					this.inherited(arguments);
+				},
+				postCreate: function() {
+					this.inherited(arguments);
+					dojo.addClass(this.domNode,'g740-form');
 				},
 // Задать значение св-ва
 				set: function(name, value) {
@@ -126,84 +138,42 @@ define(
 					return this.requests[fullName];
 			    },
 				
-// Выполнить запрос по полному имени
-//	requestExec = #form|#focus|<имя набора строк>.name.mode(param1;...;paramN)
-				execByFullName: function(requestExec, attr) {
-					if (!attr) attr={};
-					var requestParams='';
-					var n=requestExec.indexOf('(')
-					if (n>=0) {
-						requestParams=requestExec.substr(n+1);
-						requestExec=requestExec.substr(0,n);
-						n=requestParams.lastIndexOf(')');
-						if (n>=0) requestParams=requestParams.substr(0,n);
-					}
-					
-					var requestName='';
-					var requestMode='';
-					var rowsetName='#form';
-					var p=requestExec.split('.');
-					if (p.length==1) {
-						requestName=p[0];
-						requestMode='';
-					}
-					if (p.length==2) {
-						var name=p[0];
-						if (name=='#focus' || name=='#form' || this.rowsets[name]) {
-							rowsetName=p[0];
-							requestName=p[1];
-							requestMode='';
-						}
-						else {
-							requestName=p[0];
-							requestMode=p[1];
-						}
-					}
-					if (p.length>=3) {
-						rowsetName=p[0];
-						requestName=p[1];
-						requestMode=p[2];
-					}
-					if (rowsetName=='#focus') {
-						rowsetName='';
-						var objRowSet=this.getFocusedRowSet();
-						if (!objRowSet) return false;
-						rowsetName=objRowSet.name;
-					}
-					var G740params={};
-					if (rowsetName!='#form') {
-						var objRowSet=this.rowsets[rowsetName];
-						if (!objRowSet) return false;
-						
-						if (requestParams) G740params=objRowSet._getRequestG740params(requestParams);
-						return objRowSet.exec({
-							requestName: requestName,
-							requestMode: requestMode,
-							G740params: G740params,
-							attr: attr
-						});
-					} else {
-						if (requestParams) G740params=this._getRequestG740params(requestParams);
-						return this.exec({
-							requestName: requestName,
-							requestMode: requestMode,
-							G740params: G740params,
-							attr: attr
-						});
-					}
+				execEventOnClose: function() {
+					var result=true;
+					if (this.js_onclose) result=g740.js_eval(this, this.js_onclose, true);
+					if (result && this.evt_onclose) result=this.exec({exec: this.evt_onclose});
+					return result;
 				},
-				
+				execEventOnShow: function() {
+					if (this.js_onshow) g740.js_eval(this, this.js_onshow, true);
+					if (this.evt_onshow) this.exec({exec: this.evt_onshow});
+					return true;
+				},
+			
 // Выполнить запрос
 //	para.requestName
 //	para.requestMode
+//	para.exec
 //	para.G740params - ассоциативный массив значений параметров в формате G740
 //	para.attr		- ассоциативный массив атрибутов, не передаваемый на сервер
 				exec: function(para) {
 					if (!para) return false;
+					if (para.exec) {
+						para=this.prepareRequestExec(para.exec, para.attr, '#form');
+						var rowsetName=para.rowsetName;
+						if (rowsetName!='#form') {
+							if (rowsetName=='#focus') {
+								var objRowSet=this.getFocusedRowSet();
+								if (objRowSet) rowsetName=objRowSet.name;
+							}
+							var obj=this.rowsets[rowsetName];
+							if (obj && obj.exec) return obj.exec(para);
+							return false;
+						}
+					}
 					var requestName=para.requestName;
 					var requestMode=para.requestMode;
 					if (!this.getRequestEnabled(requestName, requestMode)) return false;
-
 					var attr={};
 					if (para.attr) attr=para.attr;
 					
@@ -217,103 +187,36 @@ define(
 						if (r.save) isSave=true;
 						if (r.close) isClose=true;
 					}
-					
 					if (isSave) {
 						var objFocusedRowSet=this.getFocusedRowSet();
 						if (objFocusedRowSet && !objFocusedRowSet.isFilter && objFocusedRowSet.getExistUnsavedChanges()) {
 							if (!objFocusedRowSet.exec({requestName: 'save'})) return false;
 						}
 					}
-
 					var G740params={};
+					var ppp={};
 					if (r && r.params) {
-						var p=this._getRequestG740params(r.params);
-						for(var name in p) G740params[name]=p[name];
+						var ppp=this._getRequestG740params(r.params);
+						for(var name in ppp) G740params[name]=ppp[name];
 					}
 					if (para.G740params) for(var name in para.G740params) G740params[name]=para.G740params[name];
-					
-					if (r && r.requests) {
-						this._execResult='';
-						for(var i=0; i<r.requests.length; i++) {
-							if (this._execResult!='') break;
-							
-							var rr=r.requests[i];
-							var rowsetName=rr.rowset;
-							
-							if (!rowsetName) rowsetName='#form';
-							if (rr.name=='connect') rowsetName='#form';
-							if (rr.name=='disconnect') rowsetName='#form';
-							if (rr.name=='close') rowsetName='#form';
-							if (rr.name=='result') rowsetName='#form';
-							if (rr.name=='form') rowsetName='#form';
-							if (rr.name=='httpget') rowsetName='#form';
-							
-							if (rowsetName=='#focus') {
-								var objFocusedRowSet=this.getFocusedRowSet();
-								if (!objFocusedRowSet) continue;
-								rowsetName=objFocusedRowSet.name;
-							}
-							
-							if (rowsetName=='#form') {
-								if (!this.getRequestEnabled(rr.name, rr.mode)) continue;
-								var p=this._getRequestG740params(rr.params);
-								for(var name in G740params) p[name]=G740params[name];
-								var attr={};
-								if (rr.close) attr['close']=rr.close;
-								if (rr.name=='form') {
-									if (rr.modal) attr['modal']=rr.modal;
-									if (rr.width) attr['width']=rr.width;
-									if (rr.height) attr['height']=rr.height;
-									if (rr.closable) attr['closable']=rr.closable;
-								}
-								if (rr.name=='httpget') {
-									attr['url']=rr.url;
-								}
-								var result=this.exec({
-									requestName: rr.name,
-									requestMode: rr.mode,
-									sync: true,
-									G740params: p,
-									attr: attr
-								});
-								if (!result) return false;
-								if (this._execResult=='form') {
-									var objDialog=g740.application.getModalDialog();
-									if (objDialog && objDialog.attr && objDialog.attr.objForm==this) {
-										var requests=[];
-										for(var j=i+1; j<r.requests.length; j++) {
-											var rrr=r.requests[j];
-											requests.push(rrr);
-										}
-										if (requests.length>0) objDialog.attr['onafterclose']=requests;
-									}
-									break;
-								}
-							}
-							else {
-								var objRowSet=this.rowsets[rowsetName];
-								if (!objRowSet) return false;
-								if (!objRowSet.getRequestEnabled(rr.name, rr.mode)) continue;
-								var p=objRowSet._getRequestG740params(rr.params);
-								for(var name in G740params) p[name]=G740params[name];
-								
-								var result=objRowSet.exec({
-									requestName: rr.name,
-									requestMode: rr.mode,
-									sync: true,
-									G740params: p
-								});
-								if (!result) return false;
-								if (rr.close) {
-									isClose=true;
-									break;
-								}
-							}
+					if (r && r.params) for(var name in r.params) {
+						var pDef=r.params[name];
+						if (!pDef) continue;
+						if (!pDef.priority) continue;
+						if (typeof(ppp[name])!='undefined') {
+							G740params[name]=ppp[name];
 						}
+						else {
+							if (typeof(G740params[name])!='undefined') delete G740params[name];
+						}
+					}
+					if (r && r.requests) {
+						this.execListOfRequests(r.requests, G740params);
 					}
 					else {
 						var result=false;
-						if (requestName=='result') {
+						if (requestName=='none') {
 							result=true;
 						} 
 						else if (requestName=='close') {
@@ -336,18 +239,24 @@ define(
 							this._execResult='form';
 						} 
 						else if (requestName=='httpget') {
+							var p={};
 							var url=attr.url;
 							if (!url) url='';
 							var urlParams='';
 							var urlParamDelimiter='';
 							for(var paramName in G740params) {
 								if (G740params[paramName]=='') continue;
-								if (paramName=='url') {
-									url=G740params[paramName];
-									continue;
+								if (paramName.substr(0,5)=='http.') {
+									if (paramName=='http.url') url=G740params[paramName];
+									else if (paramName=='http.mode') requestMode=G740params[paramName];
+									else if (paramName=='http.window') p.windowName=G740params[paramName];
+									else if (paramName=='http.window.width') p.windowWidth=G740params[paramName];
+									else if (paramName=='http.window.height') p.windowHeight=G740params[paramName];
 								}
-								urlParams+=urlParamDelimiter+encodeURIComponent(paramName)+'='+encodeURIComponent(G740params[paramName]);
-								urlParamDelimiter='&';
+								else {
+									urlParams+=urlParamDelimiter+encodeURIComponent(paramName)+'='+encodeURIComponent(G740params[paramName]);
+									urlParamDelimiter='&';
+								}
 							}
 							if (urlParams) {
 								urlParamDelimiter='?';
@@ -355,17 +264,46 @@ define(
 								url+=urlParamDelimiter+urlParams;
 							}
 							if (requestMode=='open') {
-								result=g740.request.httpOpen(url);
+								result=g740.request.httpOpen(url, p);
 							}
 							else {
 								result=g740.request.httpGet(url);
 							}
 						}
+						else if (requestName=='httpput') {
+							var url=attr.url;
+							var ext=attr.ext;
+							if (!url) url='';
+							var urlParams='';
+							var urlParamDelimiter='';
+							for(var paramName in G740params) {
+								if (G740params[paramName]=='') continue;
+								if (paramName.substr(0,5)=='http.') {
+									if (paramName=='http.url') url=G740params[paramName];
+									else if (paramName=='http.ext') ext=G740params[paramName];
+								}
+								else {
+									urlParams+=urlParamDelimiter+encodeURIComponent(paramName)+'='+encodeURIComponent(G740params[paramName]);
+									urlParamDelimiter='&';
+								}
+							}
+							if (urlParams) {
+								urlParamDelimiter='?';
+								if (url.indexOf('?')>=0) urlParamDelimiter='&';
+								url+=urlParamDelimiter+urlParams;
+							}
+							result=g740.request.httpPut(url, ext);
+							this._execResult='httpput';
+						}
+						else if (requestName=='clearresult') {
+							g740.application.modalResults={};
+							result=true;
+						}
 						else {
 							var xmlRequest=g740.xml.createElement('request');
 							xmlRequest.setAttribute('name', requestName);
 							if (requestMode) xmlRequest.setAttribute('mode', requestMode);
-							xmlRequest.setAttribute('form', this.name);
+							xmlRequest.setAttribute('form', this.controller);
 
 							for(var name in G740params) {
 								xmlParam=g740.xml.createElement('param');
@@ -390,19 +328,244 @@ define(
 					}
 					return true;
 				},
+// Преобразовать запрос по полному имени
+//	requestExec = #form|#focus|<имя набора строк>.name.mode(param1;...;paramN)
+				prepareRequestExec: function(requestExec, attr, rowsetNameDefault) {
+					var result={};
+					if (!rowsetNameDefault) rowsetNameDefault='#form';
+					
+					var requestParams='';
+					var n=requestExec.indexOf('(')
+					if (n>=0) {
+						requestParams=requestExec.substr(n+1);
+						requestExec=requestExec.substr(0,n);
+						n=requestParams.lastIndexOf(')');
+						if (n>=0) requestParams=requestParams.substr(0,n);
+					}
+					var requestName='';
+					var requestMode='';
+					var rowsetName=rowsetNameDefault;
+					var p=requestExec.split('.');
+					if (p.length==1) {
+						requestName=p[0];
+						requestMode='';
+					}
+					if (p.length==2) {
+						var name=p[0];
+						if (name=='#focus' || name=='#form' || this.rowsets[name]) {
+							rowsetName=p[0];
+							requestName=p[1];
+							requestMode='';
+						}
+						else {
+							requestName=p[0];
+							requestMode=p[1];
+						}
+					}
+					if (p.length>=3) {
+						rowsetName=p[0];
+						requestName=p[1];
+						requestMode=p[2];
+					}
+
+					if (requestName=='connect') rowsetName='#form';
+					if (requestName=='disconnect') rowsetName='#form';
+					if (requestName=='close') rowsetName='#form';
+					if (requestName=='none') rowsetName='#form';
+					if (requestName=='form') rowsetName='#form';
+					if (requestName=='httpget') rowsetName='#form';
+					if (requestName=='httpput') rowsetName='#form';
+					if (requestName=='clearresult') rowsetName='#form';
+
+					if (rowsetName=='#focus') {
+						var objRowSet=this.getFocusedRowSet();
+						if (objRowSet) rowsetName=objRowSet.name;
+					}
+					
+					if (rowsetName) result.rowsetName=rowsetName;
+					result.requestName=requestName;
+					result.requestMode='';
+					if (requestMode) {
+						result.requestMode=requestMode;
+					}
+					if (attr) result.attr=attr;
+					result.sync=true;
+
+					if (rowsetName=='#form' && this._getRequestG740params) {
+						result.G740params=this._getRequestG740params(requestParams);
+					}
+					else {
+						var objRowSet=this.rowsets[rowsetName];
+						if (objRowSet && objRowSet._getRequestG740params) {
+							result.G740params=objRowSet._getRequestG740params(requestParams);
+						}
+					}
+					return result;
+				},
+				
 				_execResult: '',	// блокируем дальнейшее выполнение цепочки запросов
+				execListOfRequests: function(listOfRequests, G740params) {
+					if (this.isObjectDestroed) return false;
+					if (g740.application.getFocusedForm()!=this && g740.application.objForm!=this) return false;
+					var lst=[];
+					if (listOfRequests) for(var i=0; i<listOfRequests.length; i++) {
+						var rr=listOfRequests[i];
+						if (!rr) continue;
+						// копируем запрос, модифицируем список параметров
+						var r={};
+						for(var name in rr) r[name]=rr[name];
+						if (r.exec) {
+							r=this.prepareRequestExec(r.exec);
+							r.name=r.requestName;
+							r.mode=r.requestMode;
+							delete r.requestName;
+							delete r.requestMode;
+							delete r.exec;
+						}
+						
+						var p={};
+						if (G740params) for(var name in G740params) {
+							p[name]={
+								name: name,
+								value: G740params[name]
+							};
+						}
+						if (rr.params) {
+							for(var name in rr.params) p[name]=rr.params[name];
+						}
+						r.params=p;
+						lst.push(r);
+					}
+					for(var i=lst.length-1; i>=0; i--) {
+						var r=lst[i];
+						this.fifoRequests.unshift(r);
+					}
+					if (this.fifoRequests.length>0) {
+						this._execResult='';
+						var rr=this.fifoRequests.shift();
+						var rowsetName='#form';
+						if (rr.rowsetName) rowsetName=rr.rowsetName;
+						var obj=this;
+						if (rr && rr.rowset) {
+							rowsetName=rr.rowset;
+							if (rr.name=='connect') rowsetName='#form';
+							if (rr.name=='disconnect') rowsetName='#form';
+							if (rr.name=='close') rowsetName='#form';
+							if (rr.name=='none') rowsetName='#form';
+							if (rr.name=='form') rowsetName='#form';
+							if (rr.name=='httpget') rowsetName='#form';
+							if (rr.name=='httpput') rowsetName='#form';
+							if (rr.name=='clearresult') rowsetName='#form';
+							if (rowsetName=='#focus') {
+								var objFocusedRowSet=this.getFocusedRowSet();
+								if (objFocusedRowSet) rowsetName=objFocusedRowSet.name;
+							}
+						}
+						if (rr && rowsetName!='#form') obj=this.rowsets[rowsetName];
+						if (!obj) rr=null;
+						if (obj.isObjectDestroed) rr=null;
+						if (rr && rr.js_enabled) {
+							if (!g740.js_eval(obj, rr.js_enabled, true)) rr=null;
+						}
+						if (rr && obj.getRequestEnabled) {
+							if (!obj.getRequestEnabled(rr.name, rr.mode)) rr=null;
+						}
+						if (rr && obj.exec) {
+							var attr={};
+							if (rr.name=='form') {
+								if (rr.modal) attr['modal']=rr.modal;
+								if (rr.width) attr['width']=rr.width;
+								if (rr.height) attr['height']=rr.height;
+								if (rr.closable) attr['closable']=rr.closable;
+							}
+							if (rr.name=='httpget' || rr.name=='httpput') {
+								attr['url']=rr.url;
+								attr['ext']=rr.ext;
+							}
+							
+							var p={};
+							if (obj._getRequestG740params) p=obj._getRequestG740params(rr.params);
+							var result=obj.exec({
+								requestName: rr.name,
+								requestMode: rr.mode,
+								exec: rr.exec,
+								sync: true,
+								G740params: p,
+								attr: attr
+							});
+
+							if (!result) this.fifoRequests=[];
+						}
+					}
+					// Если пауза в цепочке, до завершения асинхронного запроса (fttpget, fttpput, form)
+					if (this._execResult) return true;
+					// Если очередь не пуста, выполняем следующий запрос из очереди
+					if (this.fifoRequests.length>0) {
+						this.execListOfRequests();
+					}
+					return true;
+				},
+				continueExecListOfRequest: function() {
+					this.isActionExecuted=true;
+					if (this.fifoRequests.length!=0) this.execListOfRequests();
+					g740.execDelay.go({
+						obj: this,
+						func: function() {
+							this.isActionExecuted=false;
+							this.doG740Repaint();
+						},
+						delay: 50
+					});
+				},
+				
+				getRequestByKey: function(key, rowsetName) {
+					var result=null;
+					for (var name in this.requests) {
+						var rr=this.requests[name];
+						if (!rr) continue;
+						if (!rr.key) continue;
+						
+						if (rr.key.keyCode!=key.keyCode) continue;
+						if (rr.key.ctrlKey!=key.ctrlKey) continue;
+						if (rr.key.altKey!=key.altKey) continue;
+						if (rr.key.shiftKey!=key.shiftKey) continue;
+						if (rr.rowsetName && rowsetName && rr.rowsetName!=rowsetName) continue;
+						result=rr;
+						break;
+					}
+					return result;
+				},
 				
 				getRequestEnabled: function(requestName, requestMode) {
 					var procedureName='g740.Form['+this.name+'].getRequestEnabled';
 					if (this.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject');
+					if (!requestName) return false;
 					var fullName=requestName;
 					if (requestMode) fullName=requestName+'.'+requestMode;
 					var r=this.requests[fullName];
 					if (!r) {
-						if (requestName=='connect' || requestName=='disconnect' || requestName=='httpget' || requestName=='close') return true;
+						if (requestName=='refresh') return false;
+						if (requestName=='refreshrow') return false;
+						if (requestName=='expand') return false;
+						if (requestName=='save') return false;
+						if (requestName=='append') return false;
+						if (requestName=='copy') return false;
+						if (requestName=='move') return false;
+						if (requestName=='link') return false;
+						if (requestName=='delete') return false;
+						if (requestName=='join') return false;
+						if (requestName=='change') return false;
+						if (requestName=='shift') return false;
+						if (requestName=='undo') return false;
+						if (requestName=='expand') return false;
+						if (requestName=='collapse') return false;
+						if (requestName=='mark') return false;
+						if (requestName=='unmarkall') return false;
+						
+						if (requestName=='connect' || requestName=='disconnect' || requestName=='httpget' || requestName=='httpput' || requestName=='close') return true;
 						if (requestName=='form') return requestMode!='';
 						if (requestName=='result') return true;
-						return false;
+						return true;
 					}
 					if (r.enabled===false) return false;
 					if (!g740.js_eval(this, r.js_enabled, true)) return false;
@@ -464,7 +627,7 @@ define(
 					for(var paramName in requestParams) {
 						var p=requestParams[paramName];
 						if (!p) continue;
-						if (p.enabled==false) continue;
+						if (typeof(p.enabled)!='undefined' && !p.enabled) continue;
 						if (!g740.js_eval(this, p.js_enabled, true)) continue;
 						var value='';
 						if (typeof(p.value)!='undefined') {
@@ -577,19 +740,50 @@ define(
 					g740.trace.goBuilderStart();
 					try {
 						this.name=g740.xml.getAttrValue(xmlForm, 'name', '');
+						this.controller=g740.xml.getAttrValue(xmlForm, 'controller', this.name);
+						
 						this.title=g740.xml.getAttrValue(xmlForm, 'caption', '');
+						this.icon=g740.xml.getAttrValue(xmlForm, 'icon', '');
 						
 						this.isModal=g740.xml.getAttrValue(xmlForm, 'modal', '0')=='1';
 						this.isClosable=g740.xml.getAttrValue(xmlForm, 'closable', '1')=='1';
 						if (g740.xml.isAttr(xmlForm,'width')) this.g740Width=g740.xml.getAttrValue(xmlForm, 'width', this.g740Width);
 						if (g740.xml.isAttr(xmlForm,'height')) this.g740Height=g740.xml.getAttrValue(xmlForm, 'height', this.g740Height);
 
+						
+						if (g740.xml.isAttr(xmlForm,'onclose')) this.evt_onclose=g740.xml.getAttrValue(xmlForm, 'onclose', '');
+						if (g740.xml.isAttr(xmlForm,'onshow')) this.evt_onshow=g740.xml.getAttrValue(xmlForm, 'onshow', '');
 						// Вытаскиваем скрипты, если они есть
-						var xmlScript=g740.xml.findFirstOfChild(xmlForm,{nodeName:'scripts'});
-						if (!g740.xml.isXmlNode(xmlScript)) xmlScript=g740.xml.findFirstOfChild(xmlForm,{nodeName:'script'});
-						if (g740.xml.isXmlNode(xmlScript)) {
-							var script='({'+xmlScript.textContent+'})';
-							this.script=eval(script);
+						if (g740.xml.isAttr(xmlForm,'js_onclose')) this.js_onclose=g740.xml.getAttrValue(xmlForm, 'js_onclose', '');
+						if (g740.xml.isAttr(xmlForm,'js_onshow')) this.js_onshow=g740.xml.getAttrValue(xmlForm, 'js_onshow', '');
+						var xmlScripts=g740.xml.findFirstOfChild(xmlForm, {nodeName: 'scripts'});
+						if (!g740.xml.isXmlNode(xmlScripts)) xmlScripts=xmlForm;
+						var lstScript=g740.xml.findArrayOfChild(xmlScripts, {nodeName: 'script'});
+						for (var indexScript=0; indexScript<lstScript.length; indexScript++) {
+							var xmlScript=lstScript[indexScript];
+							var name=g740.xml.getAttrValue(xmlScript, 'name', '');
+							if (!name) name=g740.xml.getAttrValue(xmlScript, 'script', '');
+							if (!name) continue;
+							var f=g740.panels.buildScript(xmlScript);
+							if (name=='onclose') {
+								this.js_onclose=f;
+							}
+							else if (name=='onshow') {
+								this.js_onshow=f;
+							}
+							else {
+								if (typeof(f)=='string') {
+									if (f=='') continue;
+									try {
+										f=new Function('return '+f);
+									}
+									catch (e) {
+										f='';
+									}
+								}
+								if (typeof(f)!='function') continue;
+								this.script[name]=f;
+							}
 						}
 
 						// Строим наборы строк
@@ -640,15 +834,11 @@ define(
 							g740.panels.buildPanel(xmlChild, this, this);
 						}
 						
-						this.g740childs=[];
 						var lst=this.getChildren();
 						for (var i=0; i<lst.length; i++) {
 							var objPanel=lst[i];
 							if (!objPanel) continue;
-							if (objPanel.onG740AfterBuild) {
-								this.g740childs.push(objPanel);
-								objPanel.onG740AfterBuild();
-							}
+							if (objPanel.onG740AfterBuild) objPanel.onG740AfterBuild();
 						}
 					}
 					finally {
@@ -659,7 +849,7 @@ define(
 					
 					if (bestPanel && bestPanel.doG740Focus) {
 						g740.execDelay.go({
-							delay: 200,
+							delay: 500,
 							obj: bestPanel,
 							func: bestPanel.doG740Focus
 						});
@@ -767,6 +957,49 @@ define(
 							}
 							objRowSet.objParent=objParent;
 						}
+						
+						// Разбираемся с источниками данных для хранения маркеровок
+						for (var nodeType in objRowSet.nodeTypes) {
+							var nt=objRowSet.nodeTypes[nodeType];
+							if (!nt.markRowset) continue;
+							var objMark=this.rowsets[nt.markRowset.rowsetName];
+							if (!objMark) {
+								g740.trace.goBuilder({
+									formName: this.name,
+									rowsetName: nt.markRowset.rowsetName,
+									messageId: 'errorRowSetNotFoundInForm'
+								});
+								result=false;
+								continue;
+							}
+							objMark.isMark=true;
+							objMark.markOwnerName=name;
+							
+							var fields=objMark.getFieldsByNodeType('');
+							if (fields) {
+								if (nt.markRowset.fieldMark && !fields[nt.markRowset.fieldMark]) {
+									g740.trace.goBuilder({
+										formName: this.name,
+										rowsetName: nt.markRowset.rowsetName,
+										fieldName: nt.markRowset.fieldMark,
+										messageId: 'errorNotFoundFieldName'
+									});
+									result=false;
+									continue;
+								}
+								if (nt.markRowset.fieldNodeType && !fields[nt.markRowset.fieldNodeType]) {
+									g740.trace.goBuilder({
+										formName: this.name,
+										rowsetName: nt.markRowset.rowsetName,
+										fieldName: nt.markRowset.fieldNodeType,
+										messageId: 'errorNotFoundFieldName'
+									});
+									result=false;
+									continue;
+								}
+							}
+						}
+						
 						objRowSet.doAfterBuild();
 					}
 					return result;
@@ -780,8 +1013,6 @@ define(
 					
 					var requestName=g740.xml.getAttrValue(xmlRequest,'name','');
 					requestName=g740.xml.getAttrValue(xmlRequest,'request',requestName);
-					if (requestName=='close') requestName='onclose';
-					if (requestName=='select') requestName='onselect';
 						
 					var requestMode=g740.xml.getAttrValue(xmlRequest,'mode','');
 					if (requestName=='form') var requestMode=g740.xml.getAttrValue(xmlRequest,'form',requestMode);
@@ -800,8 +1031,37 @@ define(
 						};
 					}
 					g740.panels.buildRequestParams(xmlRequest, request);
-					this.requests[fullName]=request;
+					if (g740.xml.isAttr(xmlRequest,'rowset')) request.rowsetName=g740.xml.getAttrValue(xmlRequest,'rowset','');
 					
+					if (g740.xml.isAttr(xmlRequest,'key')) {
+						var str=g740.xml.getAttrValue(xmlRequest,'key','');
+						var key={
+							ctrlKey: false,
+							shiftKey: false,
+							altKey: false
+						};
+						if (str.indexOf('ctrl+')>=0) {
+							key.ctrlKey=true;
+							str=str.replaceAll('ctrl+','');
+						}
+						if (str.indexOf('shift+')>=0) {
+							key.shiftKey=true;
+							str=str.replaceAll('shift+','');
+						}
+						if (str.indexOf('alt+')>=0) {
+							key.altKey=true;
+							str=str.replaceAll('alt+','');
+						}
+						str=dojo.trim(str);
+						if (str=='enter') str=13;
+						if (str=='escape') str=27;
+						if (str=='space') str=32;
+						if (str=='ins') str=45;
+						if (str=='del') str=46;
+						key.keyCode=str;
+						request.key=key;
+					}
+					this.requests[fullName]=request;
 					var xmlRequests=g740.xml.findFirstOfChild(xmlRequest,{nodeName:'requests'});
 					if (!g740.xml.isXmlNode(xmlRequests)) xmlRequests=xmlRequest;
 					var lstRequest=g740.xml.findArrayOfChild(xmlRequests, {nodeName:'request'});
@@ -919,26 +1179,40 @@ define(
 					if (this.objDialogEditor && this.objDialogEditor.doG740Repaint) this.objDialogEditor.doG740Repaint(para);
 				},
 				doG740RepaintChildsVisible: function() {
-					var index=0;
-					for (var i=0; i<this.g740childs.length; i++) {
-						var objPanel=this.g740childs[i];
+					var isChanged=false;
+					var lst=this.getChildren();
+					for (var i=0; i<lst.length; i++) {
+						var objPanel=lst[i];
 						if (!objPanel) continue;
-						if (objPanel.g740className=='g740.Panel' && objPanel.objForm && objPanel.js_visible) {
-							var visible=g740.js_eval(objPanel.objForm, objPanel.js_visible, true);
+						if (objPanel.g740className=='g740.Panel' && objPanel.js_visible) {
+							if (!objPanel.domNode) continue;
+
+							var visible=false;
+							var obj=null;
+							if (objPanel.getRowSet) obj=objPanel.getRowSet();
+							if (!obj) obj=objPanel.objForm;
+							if (obj) {
+								visible=g740.convertor.toJavaScript(g740.js_eval(obj, objPanel.js_visible, true),'check');
+							}
+
 							if (visible!=objPanel.visible) {
 								if (visible) {
-									this.addChild(objPanel, index);
-									if (objPanel.doG740Repaint) objPanel.doG740Repaint({});
+									dojo.style(objPanel.domNode,'display','block');
+									if (objPanel.doG740Repaint) {
+										objPanel.visible=visible;
+										objPanel.doG740Repaint({isFull: true});
+									}
 								}
 								else {
-									this.removeChild(objPanel);
+									dojo.style(objPanel.domNode,'display','none');
 								}
 								objPanel.visible=visible;
+								isChanged=true;
 							}
 							if (!objPanel.visible) continue;
 						}
-						index++;
 					}
+					if (isChanged) this.layout();
 				},
 
 				doG740Get: function(name) {
@@ -972,7 +1246,6 @@ define(
 				// Событие - смена панели, принимающей фокус ввода
 				onG740ChangeFocusedPanel: function(objPanel) {
 					var procedureName='g740.Form['+this.name+'].onG740ChangeFocusedPanel';
-					if (this._isChangeFocusedPanelDisabled) return false;
 					if (this.isObjectDestroed) return false;
 					if (this.objFocusedPanel==objPanel) return true;
 					var oldRowSet=this.getFocusedRowSet();
@@ -985,52 +1258,61 @@ define(
 					}
 					if (newRowSet && newRowSet.isRef) return true;
 					if (newRowSet && newRowSet.isRefTree) return true;
-					
-					if (oldRowSet && (newRowSet!=oldRowSet)) {
-						if (!oldRowSet.isFilter && oldRowSet.getExistUnsavedChanges()) {
-							if (!oldRowSet.exec({requestName: 'save'})) {
-								this._isChangeFocusedPanelDisabled=true;
-								g740.execDelay.go({
-									delay:50,
-									obj: this,
-									func: this._setFocusedPanelToOldFocusedPanel
-								});
-								return false;
-							}
+					if (oldRowSet!=newRowSet) {
+						this._newObjPanel=objPanel;
+						if (this._isChangeFocusedPanelEnabled) {
+							this._isChangeFocusedPanelEnabled=false;
+							g740.execDelay.go({
+								delay:5,
+								obj: this,
+								func: this._setFocusedPanelAndChangeRowSet
+							});
 						}
+						return true;
 					}
-					this.objFocusedPanel=objPanel;
-					if (newRowSet!=oldRowSet) {
-						this.doG740Repaint({objRowSet: newRowSet});
+					else {
+						this.objFocusedPanel=objPanel;
 					}
 					return true;
 				},
-				_isChangeFocusedPanelDisabled: false,
-				_setFocusedPanelToOldFocusedPanel: function() {
-					if (this.objFocusedPanel) {
-						if (this.objFocusedPanel.doG740Focus) {
-							this.objFocusedPanel.doG740Focus();
+				_isChangeFocusedPanelEnabled: true,
+				_newObjPanel: null,
+				_setFocusedPanelAndChangeRowSet: function() {
+					try {
+						if (this.isObjectDestroed) return false;
+						var objPanel=this._newObjPanel;
+						var oldRowSet=this.getFocusedRowSet();
+						var newRowSet=null;
+						if (objPanel && !objPanel.isObjectDestroed) {
+							var newRowSet=this.rowsets[objPanel.rowsetName];
 						}
-						else {
-							try {
-								this.objFocusedPanel.set('focused',true);
-							}
-							catch(e) {
+						if (oldRowSet && !oldRowSet.isFilter && oldRowSet.getExistUnsavedChanges()) {
+							if (!oldRowSet.exec({requestName: 'save'})) {
+								if (this.objFocusedPanel) {
+									if (this.objFocusedPanel.doG740Focus) {
+										this.objFocusedPanel.doG740Focus();
+									}
+									else {
+										try {
+											this.objFocusedPanel.set('focused',true);
+										}
+										catch(e) {
+										}
+									}
+								}
+								return false;
 							}
 						}
+						this.objFocusedPanel=objPanel;
+						this.doG740Repaint({}); // эта перерисовка нужна для отображения пенели toolbar при смене текущего источника данных
 					}
-					g740.execDelay.go({
-						delay:50,
-						obj: this,
-						func: this._setFocusedPanelDisabledToOff
-					});
-				},
-				_setFocusedPanelDisabledToOff: function() {
-					this._isChangeFocusedPanelDisabled=false;
+					finally {
+						this._isChangeFocusedPanelEnabled=true;
+						this._newObjPanel=null;
+					}
+					return true;
 				},
 
-				
-				
 				// Передача фокуса ввода
 				canFocused: function() {
 					var result=false;
