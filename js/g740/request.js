@@ -428,38 +428,22 @@ define(
 				if (ext) {
 					var lstExt=ext.split(';');
 					for(var i=0; i<lstExt.length; i++) {
-						var e=lstExt[i];
+						var e=dojo.trim(lstExt[i]);
 						if (e=='jpg') {
 							if (accept) accept+=',';
-							accept+='image/jpeg';
+							accept+='.jpg,.jpeg';
 						}
-						if (e=='png') {
+						else if (e=='doc') {
 							if (accept) accept+=',';
-							accept+='image/png';
+							accept+='.doc,.docx';
 						}
-						if (e=='gif') {
+						else if (e=='xls') {
 							if (accept) accept+=',';
-							accept+='image/gif';
+							accept+='.xls,.xlsx';
 						}
-						if (e=='pdf') {
+						else {
 							if (accept) accept+=',';
-							accept+='application/pdf';
-						}
-						if (e=='doc') {
-							if (accept) accept+=',';
-							accept+='application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-						}
-						if (e=='xls') {
-							if (accept) accept+=',';
-							accept+='application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-						}
-						if (e=='zip') {
-							if (accept) accept+=',';
-							accept+='application/zip';
-						}
-						if (e=='xml') {
-							if (accept) accept+=',';
-							accept+='text/xml';
+							accept+='.'+e;
 						}
 					}
 				}
