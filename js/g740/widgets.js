@@ -803,7 +803,7 @@ define(
 						this.domNodeItems.appendChild(domItem);
 						this._listOfDomItem[item['id']]=domItem;
 					}
-					if (!this._listOfDomItem[this.value]) this.value=this.getIdFirst();
+					if (this.value=='' || !this._listOfDomItem[this.value]) this.value=this.getIdFirst();
 					this._renderValue();
 					this.onResize();
 				},
@@ -1022,11 +1022,11 @@ define(
 					if (!objTreeStorage) return result;
 					if (objTreeStorage.isObjectDestroed) return result;
 					
-					if (this.isAddEmptyItem) result.push({id: '', value: '---//---'});
 
 					var nodes=objTreeStorage.getChildsOrdered(objTreeStorage.rootNode);
 					var filter='';
 					if (this.filter) filter=this.filter.toLowerCase();
+					if (!filter && this.isAddEmptyItem) result.push({id: '', value: '---//---'});
 					for (var i=0; i<nodes.length; i++) {
 						var node=nodes[i];
 						if (!node) continue;
@@ -1042,6 +1042,7 @@ define(
 						var item={id: node.id, value: value};
 						result.push(item);
 					}
+					if (filter && this.isAddEmptyItem) result.push({id: '', value: '---//---'});
 					return result;
 				}
 			}
