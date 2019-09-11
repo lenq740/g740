@@ -69,6 +69,9 @@
 	messageBtnYes: 'Да',
 	messageBtnNo: 'Нет',
 	messageBtnClear: 'Очистить',
+	messageBtnErrorOnSaveOk: 'Продолжить',
+	messageBtnErrorOnSaveUndo: 'Отменить изменения',
+	
 	messageDlgConfirmTitle: 'Вопрос',
 	messageDlgMessageTitle: 'Сообщение',
 	messageDlgErrorTitle: 'Ошибка',

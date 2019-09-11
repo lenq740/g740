@@ -63,23 +63,38 @@ define(
 			objDialog.show();
 			return objDialog;
 		};
-		g740.showError=function(message, objOwner) {
+		g740.showError=function(message, objOwner, requestName) {
 			var objForm=null;
 			var objFocusedPanel=null
+			var isSaveMode=false;
 			if (objOwner) {
-				if (objOwner.g740className=='g740.RowSet' && !objOwner.isObjectDestroed) objForm=objOwner.objForm;
+				if (objOwner.g740className=='g740.RowSet' && !objOwner.isObjectDestroed) {
+					objForm=objOwner.objForm;
+					if (requestName=='save') isSaveMode=true;
+				}
 				if (objOwner.g740className=='g740.Form' && !objOwner.isObjectDestroed) objForm=objOwner;
 			}
 			if (objForm && !objForm.isObjectDestroed && objForm.objFocusedPanel) objFocusedPanel=objForm.objFocusedPanel;
-			var objDialog=new g740.DialogConfirm(
-				{ 
+			var p={
 					duration: 0, 
 					draggable: false,
 					mode: 'error',
 					messageText: message,
 					objOwner: objFocusedPanel
+			};
+			if (isSaveMode) {
+				p.closePara=objOwner;
+				p.btnOkMessageId='messageBtnErrorOnSaveOk';
+				p.btnGoIcon='undo';
+				p.btnGoMessageId='messageBtnErrorOnSaveUndo';
+				p.height='280px';
+				p.onClolseGo=function(objRowSet) {
+					if (objRowSet && objRowSet.g740className=='g740.RowSet' && !objRowSet.isObjectDestroed) {
+						objRowSet.undoUnsavedChanges();
+					}
 				}
-			);
+			}
+			var objDialog=new g740.DialogConfirm(p);
 			objDialog.show();
 			return objDialog;
 		};

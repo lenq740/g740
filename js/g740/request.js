@@ -349,7 +349,11 @@ define(
 							var obj=para.objOwner;
 							if (obj.g740className=='g740.RowSet' && obj.isIgnoreRequestError) isShowError=false;
 						}
-						if (isShowError) g740.showError(errMessage, para.objOwner);
+						if (isShowError) {
+							var requestName='';
+							if (para && para.requestName) requestName=para.requestName;
+							g740.showError(errMessage, para.objOwner, requestName);
+						}
 					}
 					if (message) g740.showMessage(message, para.objOwner);
 					this._indexExecuted--;

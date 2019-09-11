@@ -1410,11 +1410,15 @@ define(
 				btnOkIcon: 'ok',
 				btnCancelMessageId: 'messageBtnCancel',
 				btnCancelIcon: 'cancel',
+				btnGoMessageId: '',
+				btnGoIcon: '',
+
 				objBtnOk: null,
 				objOwner: null,
 
 				onCloseOk: null,
 				onClolseCancel: null,
+				onClolseGo: null,
 				closePara: null,
 				closeObj: null,
 				mode: 'confirm',
@@ -1444,6 +1448,12 @@ define(
 						this.btnCancelMessageId=value;
 						return true;
 					}
+					if (name=='btnGoMessageId') {
+						if (this.btnGoMessageId==value) return true;
+						if (value || !g740._messages[value]) g740.error('errorIncorrectValue',value);
+						this.btnGoMessageId=value;
+						return true;
+					}
 					if (name=='btnOkIcon') {
 						if (this.btnOkIcon==value) return true;
 						if (!value) value='';
@@ -1458,6 +1468,13 @@ define(
 						this.btnCancelIcon=value;
 						return true;
 					}
+					if (name=='btnGoIcon') {
+						if (this.btnGoIcon==value) return true;
+						if (!value) value='';
+						if (value && !g740.icons._items[value]) g740.error('errorIncorrectValue',value);
+						this.btnGoIcon=value;
+						return true;
+					}
 					if (name=='onCloseOk') {
 						if (this.onCloseOk==value) return true;
 						if (!value) value=null;
@@ -1470,6 +1487,13 @@ define(
 						if (!value) value=null;
 						if (value && typeof(value)!='function') g740.error('errorIncorrectTypeOfValue',value);
 						this.onCloseCancel=value;
+						return true;
+					}
+					if (name=='onClolseGo') {
+						if (this.onClolseGo==value) return true;
+						if (!value) value=null;
+						if (value && typeof(value)!='function') g740.error('errorIncorrectTypeOfValue',value);
+						this.onClolseGo=value;
 						return true;
 					}
 					if (name=='closePara') {
@@ -1528,7 +1552,7 @@ define(
 						{
 							design: 'headline',
 							region: 'bottom',
-							style: 'height: 28px;padding-top: 1px'
+							style: 'height: 28px;padding-top: 1px;border-bottom-style:solid;border-bottom-width:2px;border-bottom-color: rgba(255, 255, 255, 0);'
 						},
 						null
 					);
@@ -1536,7 +1560,7 @@ define(
 
 					var p={
 						region: 'center',
-						style: ''
+						style: 'overflow-y:auto;'
 					};
 					if (this.mode=='error') {
 						p['style']+='background-color: red; color: white';
@@ -1588,9 +1612,25 @@ define(
 					);
 					objPanelBottom.addChild(objBtn);
 					this.objBtnOk=objBtn;
+					
+					if (this.btnGoMessageId && this.btnGoIcon) {
+						var objBtn=new g740.PanelButton(
+							{
+								region: 'right',
+								label: g740.getMessage(this.btnGoMessageId),
+								onClick: dojo.hitch(this, this.onBtnGoClick),
+								onKeyDown: dojo.hitch(this, this.onKeyDown),
+								iconClass: g740.icons.getIconClassName(this.btnGoIcon,'medium')
+							},
+							null
+						);
+						objPanelBottom.addChild(objBtn);
+					}
+					
 					this.set('title',g740.getMessage(this.titleMessageId));
 				},
 				_isOk: false,
+				_isGo: false,
 				onBtnOkClick: function(e) {
 					if (this.hide) {
 						this._isOk=true;
@@ -1599,6 +1639,12 @@ define(
 				},
 				onBtnCancelClick: function(e) {
 					if (this.hide) {
+						this.hide();
+					}
+				},
+				onBtnGoClick: function(e) {
+					if (this.hide) {
+						this._isGo=true;
 						this.hide();
 					}
 				},
@@ -1620,6 +1666,16 @@ define(
 								delay: 50,
 								obj: this.closeObj,
 								func: this.onCloseOk,
+								para: this.closePara
+							});
+						}
+					}
+					else if (this._isGo) {
+						if (this.onClolseGo) {
+							g740.execDelay.go({
+								delay: 50,
+								obj: this.closeObj,
+								func: this.onClolseGo,
 								para: this.closePara
 							});
 						}
