@@ -286,6 +286,7 @@ define(
 				emptyValue: '',
 				isSaveOnChange: false,
 				isShowNullAsEmptyString: true,
+				_btnClearWidth: 0,
 				set: function(name, value) {
 					if (name=='objForm') {
 						this.objForm=value;
@@ -435,7 +436,7 @@ define(
 				getMinWidth: function() {
 					var result=10;
 					if (this.fieldDef.len) {
-						result=parseInt(this.fieldDef.len*g740.config.charwidth+this._getButtonWidth()+5);
+						result=parseInt(this.fieldDef.len*g740.config.charwidth+this._getButtonWidth()+this._btnClearWidth+5);
 					}
 					return result;
 				},
@@ -559,6 +560,7 @@ define(
 			}
 		);
 		
+/*		
 	    // Виджет для поля даты
 		dojo.declare(
 			'g740.FieldEditor.Date1',
@@ -661,11 +663,14 @@ define(
 				},
 			}
 		);
+*/		
+		
 		// Виджет для поля строки
 		dojo.declare(
 			'g740.FieldEditor.String',
 			[g740.TextBox, g740.FieldEditor],
 			{
+				_btnClearWidth: 8,
 				constructor: function(para, domElement) {
 					var procedureName='g740.FieldEditor.String.constructor';
 					try {
@@ -1013,6 +1018,7 @@ define(
 			'g740.FieldEditor.Date',
 			[g740.ComboBox, g740.FieldEditor],
 			{
+				_btnClearWidth: 8,
 				postCreate: function() {
 					this.inherited(arguments);
 				},
@@ -1113,6 +1119,7 @@ define(
 			'g740.FieldEditor.List',
 			[g740.ComboBox, g740.FieldEditor],
 			{
+				_btnClearWidth: 8,
 				postCreate: function() {
 					this.inherited(arguments);
 				},
@@ -1247,6 +1254,7 @@ define(
 			'g740.FieldEditor.Ref',
 			[g740.ComboBox, g740.FieldEditor],
 			{
+				_btnClearWidth: 8,
 				postCreate: function() {
 					this.inherited(arguments);
 				},

@@ -248,9 +248,20 @@ define(
 					this.attr={};
 					this.inherited(arguments);
 					
-					if (objParentForm && objParentForm.objFocusedPanel && objParentForm.objFocusedPanel.doG740Focus) {
-						objParentForm.objFocusedPanel.doG740Focus();
-						objParentForm.continueExecListOfRequest();
+					var focusedForm=g740.application.getFocusedForm();
+					if (focusedForm && focusedForm==g740.application.objForm && g740.application.objForm.objPanelForm) {
+						var objPanelForm=g740.application.objForm.objPanelForm;
+						if (objPanelForm.onChangeFocusedForm) {
+							objPanelForm._isExpandedOnEmptyFirst=false;
+							objPanelForm.onChangeFocusedForm();
+						}
+					}
+					
+					if (objParentForm) {
+						if (objParentForm.objFocusedPanel && objParentForm.objFocusedPanel.doG740Focus) {
+							objParentForm.objFocusedPanel.doG740Focus();
+						}
+						if (objParentForm.continueExecListOfRequest) objParentForm.continueExecListOfRequest();
 					}
 				},
 				show: function() {

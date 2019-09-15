@@ -567,6 +567,7 @@ html, body {
 }
 .g740-widget-text.g740-widget-num .g740-widget-input {
 	text-align: right;
+	padding-right: 10px;
 }
 
 .g740-combobox .g740-widget-input {
