@@ -9,7 +9,7 @@ define(
 	function() {
 		if (typeof(g740)=='undefined') g740={};
 		
-		// Контейнер, содержащий поле и метку - название поля
+// g740.FieldContainer - контейнер, содержащий поле и метку - название поля
 		dojo.declare(
 			'g740.FieldContainer',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -268,7 +268,7 @@ define(
 			}
 		);
 		
-		// Абстрактный предок всех полей
+// g740.FieldEditor - абстрактный предок всех полей
 		dojo.declare(
 			'g740.FieldEditor',
 			null,
@@ -524,7 +524,6 @@ define(
 							if (node) nodeType=node.nodeType;
 							if (this.nodeType!=nodeType) return false;
 						}
-						
 						this.objRowSet.setFieldProperty({fieldName: this.fieldName, propertyName: 'value', value: newValue, id: rowId});
 						if (this.isSaveOnChange && this.objRowSet.getExistUnsavedChanges()) {
 							this.objRowSet.exec({requestName: 'save'});
@@ -559,113 +558,7 @@ define(
 				}
 			}
 		);
-		
-/*		
-	    // Виджет для поля даты
-		dojo.declare(
-			'g740.FieldEditor.Date1',
-			[dijit.form.DateTextBox, g740.FieldEditor],
-			{
-				isShowNullAsEmptyString: false,
-				constructor: function(para, domElement) {
-					var procedureName='g740.FieldEditor.Date.constructor';
-					try {
-						this.set('datePattern','dd.MM.yyyy');
-						this.set('selector','date');
-						this.emptyValue=null;
-						this.inherited(arguments);
-					}
-					finally {
-					}
-				},
-
-				postCreate: function() {
-					this.inherited(arguments);
-				},
-				on: function(name, func) {
-					if (name=='Focus') {
-						if (this.focusNode) dojo.on(this.focusNode, 'focus', dojo.hitch(this, func));
-						return true;
-					}
-					if (name=='Blur') {
-						if (this.focusNode) dojo.on(this.focusNode, 'blur', dojo.hitch(this, func));
-						return true;
-					}
-					return this.inherited(arguments);
-				},
-				_onKey: function(e) {
-					if (e.keyCode==13 && e.ctrlKey) {
-						// Ctrl+Enter
-						dojo.stopEvent(e);
-						if (!this.getReadOnly()) this.openDropDown();
-					}
-					else if (this._opened && e.keyCode == 27) {
-						this.closeDropDown();
-					}
-					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
-						// Enter, Tab
-						dojo.stopEvent(e);
-						if (this.textbox) this.set('displayedValue',this.textbox.value);
-						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
-					}
-					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {
-						// Shift+Tab
-						dojo.stopEvent(e);
-						if (this.textbox) this.set('displayedValue',this.textbox.value);
-						if (this.objPanel) this.objPanel.doG740FocusChildPrev(this);
-					}
-				},
-				getMinWidth: function() {
-					result=parseInt(9*g740.config.charwidth+this._getButtonWidth());
-					return result;
-				},
-				setWidth: function(width) {
-					this._width=this.getMinWidth();
-					if (this.domNode) dojo.style(this.domNode, 'width', this.getStyleWidth());
-				},
-				_getButtonWidth: function() {
-					return 15;
-				},
-				openDropDown: function() {
-					if (this.getEventOnActionEnabled()) {
-						this.execEventOnAction();
-						return false;
-					}
-					this.inherited(arguments);
-				},
-				doSelect: function() {
-					if (!this.focusNode) return;
-					var value=this.focusNode.value;
-					var cursorPos=String(value).length;
-					if (this.focusNode.setSelectionRange) {
-						this.focusNode.setSelectionRange(0,cursorPos);
-					}
-					else if (this.focusNode.createTextRange) {
-						var range=this.focusNode.createTextRange();
-						range.collapse(true);
-						range.moveStart('character', 0);
-						range.moveEnd('character', cursorPos);
-						range.select();
-					}
-				},
-				onG740Focus: function() {
-					if (this.domNode && !dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.addClass(this.domNode,'g740-widget-focused');
-					this.inherited(arguments);
-					g740.execDelay.go({
-						delay: 50,
-						obj: this,
-						func: this.doSelect
-					});
-				},
-				onG740Blur: function() {
-					if (this.domNode && dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.removeClass(this.domNode,'g740-widget-focused');
-					this.inherited(arguments);
-				},
-			}
-		);
-*/		
-		
-		// Виджет для поля строки
+// g740.FieldEditor.String - виджет для поля строки
 		dojo.declare(
 			'g740.FieldEditor.String',
 			[g740.TextBox, g740.FieldEditor],
@@ -750,7 +643,7 @@ define(
 				}
 			}
 		);
-		// Виджет для поля многострочного редактора
+// g740.FieldEditor.Memo - виджет для поля многострочного редактора
 		dojo.declare(
 			'g740.FieldEditor.Memo',
 			[g740.Memo, g740.FieldEditor],
@@ -838,7 +731,7 @@ define(
 				}
 			}
 		);
-		// Виджет для поля CheckBox
+// g740.FieldEditor.Icons - виджет для поля icons
 		dojo.declare(
 			'g740.FieldEditor.Icons',
 			[dijit._Widget, dijit._TemplatedMixin, g740.FieldEditor],
@@ -925,7 +818,14 @@ define(
 				convertFromValueToTextValue: function(value) {
 					var baseType=this.getBaseType();
 					if (baseType=='num') {
-						if (typeof(value)=='boolean') value=value?1:0;
+						var t=typeof(value);
+						if (t=='boolean') {
+							value=value?1:0;
+						}
+						else if (t=='string') {
+							value=parseInt(value);
+							if (!value) value=0;
+						}
 					}
 					return value;
 				},
@@ -982,6 +882,7 @@ define(
 				}
 			}
 		);
+// g740.FieldEditor.Check - виджет для поля CheckBox
 		dojo.declare(
 			'g740.FieldEditor.Check',
 			[g740.FieldEditor.Icons],
@@ -1012,8 +913,7 @@ define(
 				},
 			}
 		);
-
-		// Виджет для поля даты
+// g740.FieldEditor.Date - виджет для поля даты
 		dojo.declare(
 			'g740.FieldEditor.Date',
 			[g740.ComboBox, g740.FieldEditor],
@@ -1111,10 +1011,7 @@ define(
 				}
 			}
 		);
-
-
-		
-	    // Виджет для поля List
+// g740.FieldEditor.List - виджет для поля List
 		dojo.declare(
 			'g740.FieldEditor.List',
 			[g740.ComboBox, g740.FieldEditor],
@@ -1249,7 +1146,7 @@ define(
 				}
 			}
 		);
-		// Виджет для поля справочника
+// g740.FieldEditor.Ref - виджет для поля справочника
 		dojo.declare(
 			'g740.FieldEditor.Ref',
 			[g740.ComboBox, g740.FieldEditor],
@@ -1388,7 +1285,7 @@ define(
 				}
 			}
 		);
-		// Виджет RadioGroup
+// g740.FieldEditor.RadioGroupBox - виджет RadioGroup
 		dojo.declare(
 			'g740.FieldEditor.RadioGroupBox',
 			[dijit._Widget, dijit._TemplatedMixin, g740.FieldEditor],
@@ -1627,7 +1524,7 @@ define(
 				}
 			}
 		);
-		// Виджет для поля RefList
+// g740.FieldEditor.RefList - виджет для поля RefList
 		dojo.declare(
 			'g740.FieldEditor.RefList',
 			[dijit._Widget, dijit._TemplatedMixin, g740.FieldEditor],
@@ -1835,7 +1732,7 @@ define(
 				}
 			}
 		);
-		// Виджет для поля RefTree
+// g740.FieldEditor.RefTree - виджет для поля RefTree
 		dojo.declare(
 			'g740.FieldEditor.RefTree',
 			[g740.FieldEditor.RefList],
@@ -1878,8 +1775,7 @@ define(
 				}
 			}
 		);
-		
-	    // Виджет кнопки
+// g740.FieldEditor.Button - виджет кнопки
 		dojo.declare(
 			'g740.FieldEditor.Button',
 			[dijit.form.Button, g740.FieldEditor],

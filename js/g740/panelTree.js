@@ -8,7 +8,7 @@ define(
 	[],
 	function() {
 		if (typeof(g740)=='undefined') g740={};
-// Класс дерево
+// g740.Tree - дерево
 		dojo.declare(
 			'g740.Tree',
 			[g740._PanelAbstract, dijit._TemplatedMixin, dijit.layout._LayoutWidget],
@@ -680,6 +680,7 @@ define(
 				}
 			}
 		);
+		
 		g740.panels._builderPanelTree=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanelTree';
@@ -715,6 +716,7 @@ define(
 		};
 		g740.panels.registrate('tree', g740.panels._builderPanelTree);
 
+// g740.TreeMenu - древовидное меню
 		dojo.declare(
 			'g740.TreeMenu',
 			[g740.Tree],
@@ -874,7 +876,7 @@ define(
 		};
 		g740.panels.registrate('treemenu', g740.panels._builderPanelTreeMenu);
 
-// Виджет: дерево с пометкой листьев
+// g740.TreeCheckBox - дерево с пометкой листьев
 		dojo.declare(
 			'g740.TreeCheckBox',
 			[g740.Tree],

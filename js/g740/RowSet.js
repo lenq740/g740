@@ -9,7 +9,7 @@ define(
 	function () {
 	    if (typeof (g740)=='undefined') g740={};
 
-// Описание стандартных запросов для набора строк
+// описание стандартных запросов для набора строк
 	    g740.rowsetRequestInfo={
 	        'definition': {
 	            sync: true,
@@ -183,7 +183,7 @@ define(
 	            specnofilter: true
 	        }
 	    };
-
+// список допустимых типов полей
 		g740.fieldTypes={
 			'string': true,
 			'memo': true,
@@ -198,8 +198,7 @@ define(
 			'reftree': true,
 			'html': true
 		};
-		
-//	Набор строк
+// g740.RowSet - набор строк
 	    dojo.declare(
 			"g740.RowSet",
 			null,
@@ -3423,8 +3422,7 @@ define(
 			    }
 			}
 		);
-
-	    // Древовидное хранилище, уникальность id в пределах дочерних элементов узла
+// g740.TreeStorage - древовидное хранилище, уникальность id в пределах дочерних элементов узла
 	    dojo.declare(
 			"g740.TreeStorage",
 			null,
@@ -3699,8 +3697,7 @@ define(
 			    }
 			}
 		);
-
-	    //	Интерфейс dojo.data.api для RowSet
+// g740.RowSetDataApi - интерфейс dojo.data.api для RowSet
 	    dojo.declare(
 			'g740.RowSetDataApi',
 			null,

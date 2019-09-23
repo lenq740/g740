@@ -9,7 +9,7 @@ define(
 	function() {
 		if (typeof(g740)=='undefined') g740={};
 		
-// Виджет: заголовок панели
+// g740.PanelTitle - виджет: заголовок панели
 		dojo.declare(
 			'g740.PanelTitle',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -20,7 +20,7 @@ define(
 				_setTitleAttr: { node: "titleNode", type: "innerHTML" }
 			}
 		);
-
+// g740.PanelSeparator - виджет для отступа между панелями
 		dojo.declare(
 			'g740.PanelSeparator',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -46,8 +46,7 @@ define(
 				}
 			}
 		);
-	
-// Виджет: пагнатор
+// g740.Paginator - виджет: пагнатор
 		dojo.declare(
 			'g740.Paginator',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -269,8 +268,7 @@ define(
 				}
 			}
 		);
-
-// Виджет: строковый редактор с кнопкой вызова диалога
+// g740.TextBox - виджет: строковый редактор с кнопкой вызова диалога
 		dojo.declare(
 			'g740.TextBox',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -373,8 +371,7 @@ define(
 				
 			}
 		);
-
-// Виджет: Memo редактор с кнопкой вызова диалога
+// g740.Memo - виджет: Memo редактор с кнопкой вызова диалога
 		dojo.declare(
 			'g740.Memo',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -439,8 +436,7 @@ define(
 				}
 			}
 		);
-
-// Виджет: Текстовый редактор с кнопкой вызова диалога
+// g740.ComboBox - виджет: Текстовый редактор с кнопкой вызова диалога
 		dojo.declare(
 			'g740.ComboBox',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -547,8 +543,7 @@ define(
 				}
 			}
 		);
-		
-// Виджет: список с пометками элементов
+// g740.ListCheckBox - виджет: список с пометками элементов
 		dojo.declare(
 			'g740.ListCheckBox',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -703,8 +698,7 @@ define(
 				}
 			}
 		)
-
-// Виджет: абстрактный предок списка
+// g740._ListAbstract - виджет: абстрактный предок списка
 		dojo.declare(
 			'g740._ListAbstract',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -977,8 +971,7 @@ define(
 				}
 			}
 		);
-		
-// Виджет: список, начитываемый из DataApi
+// g740.ListRowSet - виджет: список, начитываемый из RowSet
 		dojo.declare(
 			'g740.ListRowSet',
 			g740._ListAbstract,
@@ -1047,8 +1040,7 @@ define(
 				}
 			}
 		);
-
-// Виджет: список, начитываемый из строки, разделенной ;
+// g740.ListItems - виджет: список, начитываемый из строки, разделенной ;
 		dojo.declare(
 			'g740.ListItems',
 			g740._ListAbstract,
@@ -1114,8 +1106,7 @@ define(
 				}
 			}
 		);
-		
-// Класс MenuBar
+// g740.MenuBar - строка меню
 		dojo.declare(
 			'g740.MenuBar',
 			dijit.MenuBar,
@@ -1183,7 +1174,7 @@ define(
 			    }
 			}
 		);
-// Класс Toolbar
+// g740.Toolbar
 		dojo.declare(
 			'g740.Toolbar',
 			dijit.Toolbar,
@@ -1226,7 +1217,7 @@ define(
 				}
 			}
 		);
-// Класс ToolbarButton - кнопка в Toolbar
+// g740.ToolbarButton - кнопка в Toolbar
 		dojo.declare(
 			'g740.ToolbarButton',
 			dijit.form.Button,
@@ -1313,8 +1304,44 @@ define(
 						obj: this,
 						func: this._setClickTimeoutOff
 					});
+					
+					var objPanel=this.getPanelForFocus();
+					if (objPanel && objPanel.doG740FocusChildFirst) objPanel.doG740FocusChildFirst();
+					
 					if (this.objAction) return this.objAction.exec();
 					return false;
+				},
+				getPanelForFocus: function() {
+					var objForm=null;
+					var objToolBarPanel=null;
+
+					var obj=this.getParent();
+					if (obj && obj.getParent) obj=obj.getParent();
+					if (obj.g740className=='g740.Panel') {
+						objToolBarPanel=obj;
+						objForm=objToolBarPanel.objForm;
+					}
+					
+					if (!this.objAction) {
+						if (!objForm) return null;
+						var objFocusedPanel=objForm.objFocusedPanel;
+						if (objFocusedPanel) return objFocusedPanel;
+						if (objToolBarPanel) return objToolBarPanel;
+						return null;
+					}
+					
+					if (!objForm) objForm=this.objAction.objForm;
+					if (!objForm) return null;
+					var objFocusedPanel=objForm.objFocusedPanel;
+					
+					var rowsetName=this.objAction.rowsetName;
+					if (!rowsetName || rowsetName=='#focus' || rowsetName=='#form') {
+						if (objFocusedPanel) return objFocusedPanel;
+						return null;
+					}
+					if (objToolBarPanel && objToolBarPanel.rowsetName==rowsetName) return objToolBarPanel;
+					if (objFocusedPanel && objFocusedPanel.rowsetName==rowsetName) return objFocusedPanel;
+					return null;
 				},
 				onG740KeyDown: function(e) {
 					dojo.stopEvent(e);
@@ -1329,7 +1356,7 @@ define(
 				}
 			}
 		);
-// Класс PanelButton - кнопка в панели
+// g740.PanelButton - кнопка в панели
 		dojo.declare(
 			'g740.PanelButton',
 			g740.ToolbarButton,
@@ -1380,7 +1407,7 @@ define(
 				}
 			}
 		);
-
+// g740.ToolbarComboButton
 		dojo.declare(
 			'g740.ToolbarComboButton',
 			dijit.form.DropDownButton,
@@ -1459,9 +1486,7 @@ define(
 				}
 			}
 		);
-		
-		
-// Класс выпадающего по правой кнопке меню
+// g740.Menu - выпадающее по правой кнопке меню
 		dojo.declare(
 			'g740.Menu',
 			dijit.Menu,
@@ -1486,6 +1511,7 @@ define(
 				}
 			}
 		);
+// g740.PopupMenuItem
 		dojo.declare(
 			'g740.PopupMenuItem',
 			dijit.PopupMenuItem,
@@ -1521,7 +1547,7 @@ define(
 				}
 			}
 		);
-		
+// g740.MenuItem
 		dojo.declare(
 			'g740.MenuItem',
 			dijit.MenuItem,
@@ -1573,7 +1599,7 @@ define(
 				}
 			}
 		);
-		
+// g740.PopupMenuBarItem
 		dojo.declare(
 			'g740.PopupMenuBarItem',
 			dijit.PopupMenuBarItem,
@@ -1620,6 +1646,7 @@ define(
 			    }
 			}
 		);
+// g740.MenuBarItem
 		dojo.declare(
 			'g740.MenuBarItem',
 			dijit.MenuBarItem,
@@ -1671,7 +1698,7 @@ define(
 			    }
 			}
 		);
-		
+// g740.Action
 		dojo.declare(
 			'g740.Action',
 			null,

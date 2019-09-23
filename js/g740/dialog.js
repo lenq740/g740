@@ -9,8 +9,7 @@ define(
 	function() {
 		if (typeof(g740)=='undefined') g740={};
 		
-
-// Предок модального диалога, стандартный диалог dojo иногда зависает Internet Explorer 11
+// g740.Dialog - предок модального диалога, стандартный диалог dojo иногда зависает Internet Explorer 11
 		dojo.declare(
 			'g740.Dialog',
 			dijit._Widget,
@@ -209,8 +208,7 @@ define(
 				}
 			}
 		);
-		
-// Контейнер модальной экранной формы
+// g740.DialogModalForm - контейнер модальной экранной формы
 		dojo.declare(
 			'g740.DialogModalForm',
 			g740.Dialog,
@@ -290,8 +288,7 @@ define(
 				}
 			}
 		);
-		
-// Диалог редактора: абстрактный предок
+// g740.DialogEditorAbstract - диалог редактора: абстрактный предок
 		dojo.declare(
 			'g740.DialogEditorAbstract',
 			g740.Dialog,
@@ -428,8 +425,7 @@ define(
 				}
 			}
 		);
-
-// Диалог редактора: календарь
+// g740.DialogEditorDate - диалог редактора: календарь
 		dojo.declare(
 			'g740.DialogEditorDate',
 			g740.DialogEditorAbstract,
@@ -603,8 +599,7 @@ define(
 				}
 			}
 		);
-		
-// Диалог редактора: справочник
+// g740.DialogEditorRef - диалог редактора: справочник
 		dojo.declare(
 			'g740.DialogEditorRef',
 			g740.DialogEditorAbstract,
@@ -783,8 +778,7 @@ define(
 				}
 			}
 		);
-
-// Диалог редактора: список list
+// g740.DialogEditorList - диалог редактора: список list
 		dojo.declare(
 			'g740.DialogEditorList',
 			g740.DialogEditorAbstract,
@@ -902,8 +896,7 @@ define(
 				}
 			}
 		);
-
-// Диалог редактора: reflist
+// g740.DialogEditorRefList - диалог редактора: reflist
 		dojo.declare(
 			'g740.DialogEditorRefList',
 			g740.DialogEditorAbstract,
@@ -1069,8 +1062,7 @@ define(
 				}
 			}
 		);
-		
-// Диалог редактора: reftree
+// g740.DialogEditorRefTree - диалог редактора: reftree
 		dojo.declare(
 			'g740.DialogEditorRefTree',
 			g740.DialogEditorAbstract,
@@ -1254,9 +1246,7 @@ define(
 				}
 			}
 		);
-		
-		
-// Диалог редактора: memo поле
+// g740.DialogEditorMemo - диалог редактора: memo поле
 		dojo.declare(
 			'g740.DialogEditorMemo',
 			g740.DialogEditorAbstract,
@@ -1408,8 +1398,7 @@ define(
 				}
 			}
 		);
-
-// Диалог: запрос на подтверждение
+// g740.DialogConfirm - диалог: запрос на подтверждение
 		dojo.declare(
 			'g740.DialogConfirm',
 			g740.Dialog,
@@ -1716,8 +1705,7 @@ define(
 				}
 			}
 		);
-		
-// Диалог: запрос Login
+// g740.DialogLogin - диалог: запрос Login
 		dojo.declare(
 			'g740.DialogLogin',
 			g740.Dialog,

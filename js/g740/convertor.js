@@ -186,6 +186,15 @@ define(
 			},
 //	Преобразование даты из JavaScript в текст
 			_js2textDate: function(expr) {
+				if (typeof(expr)=='string') {
+					if (expr.length<10) return '';
+					try {
+						expr=new Date(expr.substr(0,4), expr.substr(5,2)-1, expr.substr(8,2));
+					}
+					catch (e) {
+						return '';
+					}
+				}
 				if (expr===null) return '';
 				if (typeof(expr)=='object') {
 					if (expr.getFullYear && expr.getMonth && expr.getDate) {

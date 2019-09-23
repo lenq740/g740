@@ -776,7 +776,7 @@ define(
 
 	doG740AddChildPanel: function(objPanel)		Добавление дочерней панели, если нужно добавлять с прокладкой (g740.PanelAccordion)
 ---------------------------------------------------------------------------*/
-// Класс предок панелей
+// g740._PanelAbstract - предок панелей
 		dojo.declare(
 			'g740._PanelAbstract',
 			dijit._Widget,
@@ -1263,8 +1263,7 @@ define(
 				}
 			}
 		);
-
-// Класс Panel
+// g740.Panel
 		dojo.declare(
 			'g740.Panel',
 			[dijit.layout.BorderContainer, g740._PanelAbstract],
@@ -1396,8 +1395,7 @@ define(
 				}
 			}
 		);
-
-// Класс PanelCenter - единственный дочерний элемент центрируется
+// g740.PanelCenter - единственный дочерний элемент центрируется
 		dojo.declare(
 			'g740.PanelCenter',
 			[dijit.layout._LayoutWidget, g740._PanelAbstract],
@@ -1429,9 +1427,7 @@ define(
 				}
 			}
 		);
-		
-
-// Класс PanelScroll - все дочерние как top, с прокруткой
+// g740.PanelScroll - все дочерние как top, с прокруткой
 		dojo.declare(
 			'g740.PanelScroll',
 			[dijit.layout._LayoutWidget, g740._PanelAbstract],
@@ -1518,7 +1514,7 @@ define(
 				}
 			}
 		);
-		
+// g740.PanelExpander - раскрывающаяся панель		
 		dojo.declare(
 			'g740.PanelExpander',
 			[g740._PanelAbstract, dijit._TemplatedMixin, dijit.layout._LayoutWidget],
@@ -1798,9 +1794,7 @@ define(
 				}
 			}
 		);
-		
-		
-// Класс PanelTab
+// g740.PanelTab
 		dojo.declare(
 			'g740.PanelTab',
 			[dijit.layout.TabContainer, g740._PanelAbstract],
@@ -2005,8 +1999,7 @@ define(
 				}
 			}
 		);
-		
-// Класс PanelAccordion
+// g740.PanelAccordion
 		dojo.declare(
 			'g740.PanelAccordion',
 			[g740._PanelAbstract, dijit.layout.AccordionContainer],
@@ -2139,8 +2132,7 @@ define(
 				}
 			}
 		);
-
-// Класс AccordionContentPane - дочерняя панелька 1-го уровня для PanelAccordion
+// g740.AccordionContentPane - дочерняя панелька 1-го уровня для PanelAccordion
 		dojo.declare(
 			'g740.AccordionContentPane',
 			[g740._PanelAbstract, dijit.layout.ContentPane],
@@ -2162,8 +2154,7 @@ define(
 				}
 			}
 		);
-		
-// Класс PanelBestChild
+// g740.PanelBestChild
 		dojo.declare(
 			'g740.PanelBestChild',
 			[dijit.layout.StackContainer, g740._PanelAbstract],
@@ -2192,8 +2183,7 @@ define(
 				}
 			}
 		);
-		
-// Класс PanelFormContainer
+// g740.PanelFormContainer
 		dojo.declare(
 			'g740.PanelFormContainer',
 			[dijit.layout.BorderContainer, g740._PanelAbstract],
@@ -2561,8 +2551,7 @@ define(
 				}
 			}
 		);
-
-// Виджет табулятора для PanelFormContainer
+// g740.WidgetPanelFormMultiTabs - виджет табулятора для PanelFormContainer
 		dojo.declare(
 			'g740.WidgetPanelFormMultiTabs',
 			[dijit._Widget, dijit._TemplatedMixin],
@@ -2742,8 +2731,7 @@ define(
 				}
 			}
 		);
-
-// Виджет раскрывающегося дерева для PanelFormContainer
+// g740.WidgetFormContainerTreeMenu - виджет раскрывающегося дерева для PanelFormContainer
 		dojo.declare(
 			'g740.WidgetFormContainerTreeMenu',
 			[g740.PanelExpander],
@@ -2939,8 +2927,7 @@ define(
 				}
 			}
 		);
-		
-// Класс PanelWebBrowser
+// g740.PanelWebBrowser - iframe, отображение html содержимого по ссылке
 		dojo.declare(
 			'g740.PanelWebBrowser',
 			[g740._PanelAbstract, dijit.layout.ContentPane],
@@ -3117,8 +3104,7 @@ define(
 				}
 			}
 		);
-
-// Класс PanelExtControl
+// g740.PanelExtControl - iframe, внешний html виджет, включенный в стандартную перерисовку
 		dojo.declare(
 			'g740.PanelExtControl',
 			[g740._PanelAbstract, dijit.layout.ContentPane],
@@ -3203,8 +3189,7 @@ define(
 				}
 			}
 		);
-
-// Класс PanelImg
+// g740.PanelImg - картинка
 		dojo.declare(
 			'g740.PanelImg',
 			[g740._PanelAbstract, dijit.layout.ContentPane],
@@ -3267,8 +3252,7 @@ define(
 				}
 			}
 		);
-
-// Класс PanelMemo
+// g740.PanelMemo - панель memo поля
 		dojo.declare(
 			'g740.PanelMemo',
 			[g740.Panel],
@@ -3493,8 +3477,7 @@ define(
 				}
 			}
 		);
-
-// Класс PanelHTML
+// g740.PanelHTML - произвольное HTML содержимое
 		dojo.declare(
 			'g740.PanelHTML',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
@@ -3747,8 +3730,7 @@ define(
 				}
 			}
 		);
-
-// Класс PanelListHTML
+// g740.PanelListHTML - список произвольного HTML содержимого из всех строк источника данных
 		dojo.declare(
 			'g740.PanelListHTML',
 			[g740._PanelAbstract, dijit._TemplatedMixin],

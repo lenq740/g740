@@ -1199,6 +1199,7 @@ define(
 			var objGrid=new g740.Grid(p, null);
 			objPanel.addChild(objGrid);
 			objPanel.isG740AutoMenu=true;
+			
 			return objPanel;
 	    };
 	    g740.panels.registrate('grid', g740.panels._builderGrid);

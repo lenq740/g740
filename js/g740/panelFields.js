@@ -40,6 +40,7 @@ define(
 				
 				set: function(name, value) {
 					if (name=='fields' && value) {
+						this._isRendered=false;
 						this.lines=[];
 						this.columns={};
 						var objRowSet=this.getRowSet();
@@ -133,13 +134,13 @@ define(
 				postCreate: function() {
 					this.inherited(arguments);
 					this.domNode.title='';
+					this.renderTitle();
 					this.render();
 				},
 				_isRendered: false,
-				render: function() {
+				renderTitle: function() {
 					if (!this.domNodeTitle) return false;
 					if (!this.domNodeDivBody) return false;
-					
 					this.domNodeTitle.innerHTML='';
 					if (this.title && this.isShowTitle) {
 						objDiv=document.createElement('div');
@@ -152,6 +153,10 @@ define(
 						dojo.style(this.domNodeDivPadding, 'padding-top', this.padding);
 					}
 					dojo.style(this.domNodeDivPadding, 'padding-bottom', this.padding);
+				},
+				render: function() {
+					if (!this.domNodeTitle) return false;
+					if (!this.domNodeDivBody) return false;
 
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];
@@ -178,6 +183,7 @@ define(
 								fieldDef: fld,
 								nodeType: this.nodeType
 							};
+							if (fld.rowId) p.rowId=fld.rowId;
 							var objFieldEditor=g740.panels.createObjField(fld, p, null);
 							var label=fld.name;
 							if (fld.caption) label=fld.caption;
@@ -527,7 +533,7 @@ define(
 			if (!para.rowsetName) {
 				g740.trace.goBuilder({
 					formName: para.objForm.name,
-					panelType: 'multiline',
+					panelType: 'fields',
 					messageId: 'errorRowSetNameEmpty'
 				});
 				return null;
@@ -536,7 +542,7 @@ define(
 			if (!objRowSet) {
 				g740.trace.goBuilder({
 					formName: para.objForm.name,
-					panelType: 'multiline',
+					panelType: 'fields',
 					rowsetName: para.rowsetName,
 					messageId: 'errorRowSetNotFoundInForm'
 				});
@@ -569,6 +575,146 @@ define(
 			return result;
 		};
 		g740.panels.registrate('fields', g740.panels._builderPanelFields);
+
+
+
+		dojo.declare(
+			'g740.PanelAttribute',
+			[g740.PanelFields],
+			{
+				doG740Repaint: function(para) {
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return false;
+					if (!para) para={};
+					if (para.isFull) {
+						var fields=this.getFields();
+						this.set('fields',fields);
+						this.render();
+						this.layout();
+					}
+					
+					if (this.objToolBar) this.objToolBar.doG740Repaint(para);
+					if (this.objPanelButtons) this.objPanelButtons.doG740Repaint(para);
+					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
+					for(var i=0; i<this._childs.length; i++) {
+						var obj=this._childs[i];
+						if (!obj) continue;
+						if (obj.fieldDef && obj.fieldDef.objFC) {
+							if (obj.fieldDef.objFC.doG740Repaint) obj.fieldDef.objFC.doG740Repaint();
+						}
+						else {
+							if (obj.doG740Repaint) obj.doG740Repaint();
+						}
+					}
+				},
+				getFields: function() {
+					var result=[];
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return result;
+					var rowsetFields=objRowSet.getFieldsByNodeType('');
+					var rowsetFldDefValue=rowsetFields['value'];
+					
+					var objTreeStorage=objRowSet.objTreeStorage;
+					if (!objTreeStorage) return result;
+					for (var node=objTreeStorage.getFirstChildNode(objTreeStorage.rootNode); node; node=objTreeStorage.getNextNode(node)) {
+						var info=node.info;
+						var fldDef={};
+						fldDef.name='value';
+						fldDef.rowId=info.id;
+						fldDef.maxlength=rowsetFldDefValue.maxlength;
+						fldDef.save=1;
+						var type='string';
+						var len=0;
+						var dec=0;
+						if (rowsetFields.caption) fldDef.caption=info['caption.value'];
+						if (rowsetFields.type) type=info['type.value'];
+						if (rowsetFields.len) len=info['len.value'];
+						if (rowsetFields.dec) dec=info['dec.value'];
+						
+						fldDef.type=type;
+						if (type=='date') {
+							fldDef.len=10;
+						}
+						else if (type=='num') {
+							if (!len) len=10;
+							fldDef.len=len;
+							if (dec) fldDef.dec=dec;
+						}
+						else if (type=='string') {
+							if (len) {
+								fldDef.len=len;
+							}
+							else {
+								fldDef.stretch=1;
+							}
+						}
+						else if (type=='memo') {
+							fldDef.stretch=1;
+						}
+						else if (type=='list') {
+							if (!rowsetFields.list) continue;
+							fldDef.list=info['list.value'];
+							if (len) {
+								fldDef.len=len;
+							}
+							else {
+								fldDef.stretch=1;
+							}
+						}
+						result.push(fldDef);
+					}
+					return result;
+				}
+			}
+		);
+
+		g740.panels._builderPanelAttribute=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelAttribute';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			if (!para.rowsetName) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'attribute',
+					messageId: 'errorRowSetNameEmpty'
+				});
+				return null;
+			}
+			var objRowSet=para.objForm.rowsets[para.rowsetName];
+			if (!objRowSet) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'attribute',
+					rowsetName: para.rowsetName,
+					messageId: 'errorRowSetNotFoundInForm'
+				});
+				return null;
+			}
+			
+			var rowsetFields=objRowSet.getFieldsByNodeType(para.nodeType);
+			var lst=['caption','type','value'];
+			for(var i=0; i<lst.length; i++) {
+				var fieldName=lst[i];
+				if (!rowsetFields[fieldName]) {
+					g740.trace.goBuilder({
+						formName: para.objForm.name,
+						panelType: 'attribute',
+						rowsetName: para.rowsetName,
+						messageId: 'errorNotFoundFieldName',
+						fieldName: fieldName
+					});
+					return null;
+				}
+			}
+			
+			if (g740.xml.getAttrValue(xml,'captionup','0')=='1') para.isLabelTop=true;
+			var result=new g740.PanelAttribute(para, null);
+			return result;
+		};
+		g740.panels.registrate('attribute', g740.panels._builderPanelAttribute);
 
 		return g740;
 	}
