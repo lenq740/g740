@@ -132,7 +132,26 @@ define(
 			},
 			goBuilderEnd: function() {
 				if (this._builderErrors.length>0) {
-					console.log({errors:this._builderErrors});
+					var xmlErrorDoc=dojox.xml.parser.parse('<?xml version="1.0" encoding="UTF-8"?><error></error>', 'text/xml');
+					for(var i=0; i<this._builderErrors.length; i++) {
+						var obj=this._builderErrors[i];
+						var xmlItem=xmlErrorDoc.createElement('item');
+						for(var name in obj) {
+							try {
+								xmlItem.setAttribute(name, obj[name]);
+							}
+							catch(e) {
+							}
+						}
+						xmlErrorDoc.documentElement.appendChild(xmlItem);
+					}
+					try {
+						console.log('');
+						console.log(xmlErrorDoc.documentElement);
+						console.log('');
+					}
+					catch(e) {
+					}
 					g740.error('errorBuilderForm');
 				}
 				this._builderErrors=[];
@@ -143,6 +162,63 @@ define(
 					delete para.messageId;
 				}
 				this._builderErrors.push(para);
+			},
+			goTraceMessage: function(message) {
+				if (!g740.config.isTraceEnabled) return;
+				var xmlErrorDoc=dojox.xml.parser.parse('<?xml version="1.0" encoding="UTF-8"?><message></message>', 'text/xml');
+				var xmlItem=xmlErrorDoc.createElement('item');
+				if (typeof(message)=='object') {
+					for(var name in message) {
+						try {
+							xmlItem.setAttribute(name, message[name]);
+						}
+						catch(e) {
+						}
+					}
+				}
+				else {
+					try {
+						xmlItem.setAttribute('message', message.toString());
+					}
+					catch(e) {
+					}
+				}
+				xmlErrorDoc.documentElement.appendChild(xmlItem);
+				try {
+					console.log('');
+					console.log(xmlErrorDoc.documentElement);
+					console.log('');
+				}
+				catch(e) {
+				}
+			},
+			goTraceError: function(message) {
+				var xmlErrorDoc=dojox.xml.parser.parse('<?xml version="1.0" encoding="UTF-8"?><error></error>', 'text/xml');
+				var xmlItem=xmlErrorDoc.createElement('item');
+				if (typeof(message)=='object') {
+					for(var name in message) {
+						try {
+							xmlItem.setAttribute(name, message[name]);
+						}
+						catch(e) {
+						}
+					}
+				}
+				else {
+					try {
+						xmlItem.setAttribute('message', message.toString());
+					}
+					catch(e) {
+					}
+				}
+				xmlErrorDoc.documentElement.appendChild(xmlItem);
+				try {
+					console.log('');
+					console.log(xmlErrorDoc.documentElement);
+					console.log('');
+				}
+				catch(e) {
+				}
 			}
 		};
 		return g740;

@@ -3092,12 +3092,14 @@ define(
 								if (url.indexOf('?')>=0) urlParamDelimiter='&';
 								url+=urlParamDelimiter+'timestamp='+this.timestamp;
 							}
+							g740.trace.goTraceMessage({panel:'webbrowser', url:url});
 							this.domIFrame.src=url;
 							this.src=url;
 						}
 					}
 					else {
 						if (this.src==url) return true;
+						g740.trace.goTraceMessage({panel:'webbrowser', url:url});
 						this.domIFrame.src=url;
 						this.src=url;
 					}

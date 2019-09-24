@@ -138,14 +138,10 @@ define(
 	            }
 	        }
 	        catch (e) {
-				try {
-					console.log({
-						expr: js_expr,
-						error: e.toString()
-					});
-				}
-				catch (e) {
-				}
+				g740.trace.goTraceError({
+					expr: js_expr,
+					error: e.toString()
+				});
 	            result=defa;
 	        }
 	        return result;
@@ -159,11 +155,10 @@ define(
 	            if (g740.js_eval_obj && g740.js_eval_obj.doG740Get) result=g740.js_eval_obj.doG740Get(name);
 	        }
 	        catch (e) {
-				try {
-					console.log(e.toString());
-				}
-				catch (e) {
-				}
+				g740.trace.goTraceError({
+					name: name,
+					error: e.toString()
+				});
 	            result=false;
 	        }
 			if (typeof(defa)!='undefined' && !result) return defa;
@@ -177,11 +172,10 @@ define(
 				if (result>0) return result;
 			}
 	        catch (e) {
-				try {
-					console.log(e.toString());
-				}
-				catch (e) {
-				}
+				g740.trace.goTraceError({
+					name: name,
+					error: e.toString()
+				});
 	        }
 			return '';
 	    };

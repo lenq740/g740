@@ -3429,9 +3429,6 @@ define(
 			{
 			    g740className: 'g740.TreeStorage',
 
-			    isTraceEnabled: false,	// трассировка внутри объекта g740.TreeStorage
-			    isTraceGet: false,		// трассировка чтения данных внутри объекта g740.TreeStorage
-
 			    rootNode: null,			// корневой узел
 			    // Создание и уничтожение объекта
 			    // Создание экземпляра объекта				
@@ -3703,7 +3700,6 @@ define(
 			null,
 			{
 			    g740className: 'g740.RowSetDataApi',
-			    isTraceEnabled: false,	// трассировка внутри объекта g740.RowSetDataApi
 
 			    objRowSet: null,
 			    objTreeStorage: null,

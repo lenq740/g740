@@ -17,7 +17,7 @@ define(
 			mainFormDomNode: 'FormPanelMain',	// Узел DOM, в ктором размещается главная форма приложения
 			timeoutRefreshChilds: 300,			// Время ожидания перед перечиткой дочерних наборов строк
 			timeoutMaxRequest: 10000,			// Максимальное время ожидания ответа
-			isTraceEnabled: false,				// Включен режим трассировки
+			isTraceEnabled: false,				// Режим трассировки запросов
 			charwidth: 9,						// усредненная ширина символа в пикселях
 			charlabelwidth: 7,					// усредненная ширина символа в пикселях для метки
 			charheight: 14,						// высота символа в пикселях

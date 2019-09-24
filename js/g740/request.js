@@ -218,7 +218,24 @@ define(
 				try {
 					if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 					if (!para.objOwner) g740.systemError(procedureName, 'errorValueUndefined', 'para.objOwner');
+					
 					var xmlResponse=para.xmlResponse;
+					
+					if (g740.config.isTraceEnabled) {
+						var xmlRequest=para.message;
+						try {
+							if (typeof(xmlRequest)=='string') xmlRequest=dojox.xml.parser.parse(para.message,'text/xml').documentElement;
+						}
+						catch (e) {
+							xmlRequest=para.message;
+						}
+						try {
+							console.log(xmlRequest, xmlResponse);
+						}
+						catch (e) {
+						}
+					}
+
 					if (!g740.xml.isXmlNode(xmlResponse)) g740.responseError('errorNotXml', 'para.xmlResponse');
 					if (xmlResponse.nodeName!='root' || g740.xml.getAttrValue(xmlResponse,'type','')!='g740') g740.responseError('errorXmlNodeNotFound', 'root type="g740"');
 					if (g740.xml.isAttr(xmlResponse,'session')) g740.config.session=g740.xml.getAttrValue(xmlResponse,'session','');
@@ -362,6 +379,7 @@ define(
 				return result;
 			},
 			httpGet: function(url) {
+				g740.trace.goTraceMessage({request:'httpget', mode:'get', url:url});
 				var hiddenIFrameID='hiddenDownloader';
 				var iframe=document.getElementById(hiddenIFrameID);
 				if (iframe===null) {
@@ -375,6 +393,7 @@ define(
 				return true;
 			},
 			httpOpen: function(url, params) {
+				g740.trace.goTraceMessage({request:'httpget', mode:'open', url:url});
 				if (!params) params={};
 				if (params.windowName) {
 					if (!params.windowWidth) params.windowWidth=parseInt(window.outerWidth*0.9);

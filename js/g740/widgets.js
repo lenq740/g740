@@ -1297,16 +1297,16 @@ define(
 					}
 				},
 				onG740Click: function() {
+					var objPanel=this.getPanelForFocus();
+					if (objPanel && objPanel.doG740FocusChildFirst) objPanel.doG740FocusChildFirst();
+
 					if (this._isClickTimeout) return false;
 					this._isClickTimeout=true;
 					g740.execDelay.go({
-						delay: 800,
+						delay: 400,
 						obj: this,
 						func: this._setClickTimeoutOff
 					});
-					
-					var objPanel=this.getPanelForFocus();
-					if (objPanel && objPanel.doG740FocusChildFirst) objPanel.doG740FocusChildFirst();
 					
 					if (this.objAction) return this.objAction.exec();
 					return false;
@@ -1368,6 +1368,7 @@ define(
 					if (this.region=='top') {
 						dojo.addClass(this.domNode,'btnstretch');
 					}
+					if (this.domNode) this.domNode.title='';
 				},
 				onG740KeyDown: function(e) {
 					if (!e.ctrlKey && e.keyCode==13) {
