@@ -92,7 +92,22 @@ define(
 	            captionId: 'requestCopy',
 	            specrow: true,
 	            specwrite: true,
-	            specnofilter: true
+	            specnofilter: true,
+				modeDefa: 'after',
+	            mode: {
+	                after: {
+	                    specafter: true
+	                },
+	                before: {
+	                    specbefore: true
+	                },
+	                last: {
+	                    speclast: true
+	                },
+	                first: {
+	                    specfirst: true
+	                }
+				}
 	        },
 	        'move': {
 	            sync: true,
