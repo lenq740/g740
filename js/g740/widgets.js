@@ -1885,15 +1885,28 @@ define(
 						g740.showConfirm({
 							messageText: this.request.confirm,
 							closeObj: this,
-							onCloseOk: this._execGo,
+							onCloseOk: this._execGoStart,
 							objOwner: objOwner
 						});
 						return true;
 					}
 					else {
-						this._execGo();
+						this._execGoStart();
 					}
 					return true;
+				},
+				_execGoStart: function() {
+					if (this.request.lock) {
+						g740.application.doLockScreenShow();
+						g740.execDelay.go({
+							obj: this,
+							func: this._execGo,
+							delay: 50
+						});
+					}
+					else {
+						this._execGo();
+					}
 				},
 				_execGo: function() {
 					if (!this.objForm) return false;
@@ -1921,6 +1934,7 @@ define(
 							var ppp=obj._getRequestG740params(this.request.params);
 							for(var name in ppp) G740params[name]=ppp[name];
 						}
+				
 						var result=obj.exec({
 							requestName: this.request.name, 
 							requestMode: this.request.mode,
@@ -1929,6 +1943,8 @@ define(
 						});
 					}
 					finally {
+						if (this.request.lock) g740.application.doLockScreenHide();
+						
 						g740.execDelay.go({
 							obj: this,
 							func: function() {
