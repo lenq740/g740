@@ -286,6 +286,7 @@ define(
 				emptyValue: '',
 				isSaveOnChange: false,
 				isShowNullAsEmptyString: true,
+				isLastFocused: false,
 				_btnClearWidth: 0,
 				set: function(name, value) {
 					if (name=='objForm') {
@@ -542,8 +543,17 @@ define(
 				
 				onG740Focus: function() {
 					if (this.rowId && this.objRowSet && this.rowId!=this.objRowSet.getFocusedId()) this.objRowSet.setFocusedId(this.rowId);
+					this.isLastFocused=true;
 				},
 				onG740Blur: function() {
+					g740.execDelay.go({
+						delay: 250,
+						obj: this,
+						func: function() {
+							if (this.objForm && g740.application.getFocusedForm()!=this.objForm) return;
+							this.isLastFocused=false;
+						}
+					});
 				},
 				onG740KeyPress: function(e) {
 				},
@@ -574,8 +584,11 @@ define(
 				},
 				postCreate: function() {
 					if (this.fieldDef) {
-						if (this.fieldDef.on && this.fieldDef.on.dblclick) this.set('buttonVisible',true);
 						if (this.fieldDef.type=='num') dojo.addClass(this.domNode,'g740-widget-num');
+						if (this.getEventOnActionEnabled()) {
+							this.set('buttonVisible',true);
+							this.set('buttonOnly',true);
+						}
 					}
 					this.on('ButtonClick',this.onG740ButtonClick);
 					this.on('Blur',this.onG740Blur);
@@ -660,6 +673,7 @@ define(
 					dojo.style(this.domNodeTextArea, 'height', this.getHeight()+'px');
 					this.on('ButtonClick',this.onG740ButtonClick);
 					this.on('Blur',this.onG740Blur);
+					if (this.getEventOnActionEnabled()) this.set('buttonOnly',true);
 					this.inherited(arguments);
 				},
 				onG740Blur: function() {
@@ -673,7 +687,7 @@ define(
 					}
 					this.domNodeTextArea.focus();
 					if (this.getEventOnActionEnabled()) {
-						this.execEventOnAction();
+						if (!this._readOnly) this.execEventOnAction();
 					}
 					else {
 						// предотвращаем дребезг
@@ -920,6 +934,7 @@ define(
 			{
 				_btnClearWidth: 8,
 				postCreate: function() {
+					if (this.getEventOnActionEnabled()) this.set('buttonOnly',true);
 					this.inherited(arguments);
 				},
 
@@ -1018,6 +1033,7 @@ define(
 			{
 				_btnClearWidth: 8,
 				postCreate: function() {
+					if (this.getEventOnActionEnabled()) this.set('buttonOnly',true);
 					this.inherited(arguments);
 				},
 				onG740Change: function(newValue) {
@@ -1153,6 +1169,7 @@ define(
 			{
 				_btnClearWidth: 8,
 				postCreate: function() {
+					if (this.getEventOnActionEnabled()) this.set('buttonOnly',true);
 					this.inherited(arguments);
 				},
 				onG740Change: function(newValue) {

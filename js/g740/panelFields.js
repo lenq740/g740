@@ -8,6 +8,7 @@ define(
 	[],
 	function() {
 		if (typeof(g740)=='undefined') g740={};
+// g740.PanelFields - панель анкеты полей
 		dojo.declare(
 			'g740.PanelFields',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
@@ -440,15 +441,15 @@ define(
 				},
 				doG740Focus: function() {
 					this.inherited(arguments);
-					this.doG740FocusChildFirst();
-					
+					var objChildFirst=null;
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];
 						if (!obj) continue;
-						if (!obj.doG740Focus) continue;
-						obj.doG740Focus();
-						break;
+						if (!obj.getVisible()) continue;
+						if (!objChildFirst)	objChildFirst=obj;
+						if (obj.isLastFocused) objChildFirst=obj;
 					}
+					if (objChildFirst) objChildFirst.set('focused',true);
 				},
 				doG740FocusChildFirst: function() {
 					var objChild=null;
@@ -459,7 +460,7 @@ define(
 						objChild=obj;
 						break;
 					}
-					if (objChild) obj.set('focused',true);
+					if (objChild) objChild.set('focused',true);
 				},
 				doG740FocusChildLast: function() {
 					var objChild=null;
@@ -470,7 +471,7 @@ define(
 						objChild=obj;
 						break;
 					}
-					if (objChild) obj.set('focused',true);
+					if (objChild) objChild.set('focused',true);
 				},
 				doG740FocusChildNext: function(objChild) {
 					var index=this._childs.length;
@@ -489,7 +490,7 @@ define(
 						break;
 					}
 					if (objChild) {
-						obj.set('focused',true);
+						objChild.set('focused',true);
 					}
 					else {
 						var objParent=this.getParent();
@@ -513,7 +514,7 @@ define(
 						break;
 					}
 					if (objChild) {
-						obj.set('focused',true);
+						objChild.set('focused',true);
 					}
 					else {
 						var objParent=this.getParent();
@@ -522,7 +523,6 @@ define(
 				}
 			}
 		);
-
 		g740.panels._builderPanelFields=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanelFields';
@@ -576,8 +576,7 @@ define(
 		};
 		g740.panels.registrate('fields', g740.panels._builderPanelFields);
 
-
-
+// g740.PanelAttribute - панель аттрибутов, набираемых из строк таблицы
 		dojo.declare(
 			'g740.PanelAttribute',
 			[g740.PanelFields],
@@ -586,11 +585,36 @@ define(
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return false;
 					if (!para) para={};
+					if (para.objRowSet && objRowSet!=para.objRowSet) return false;
 					if (para.isFull) {
-						var fields=this.getFields();
-						this.set('fields',fields);
-						this.render();
-						this.layout();
+// Борьба с морганием при перечитке
+// Если источник данных пуст и еще не начитан, то делаем все элементы ReadOnly и ждем перерисовки после начитки. Если в течении секунды все еще не начитан, то перерисовываем пустой
+						if (objRowSet.isEnabled || para.isRenderForce) {
+							var fields=this.getFields();
+							this.set('fields',fields);
+							this.render();
+							this.layout();
+						}
+						else {
+							for(var i=0; i<this._childs.length; i++) {
+								var obj=this._childs[i];
+								if (!obj) continue;
+								if (obj.fieldDef) obj.fieldDef.readonly=true;
+							}
+							g740.execDelay.go({
+								delay: 1000,
+								obj: this,
+								func: function() {
+									var objRowSet=this.getRowSet();
+									if (!objRowSet) return false;
+									if (!objRowSet.isEnabled) this.doG740Repaint({
+										isFull: true,
+										objRowSet: objRowSet,
+										isRenderForce: true
+									});
+								}
+							});
+						}
 					}
 					
 					if (this.objToolBar) this.objToolBar.doG740Repaint(para);
@@ -626,6 +650,7 @@ define(
 						var type='string';
 						var len=0;
 						var dec=0;
+						if (rowsetFields.readonly && info['readonly.value']) fldDef.readonly=1;
 						if (rowsetFields.caption) fldDef.caption=info['caption.value'];
 						if (rowsetFields.type) type=info['type.value'];
 						if (rowsetFields.len) len=info['len.value'];
@@ -634,32 +659,72 @@ define(
 						fldDef.type=type;
 						if (type=='date') {
 							fldDef.len=10;
+							if (rowsetFields.action && info['action.value']) fldDef.evt_onaction=info['action.value'];
 						}
 						else if (type=='num') {
 							if (!len) len=10;
 							fldDef.len=len;
 							if (dec) fldDef.dec=dec;
-						}
-						else if (type=='string') {
-							if (len) {
-								fldDef.len=len;
-							}
-							else {
-								fldDef.stretch=1;
-							}
+							if (rowsetFields.action && info['action.value']) fldDef.evt_onaction=info['action.value'];
 						}
 						else if (type=='memo') {
 							fldDef.stretch=1;
+							if (rowsetFields.action && info['action.value']) fldDef.evt_onaction=info['action.value'];
+						}
+						else if (type=='radio') {
+							if (!rowsetFields.list) continue;
+							fldDef.list=info['list.value'].toString();
 						}
 						else if (type=='list') {
 							if (!rowsetFields.list) continue;
-							fldDef.list=info['list.value'];
+							fldDef.list=info['list.value'].toString();
 							if (len) {
 								fldDef.len=len;
 							}
 							else {
 								fldDef.stretch=1;
 							}
+							if (rowsetFields.action && info['action.value']) fldDef.evt_onaction=info['action.value'];
+						}
+						else if (type=='ref') {
+							if (!rowsetFields.valueid) continue;
+							
+							var fldRefName=null;
+							for(var index in rowsetFields) {
+								var fld=rowsetFields[index];
+								if (fld.refid!='valueid') continue;
+								if (!fldRefName) {
+									fldRefName=fld;
+									continue;
+								}
+								if (fld.refname=='name') {
+									fldRefName=fld;
+									continue;
+								}
+							}
+							if (!fldRefName) continue;
+							
+							fldDef.name=fldRefName.name;
+							fldDef.refname=fldRefName.refname;
+							fldDef.refid='valueid';
+							fldDef.type='string';
+							if (len) {
+								fldDef.len=len;
+							}
+							else {
+								fldDef.stretch=1;
+							}
+							if (rowsetFields.action && info['action.value']) fldDef.evt_onaction=info['action.value'];
+						}
+						else {
+							fldDef.type='string';
+							if (len) {
+								fldDef.len=len;
+							}
+							else {
+								fldDef.stretch=1;
+							}
+							if (rowsetFields.action && info['action.value']) fldDef.evt_onaction=info['action.value'];
 						}
 						result.push(fldDef);
 					}
@@ -667,7 +732,6 @@ define(
 				}
 			}
 		);
-
 		g740.panels._builderPanelAttribute=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanelAttribute';

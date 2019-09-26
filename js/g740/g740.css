@@ -272,56 +272,6 @@ html, body {
 	outline-color: orange !important;
 }
 
-.btnfieldeditor {
-	width: 23px;
-	height: 19px;
-	background-color: #F6F6F6;
-	background-image: url('icons/widget/btnfieldeditor.png');
-	background-repeat: norepeat;
-	cursor: pointer;
-}
-.btnfieldeditor:hover {
-	background-color: #E5E5E5;
-}
-.btnfieldclear {
-	width: 23px;
-	height: 19px;
-	background-color: #F6F6F6;
-	background-image: url('icons/widget/btnfieldclear11.png');
-	background-repeat: no-repeat;
-	cursor: pointer;
-}
-.btnfieldclear:hover {
-	background-color: #E5E5E5;
-}
-
-.g740-widget-text .btnfieldeditor{
-	margin-left:-1px;
-}
-.g740-widget-text .g740-widget-td-input {
-	position: relative;
-}
-.g740-widget-text .g740-widget-td-input .btnfieldclear {
-	width: 0px;
-	position: absolute;
-	top: 0px;
-	right: 0px;
-	display: none;
-}
-.g740-fieldcontainer:hover .g740-widget-text .g740-widget-td-input .btnfieldclear {
-	width: 11px;
-	display: block;
-}
-.g740-widget-text:hover  .g740-widget-td-input .btnfieldclear {
-	width: 11px;
-	display: block;
-}
-.g740-widget-text .g740-widget-td-input .btnfieldclear:hover {
-}
-.g740-widget-text .g740-widget-td-input.readonly .btnfieldclear {
-	display: none !important;
-	width: 0px !important;
-}
 
 /* g740.FieldEditor.RefList */
 .g740-widget-reflist {
@@ -587,6 +537,64 @@ html, body {
 	height:20px;
 	width:22px;
 }
+
+.btnfieldeditor {
+	width: 23px;
+	height: 19px;
+	background-color: #F6F6F6;
+	background-image: url('icons/widget/btnfieldeditor.png');
+	background-repeat: norepeat;
+	cursor: pointer;
+}
+.btnfieldeditor:hover {
+	background-color: #E5E5E5;
+}
+.btnfieldclear {
+	width: 23px;
+	height: 19px;
+	background-color: #F6F6F6;
+	background-image: url('icons/widget/btnfieldclear11.png');
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+.btnfieldclear:hover {
+	background-color: #E5E5E5;
+}
+
+.g740-widget-text .btnfieldeditor{
+	margin-left:-1px;
+}
+.g740-widget-text .g740-widget-td-input {
+	position: relative;
+}
+.g740-widget-text .g740-widget-td-input .btnfieldclear {
+	width: 0px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	display: none;
+}
+.g740-fieldcontainer:hover .g740-widget-text .g740-widget-td-input .btnfieldclear {
+	width: 11px;
+	display: block;
+}
+.g740-widget-text:hover  .g740-widget-td-input .btnfieldclear {
+	width: 11px;
+	display: block;
+}
+.g740-widget-text .g740-widget-td-input .btnfieldclear:hover {
+}
+.g740-widget-text .g740-widget-td-input.readonly .btnfieldclear {
+	display: none !important;
+	width: 0px !important;
+}
+.g740-widget-text .g740-widget-td-input.cursorpointer .g740-widget-input {
+	cursor: pointer;
+}
+.g740-widget-text .g740-widget-td-input.cursorpointer .g740-widget-textarea {
+	cursor: pointer;
+}
+
 
 /* panel memo */
 .g740-panel-memo {

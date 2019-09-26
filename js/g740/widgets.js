@@ -281,7 +281,7 @@ define(
 						'<td class="g740-widget-td-input">'+
 							'<input type="text" class="g740-widget-input" '+
 							'data-dojo-attach-point="domNodeInput" data-dojo-attach-event="'+
-							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doInputChange'+
+							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doInputChange, ondblclick: onInputDblClick'+
 							'"/>'+
 							'<div class="btnfieldclear" title="'+g740.getMessage('messageBtnClear')+'" '+
 							'data-dojo-attach-event="onclick: onClearClick"></div>'+
@@ -295,21 +295,39 @@ define(
 					'</table>'+
 				'</div>',
 				buttonVisible: false,
+				_readOnly: false,
+				_buttonOnly: false,
 				set: function(name, value) {
 					if (name=='value') {
 						this.domNodeInput.value=value;
 						return true;
 					}
-					if (name=='readOnly') {
-						this.domNodeInput.readOnly=value;
-						if (value) {
+					if (name=='readOnly' || name=='buttonOnly') {
+						if (name=='readOnly') this._readOnly=value;
+						if (name=='buttonOnly') this._buttonOnly=value;
+						var inputReadOnly=(this._readOnly || this._buttonOnly);
+						if (this._readOnly) {
 							dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-							dojo.addClass(this.domNodeInput.parentNode, 'readonly');
 						}
 						else {
 							dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-							dojo.removeClass(this.domNodeInput.parentNode, 'readonly');
 						}
+						if (this._readOnly || this._buttonOnly) {
+							this.domNodeInput.readOnly=true;
+							if (!dojo.hasClass(this.domNodeInput.parentNode, 'readonly')) dojo.addClass(this.domNodeInput.parentNode, 'readonly');
+						}
+						else {
+							this.domNodeInput.readOnly=false;
+							if (dojo.hasClass(this.domNodeInput.parentNode, 'readonly')) dojo.removeClass(this.domNodeInput.parentNode, 'readonly');
+						}
+						
+						if (this._buttonOnly && !this._readOnly) {
+							if (!dojo.hasClass(this.domNodeInput.parentNode, 'cursorpointer')) dojo.addClass(this.domNodeInput.parentNode, 'cursorpointer');
+						}
+						else {
+							if (dojo.hasClass(this.domNodeInput.parentNode, 'cursorpointer')) dojo.removeClass(this.domNodeInput.parentNode, 'cursorpointer');
+						}
+						
 						return true;
 					}
 					if (name=='buttonVisible' && this.buttonVisible!=value) {
@@ -343,6 +361,9 @@ define(
 						range.moveEnd('character', cursorPos);
 						range.select();
 					}
+				},
+				onInputDblClick: function() {
+					if (this._buttonOnly) this.onButtonClick();
 				},
 				onButtonClick: function() {
 				},
@@ -381,10 +402,10 @@ define(
 				'">'+
 					'<table class="g740-widget-table" cellpadding="0px" cellspacing="0px">'+
 					'<tr>'+
-						'<td>'+
+						'<td class="g740-widget-td-input">'+
 							'<textarea class="g740-widget-textarea" style="height:100%"'+
 							'data-dojo-attach-point="domNodeTextArea" data-dojo-attach-event="'+
-							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doTextAreaChange'+
+							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doTextAreaChange, ondblclick: onInputDblClick'+
 							'">'+
 							'</textarea>'+
 						'</td>'+
@@ -396,11 +417,33 @@ define(
 					'</tr>'+
 					'</table>'+
 				'</div>',
+				_readOnly: false,
+				_buttonOnly: false,
 				set: function(name, value) {
 					if (name=='value') {
 						this.domNodeTextArea.value=value;
 						return true;
 					}
+					if (name=='readOnly' || name=='buttonOnly') {
+						if (name=='readOnly') this._readOnly=value;
+						if (name=='buttonOnly') this._buttonOnly=value;
+						this.domNodeTextArea.readOnly=(this._readOnly || this._buttonOnly);
+						if (this._readOnly) {
+							dojo.addClass(this.domNodeTextArea, 'dijitTextBoxReadOnly');
+						}
+						else {
+							dojo.removeClass(this.domNodeTextArea, 'dijitTextBoxReadOnly');
+						}
+						
+						if (this._buttonOnly && !this._readOnly) {
+							if (!dojo.hasClass(this.domNodeTextArea.parentNode, 'cursorpointer')) dojo.addClass(this.domNodeTextArea.parentNode, 'cursorpointer');
+						}
+						else {
+							if (dojo.hasClass(this.domNodeTextArea.parentNode, 'cursorpointer')) dojo.removeClass(this.domNodeTextArea.parentNode, 'cursorpointer');
+						}
+						return true;
+					}
+/*
 					if (name=='readOnly') {
 						this.domNodeTextArea.readOnly=value;
 						if (value) {
@@ -411,11 +454,15 @@ define(
 						}
 						return true;
 					}
+*/
 					this.inherited(arguments);
 				},
 				postCreate: function() {
 					this.inherited(arguments);
 					this.focusNode=this.domNodeTextArea;
+				},
+				onInputDblClick: function() {
+					if (this._buttonOnly) this.onButtonClick();
 				},
 				onButtonClick: function() {
 				},
@@ -449,7 +496,7 @@ define(
 						'<td class="g740-widget-td-input">'+
 							'<input type="text" class="g740-widget-input" '+
 							'data-dojo-attach-point="domNodeInput" data-dojo-attach-event="'+
-							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doInputChange'+
+							'onkeydown: onKeyDown, onkeyup: onKeyUp, onkeypress: onKeyPress, onchange: doInputChange, ondblclick: onInputDblClick'+
 							'">'+
 							'<div class="btnfieldclear" title="'+g740.getMessage('messageBtnClear')+'" '+
 							'data-dojo-attach-event="onclick: onClearClick"></div>'+
@@ -463,6 +510,7 @@ define(
 					'</table>'+
 				'</div>',
 				_readOnly: false,
+				_buttonOnly: false,
 				_value: '',
 				getReadOnly: function() {
 					return this._readOnly;
@@ -475,19 +523,32 @@ define(
 						}
 						return true;
 					}
-					if (name=='readOnly') {
-						if (this.domNodeInput) {
-							this.domNodeInput.readOnly=value;
-							this._readOnly=value;
-							if (value) {
-								dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-								dojo.addClass(this.domNodeInput.parentNode, 'readonly');
-							}
-							else {
-								dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-								dojo.removeClass(this.domNodeInput.parentNode, 'readonly');
-							}
+					if (name=='readOnly' || name=='buttonOnly') {
+						if (name=='readOnly') this._readOnly=value;
+						if (name=='buttonOnly') this._buttonOnly=value;
+						var inputReadOnly=(this._readOnly || this._buttonOnly);
+						if (this._readOnly) {
+							dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
 						}
+						else {
+							dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+						}
+						if (this._readOnly || this._buttonOnly) {
+							this.domNodeInput.readOnly=true;
+							if (!dojo.hasClass(this.domNodeInput.parentNode, 'readonly')) dojo.addClass(this.domNodeInput.parentNode, 'readonly');
+						}
+						else {
+							this.domNodeInput.readOnly=false;
+							if (dojo.hasClass(this.domNodeInput.parentNode, 'readonly')) dojo.removeClass(this.domNodeInput.parentNode, 'readonly');
+						}
+						
+						if (this._buttonOnly && !this._readOnly) {
+							if (!dojo.hasClass(this.domNodeInput.parentNode, 'cursorpointer')) dojo.addClass(this.domNodeInput.parentNode, 'cursorpointer');
+						}
+						else {
+							if (dojo.hasClass(this.domNodeInput.parentNode, 'cursorpointer')) dojo.removeClass(this.domNodeInput.parentNode, 'cursorpointer');
+						}
+						
 						return true;
 					}
 					this.inherited(arguments);
@@ -511,7 +572,9 @@ define(
 						range.select();
 					}
 				},
-				
+				onInputDblClick: function() {
+					if (this._buttonOnly) this.onButtonClick();
+				},
 				onClearClick: function() {
 				},
 				onButtonClick: function() {
