@@ -91,7 +91,9 @@ define(
 						this.objFieldEditor=null;
 						this.set('objFieldEditor',objFieldEditor);
 						if (this.objFieldEditor.domNode) {
-							dojo.style(this.objFieldEditor.domNode, 'width', '100%');
+							if (this.objFieldEditor.fieldDef && this.objFieldEditor.fieldDef.stretch) {
+								dojo.style(this.objFieldEditor.domNode, 'width', '100%');
+							}
 						}
 					}
 				},

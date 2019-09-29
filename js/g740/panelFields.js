@@ -650,8 +650,9 @@ define(
 						var type='string';
 						var len=0;
 						var dec=0;
-						if (rowsetFields.readonly && info['readonly.value']) fldDef.readonly=1;
+						if (info['row.readonly']) fldDef.readonly=1;
 						if (rowsetFields.caption) fldDef.caption=info['caption.value'];
+						if (rowsetFields.stretch) (fldDef.stretch=info['stretch.value']==1);
 						if (rowsetFields.type) type=info['type.value'];
 						if (rowsetFields.len) len=info['len.value'];
 						if (rowsetFields.dec) dec=info['dec.value'];

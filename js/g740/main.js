@@ -225,11 +225,6 @@ define(
 		function execRequest(requestName, requestMode, params) {
 			var focusedForm=g740.application.getFocusedForm();
 			if (!focusedForm) return false;
-			if (!focusedForm.getRequest(requestName, requestMode)) {
-				var f=g740.application.objForm;
-				if (f && f.getRequest(requestName, requestMode)) focusedForm=f;
-			}
-			
 			var G740params={};
 			if (params) {
 				for(var name in params) G740params[name]=g740.convertor.toG740(params[name]);

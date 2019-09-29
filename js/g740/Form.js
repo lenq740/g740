@@ -157,6 +157,7 @@ define(
 //	para.G740params - ассоциативный массив значений параметров в формате G740
 //	para.attr		- ассоциативный массив атрибутов, не передаваемый на сервер
 				exec: function(para) {
+					console.log(para);
 					if (!para) return false;
 					if (para.exec) {
 						para=this.prepareRequestExec(para.exec, para.attr, '#form');
@@ -171,18 +172,24 @@ define(
 							return false;
 						}
 					}
-					var requestName=para.requestName;
-					var requestMode=para.requestMode;
-					if (!this.getRequestEnabled(requestName, requestMode)) return false;
 					var attr={};
 					if (para.attr) attr=para.attr;
-					
+					var isSave=attr['save'];
+					var isClose=attr['close'];
+
+					var requestName=para.requestName;
+					var requestMode=para.requestMode;
 					var fullName=requestName;
 					if (requestMode) fullName=requestName+'.'+requestMode;
 					var r=this.requests[fullName];
+					if (!r) {
+						if (g740.application.objForm && g740.application.objForm.objPanelForm) {
+							var objMainForm=g740.application.objForm;
+							if (objMainForm.requests[fullName]) return objMainForm.exec(para);
+						}
+					}
+					if (!this.getRequestEnabled(requestName, requestMode)) return false;
 					
-					var isSave=attr['save'];
-					var isClose=attr['close'];
 					if (r) {
 						if (r.save) isSave=true;
 						if (r.close) isClose=true;
