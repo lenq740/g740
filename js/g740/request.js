@@ -230,7 +230,24 @@ define(
 							xmlRequest=para.message;
 						}
 						try {
-							console.log(xmlRequest, xmlResponse);
+							var xmlLog=false;
+							if (g740.xml.isXmlNode(xmlRequest) && g740.xml.isXmlNode(xmlResponse)) {
+								try {
+									xmlLog=dojox.xml.parser.parse(
+										'<log>'+
+											g740.xml.toStr(xmlRequest)+
+											g740.xml.toStr(xmlResponse)+
+										'</log>',
+										'text/xml'
+									).documentElement;
+									console.log(xmlLog);
+								}
+								catch (e) {
+								}
+							}
+							if (!xmlLog) {
+								console.log(xmlRequest, xmlResponse);
+							}
 						}
 						catch (e) {
 						}
