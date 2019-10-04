@@ -42,102 +42,6 @@ define(
 // Поддержка иконок для дерева, кнопочек и меню, нужна таблица стилей icons.css
 		g740.icons={
 			_items: {
-				'default': 'g740-icons-default',
-				'save': 'g740-icons-save',
-				'set': 'g740-icons-save',
-				'undo': 'g740-icons-undo',
-				'refresh': 'g740-icons-refresh',
-				'refreshrow': 'g740-icons-refreshrow',
-				'navigate': 'g740-icons-navigate',
-				'edit': 'g740-icons-edit',
-				'groupappend': 'g740-icons-groupappend',
-				'append': 'g740-icons-append',
-				'append.into': 'g740-icons-append-into',
-				'delete': 'g740-icons-delete',
-				'expand': 'g740-icons-expand',
-				'collapse': 'g740-icons-collapse',
-				'marked': 'g740-icons-marked',
-				'mark': 'g740-icons-mark',
-				'markall': 'g740-icons-markall',
-				'unmarkall': 'g740-icons-unmarkall',
-				'mark-on': 'g740-icons-mark-on',
-				'mark-off': 'g740-icons-mark-off',
-				'move': 'g740-icons-move',
-				'copy': 'g740-icons-copy',
-				'join': 'g740-icons-join',
-				'link': 'g740-icons-link',
-
-				'httpget': 'g740-icons-httpget',
-				'httpput': 'g740-icons-httpput',
-				'www': 'g740-icons-www',
-				
-				'shift.first': 'g740-icons-shift-first',
-				'shift.last': 'g740-icons-shift-last',
-				'shift.after': 'g740-icons-shift-after',
-				'shift.before': 'g740-icons-shift-before',
-				'disconnect': 'g740-icons-disconnect',
-				'print': 'g740-icons-print',
-				'timer': 'g740-icons-timer',
-				'zip': 'g740-icons-zip',
-				'xml': 'g740-icons-xml',
-				'sql': 'g740-icons-sql',
-				'word': 'g740-icons-word',
-				'excel': 'g740-icons-excel',
-				'find': 'g740-icons-find',
-				'sort': 'g740-icons-sort',
-				
-				'ok': 'g740-icons-ok',
-				'cancel': 'g740-icons-cancel',
-				'clear': 'g740-icons-clear',
-				'go': 'g740-icons-go',
-				'menu': 'g740-icons-menu',
-				'debug': 'g740-icons-debug',
-				'ref': 'g740-icons-ref',
-				'reffolder': 'g740-icons-reffolder',
-				'tree': 'g740-icons-tree',
-				'region': 'g740-icons-region',
-				'month': 'g740-icons-month',
-				'api': 'g740-icons-api',
-
-				'admin': 'g740-icons-admin',
-				'root': 'g740-icons-root',
-				
-				'process': 'g740-icons-process',
-				'process1': 'g740-icons-process1',
-				'execute': 'g740-icons-execute',
-				'export': 'g740-icons-export',
-				'import': 'g740-icons-import',
-
-				'table': 'g740-icons-table',
-				'config': 'g740-icons-config',
-				'computer': 'g740-icons-computer',
-				'database': 'g740-icons-database',
-				'backup': 'g740-icons-backup',
-				'restore': 'g740-icons-restore',
-				'log': 'g740-icons-log',
-				'email': 'g740-icons-email',
-				'folder': 'g740-icons-folder',
-				'page': 'g740-icons-page',
-				'dbtable': 'g740-icons-dbtable',
-				'dbfield': 'g740-icons-dbfield',
-				'help': 'g740-icons-help',
-
-				'perm': 'g740-icons-perm',
-				'user': 'g740-icons-user',
-				'usergroup': 'g740-icons-usergroup',
-				'userrole': 'g740-icons-userrole',
-
-				'check-on': 'g740-icons-check-on',
-				'check-off': 'g740-icons-check-off',
-				
-				'deleted': 'g740-icons-deleted',
-				'alert': 'g740-icons-alert',
-				'warning': 'g740-icons-warning',
-				'error': 'g740-icons-error',
-				
-				'clipboard.copy': 'g740-icons-clipboard-copy',
-				'clipboard.cut': 'g740-icons-clipboard-cut',
-				'clipboard.paste': 'g740-icons-clipboard-paste'
 			},
 			getIconClassName : function(icon, size) {
 				if (size!='large' && size!='medium' && size!='small') size=g740.config.iconSizeDefault;
@@ -151,6 +55,90 @@ define(
 				if (typeof(result)!='string') result='';
 				if (result) result+=' g740-iconsize-'+size;
 				return result;
+			},
+			registerIconSvg: function(icon, svg, width, height) {
+				var domIconStyle=document.getElementById('g740iconstyle');
+				if (!domIconStyle) {
+					domIconStyle=document.createElement('style');
+					domIconStyle.setAttribute('type','text/css');
+					domIconStyle.setAttribute('id','g740iconstyle');
+					document.getElementsByTagName('head')[0].appendChild(domIconStyle);
+				}
+				var objSheet=(domIconStyle.styleSheet || domIconStyle.sheet)
+				if (objSheet && (objSheet.addRule || objSheet.insertRule)) {
+					var iconClassName='g740-icons-'+icon.replaceAll('.','-');
+					
+					var svgDark=svg;
+					var items=g740.appColorScheme.getItem().darkIconReplace;
+					if (items) for(var colorFrom in items) {
+						var colorTo=items[colorFrom];
+						svgDark=svgDark.replaceAll(colorFrom,colorTo);
+					}
+					var css="background-image: url('data:image/svg+xml;utf8,"+encodeURIComponent(svgDark)+"')";
+					if (width) css+=';width:'+width+'px';
+					if (height) css+=';height:'+height+'px';
+					if (objSheet.addRule) {
+						objSheet.addRule('.'+iconClassName, css);
+					}
+					else  {
+						objSheet.insertRule('.'+iconClassName+'{'+css+'}', 0);
+					}
+
+					if (svg.indexOf('"darkonly"')<0) {
+						var svgWhite=svg;
+						var items=g740.appColorScheme.getItem().whiteIconReplace;
+						if (items) for(var colorFrom in items) {
+							var colorTo=items[colorFrom];
+							svgWhite=svgWhite.replaceAll(colorFrom,colorTo);
+						}
+						var css="background-image: url('data:image/svg+xml;utf8,"+encodeURIComponent(svgWhite)+"')";
+						if (width) css+=';width:'+width+'px';
+						if (height) css+=';height:'+height+'px';
+						if (objSheet.addRule) {
+							objSheet.addRule('.icons-white .'+iconClassName, css);
+						}
+						else  {
+							objSheet.insertRule('.icons-white .'+iconClassName+'{'+css+'}', 0);
+						}
+					}
+					g740.icons._items[icon]=iconClassName;
+				}
+			},
+			registerIconImg: function(icon, pathImg, pathImgWhite, width, height) {
+				var domIconStyle=document.getElementById('g740iconstyle');
+				if (!domIconStyle) {
+					domIconStyle=document.createElement('style');
+					domIconStyle.setAttribute('type','text/css');
+					domIconStyle.setAttribute('id','g740iconstyle');
+					document.getElementsByTagName('head')[0].appendChild(domIconStyle);
+				}
+				var objSheet=(domIconStyle.styleSheet || domIconStyle.sheet)
+				if (objSheet && (objSheet.addRule || objSheet.insertRule)) {
+					var iconClassName='g740-icons-'+icon.replaceAll('.','-');
+					
+					var css="background-image: url('"+pathImg+"')";
+					if (width) css+=';width:'+width+'px';
+					if (height) css+=';height:'+height+'px';
+					if (objSheet.addRule) {
+						objSheet.addRule('.'+iconClassName, css);
+					}
+					else  {
+						objSheet.insertRule('.'+iconClassName+'{'+css+'}', 0);
+					}
+
+					if (pathImgWhite) {
+						var css="background-image: url('"+pathImgWhite+"')";
+						if (width) css+=';width:'+width+'px';
+						if (height) css+=';height:'+height+'px';
+						if (objSheet.addRule) {
+							objSheet.addRule('.icons-white .'+iconClassName, css);
+						}
+						else  {
+							objSheet.insertRule('.icons-white .'+iconClassName+'{'+css+'}', 0);
+						}
+					}
+					g740.icons._items[icon]=iconClassName;
+				}
 			}
 		};
 // Поддержка цветовых схем, нужна таблица стилей color.css
@@ -210,17 +198,54 @@ define(
 			_items: {
 				black: {
 					className: 'app-color-black',
-					panelExpanderLookOpacityMax: 0.55
+					panelExpanderLookOpacityMax: 0.55,
+					darkIconReplace: {
+					},
+					whiteIconReplace: {
+						'#000000': '#FFFFFF',
+						'red': '#FFFFFF',
+						'green': '#FFFFFF',
+						'blue': '#FFFFFF',
+						'yellow': '#FFFFFF'
+					}
 				},
 				red: {
 					className: 'app-color-red',
-					panelExpanderLookOpacityMax: 0.55
+					panelExpanderLookOpacityMax: 0.55,
+					darkIconReplace: {
+						'#000000': '#e5525b',
+						'red': '#E74C3C',
+						'green': '#1ABC9C',
+						'blue': '#3498DB',
+						'yellow': '#F1C40F'
+					},
+					whiteIconReplace: {
+						'#000000': '#FFFFFF',
+						'red': '#FFFFFF',
+						'green': '#FFFFFF',
+						'blue': '#FFFFFF',
+						'yellow': '#FFFFFF'
+					}
 				},
 				m: {
 					className: 'app-color-m',
+					panelExpanderLookOpacityMax: 0.55,
 					panelTreeMenuWhiteIcons: true,
 					panelGridWhiteIcons: true,
-					panelExpanderLookOpacityMax: 0.55
+					darkIconReplace: {
+						'#000000': '#2980b9',
+						'red': '#E74C3C',
+						'green': '#1ABC9C',
+						'blue': '#3498DB',
+						'yellow': '#F1C40F'
+					},
+					whiteIconReplace: {
+						'#000000': '#FFFFFF',
+						'red': '#FFFFFF',
+						'green': '#FFFFFF',
+						'blue': '#FFFFFF',
+						'yellow': '#FFFFFF'
+					}
 				}
 			},
 			getItem: function() {

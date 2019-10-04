@@ -64,6 +64,7 @@ define(
 		'dijit/MenuSeparator',
 
 		'g740/config',
+		'g740/icons/icons',
 		'g740/localization',
 		'g740/trace',
 		'g740/convertor',
@@ -540,9 +541,11 @@ define(
 				);
 	            g740.application.objPanel.startup();
 
-				
 				var itemAppColorScheme=g740.appColorScheme.getItem();
-				if (itemAppColorScheme)	dojo.addClass(document.body, itemAppColorScheme.className);
+				if (itemAppColorScheme)	{
+					dojo.addClass(document.body, itemAppColorScheme.className);
+					g740.registerBaseIcons();
+				}
 				
 				g740.application.doG740ShowForm();
 			}
