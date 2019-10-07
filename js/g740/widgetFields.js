@@ -137,6 +137,7 @@ define(
 					dojo.style(this.domNode, 'height', this.getHeight()+'px');
 					dojo.style(this.domNode,'left',this.left+'px');
 					if (this.isLabelTop) {
+						dojo.style(this.domNodeLabel,'margin-top','1px');
 					} else {
 						dojo.style(this.domNodeLabel,'top','1px');
 					}
@@ -153,7 +154,7 @@ define(
 					return this._labelWidth;
 				},
 				getLabelHeight: function() {
-					return 16;
+					return 18;
 				},
 				
 				_fieldWidth: 0,
