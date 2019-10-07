@@ -157,7 +157,6 @@ define(
 //	para.G740params - ассоциативный массив значений параметров в формате G740
 //	para.attr		- ассоциативный массив атрибутов, не передаваемый на сервер
 				exec: function(para) {
-					console.log(para);
 					if (!para) return false;
 					if (para.exec) {
 						para=this.prepareRequestExec(para.exec, para.attr, '#form');
