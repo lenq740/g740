@@ -74,7 +74,7 @@ define(
 						var colorTo=items[colorFrom];
 						svgDark=svgDark.replaceAll(colorFrom,colorTo);
 					}
-					var css="background-image: url('data:image/svg+xml;utf8,"+encodeURIComponent(svgDark)+"')";
+					var css="background-image: url('data:image/svg+xml,"+encodeURIComponent(svgDark)+"')";
 					if (width) css+=';width:'+width+'px';
 					if (height) css+=';height:'+height+'px';
 					if (objSheet.addRule) {
@@ -91,7 +91,7 @@ define(
 							var colorTo=items[colorFrom];
 							svgWhite=svgWhite.replaceAll(colorFrom,colorTo);
 						}
-						var css="background-image: url('data:image/svg+xml;utf8,"+encodeURIComponent(svgWhite)+"')";
+						var css="background-image: url('data:image/svg+xml,"+encodeURIComponent(svgWhite)+"')";
 						if (width) css+=';width:'+width+'px';
 						if (height) css+=';height:'+height+'px';
 						if (objSheet.addRule) {

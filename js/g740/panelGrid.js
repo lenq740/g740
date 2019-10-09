@@ -20,7 +20,8 @@ define(
 				g740cells: null,
 				isShowHeaders: true,
 				isShowSelected: true,
-				isShowOdd: true,
+				isShowOdd: false,	// черезполосица, пока отключена ...
+				colorReadOnly: 'gray',
 			    constructor: function (para, domElement) {
 			        var procedureName='g740.Grid.constructor';
 					this.objForm=para.objForm;
@@ -62,8 +63,8 @@ define(
 					this.on('Blur', this.onG740Blur);
 					this.on('StyleRow', this.onG740StyleRow);
 					this.on('ResizeColumn', this.onG740ResizeColumn);
-
-					//console.log(this);
+					
+					// console.log(this);
 			    },
 			    destroy: function () {
 			        var procedureName='g740.Grid.destroy';
@@ -143,10 +144,37 @@ define(
 							}
 						}
 					}
+
+					var classColorReadOnly='';
+					if (this.colorReadOnly) classColorReadOnly='g740-color-'+this.colorReadOnly;
 					
 			        if (!this.objRowSet.isObjectDestroed && this.objRowSet.isEnabled) {
 			            if (dojo.hasClass(this.domNode, 'dojoxGridRowSetDisabled')) dojo.removeClass(this.domNode, 'dojoxGridRowSetDisabled');
+						if (classColorReadOnly) {
+							var isReadOnly=this.objRowSet.getReadOnly();
+							if (this.views && this.views.views) {
+								for(var i=0; i<this.views.views.length; i++) {
+									var view=this.views.views[i];
+									if (!view) continue;
+									var node=view.scrollboxNode;
+									if (!node) continue;
+									if (isReadOnly && !dojo.hasClass(node,classColorReadOnly)) dojo.addClass(node, classColorReadOnly);
+									if (!isReadOnly && dojo.hasClass(node,classColorReadOnly)) dojo.removeClass(node, classColorReadOnly);
+								}
+							}
+						}
 			        } else {
+						if (classColorReadOnly) {
+							if (this.views && this.views.views) {
+								for(var i=0; i<this.views.views.length; i++) {
+									var view=this.views.views[i];
+									if (!view) continue;
+									var node=view.scrollboxNode;
+									if (!node) continue;
+									if (dojo.hasClass(node,classColorReadOnly)) dojo.removeClass(node, classColorReadOnly);
+								}
+							}
+						}
 			            if (!dojo.hasClass(this.domNode, 'dojoxGridRowSetDisabled')) {
 			                dojo.addClass(this.domNode, 'dojoxGridRowSetDisabled');
 			                this.render();
@@ -332,6 +360,16 @@ define(
 						}
 						this.set('structure', structure);
 						this.views.resize();
+					}
+					
+					if (this.views && this.views.views) {
+						for(var i=0; i<this.views.views.length; i++) {
+							var objView=this.views.views[i];
+							if (!objView) continue;
+							if (objView.isG740Scroll) continue;
+							objView.isG740Scroll=true;
+							dojo.on(objView.scrollboxNode, 'scroll', dojo.hitch(this, this.onG740Scroll));
+						}
 					}
 				},
 
@@ -850,15 +888,22 @@ define(
 			        objDialog.show();
 			    },
 
-			    onG740Focus: function () {
+			    isFocused: false,
+				onG740Focus: function () {
 			        if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
 			        dojo.addClass(this.domNode, 'g740-grid-focused');
+					this.isFocused=true;
 			        return true;
 			    },
 			    onG740Blur: function () {
 			        dojo.removeClass(this.domNode, 'g740-grid-focused');
+					this.isFocused=false;
 			        return true;
 			    },
+				onG740Scroll: function() {
+					if (!this.isFocused) this.doG740Focus();
+			        return true;
+				},
 			    
 				onG740StyleRow: function (row) {
 			        var node=this.getItem(row.index);
@@ -870,13 +915,17 @@ define(
 							var colorItem=g740.appColorScheme.getItem();
 							if (colorItem.panelGridWhiteIcons) rowClassName+=' icons-white';
 						}
+						else {
+							if (node.info['row.color']) {
+								rowClassName+=' g740-color-' + node.info['row.color'];
+							}
+							else if (this.colorReadOnly) {
+								var isReadOnly=objRowSet.getReadOnly();
+								if (!isReadOnly) isReadOnly=node.info['row.readonly'];
+								if (isReadOnly) rowClassName+=' g740-color-'+this.colorReadOnly;
+							}
+						}
 						if (this.isShowOdd && (row.index % 2)==1) rowClassName+=' dojoxGridRowOdd';
-						
-			            if (node.info['row.mark']) {
-			                rowClassName+=' g740-mark';
-			            } else {
-			                if (node.info['row.color']) rowClassName+=' g740-color-' + node.info['row.color'];
-			            }
 			            row.customClasses=rowClassName;
 
 			            var fields=objRowSet.getFields(node);
@@ -1194,7 +1243,12 @@ define(
 			
 			if (g740.xml.isAttr(xml,'noheader')) p.isShowHeaders=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noheader','1'),'check');
 			if (g740.xml.isAttr(xml,'noselect')) p.isShowSelected=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noselect','1'),'check');
-			if (g740.xml.isAttr(xml,'noodd')) p.isShowOdd=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noodd','1'),'check');
+			if (g740.xml.isAttr(xml,'color.readonly')) {
+				var color=g740.xml.getAttrValue(xml,'color.readonly','');
+				if (color=='white') color='';
+				p.colorReadOnly=color;
+			}
+			//if (g740.xml.isAttr(xml,'noodd')) p.isShowOdd=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noodd','1'),'check');
 			
 			var objGrid=new g740.Grid(p, null);
 			objPanel.addChild(objGrid);

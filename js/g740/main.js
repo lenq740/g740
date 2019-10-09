@@ -149,7 +149,18 @@ define(
 	    };
 	    function get(name, defa) {
 	        var result=false;
-			if (name=='IE') return dojo.hasClass(document.documentElement,'IE')?1:0;
+			if (name=='IE') {
+				var result=0;
+				try {
+					var userAgent=window.navigator.userAgent.toLowerCase();
+					result=(userAgent.indexOf('trident')>=0) || (userAgent.indexOf('msie')>=0);
+					if (!result) result=typeof(document.documentMode)=='number';
+				}
+				catch(e) {
+					result=0;
+				}
+				return result;
+			}
 			else if (name=='CSRFTOKEN') return config.csrfToken;
 			else if (name=='SESSION') return config.session;
 	        try {
@@ -526,6 +537,8 @@ define(
 
 			go: function() {
 				dojo.addClass(document.body, 'g740');
+				if (get('IE',0)) dojo.addClass(document.documentElement,'IE');
+				
 				var urlParams=this.getUrlParams();
 				if (urlParams['mode']=='login') this.isModeLoginDialog=true;
 				

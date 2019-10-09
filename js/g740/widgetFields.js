@@ -291,6 +291,7 @@ define(
 				isShowNullAsEmptyString: true,
 				isLastFocused: false,
 				_btnClearWidth: 0,
+				colorReadOnly: 'gray',
 				set: function(name, value) {
 					if (name=='objForm') {
 						this.objForm=value;

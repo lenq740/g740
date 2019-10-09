@@ -29,6 +29,7 @@ define(
 				deltaW: 8,
 				objToolBar: null,
 				objPanelButtons: null,
+				colorReadOnly: 'gray',
 				templateString: 
 					'<div class="g740-fieldsmultiline">'+
 					'<div data-dojo-attach-point="domNodeTitle"></div>'+
@@ -182,6 +183,7 @@ define(
 								rowsetName: this.rowsetName,
 								fieldName: fld.name,
 								fieldDef: fld,
+								colorReadOnly: this.colorReadOnly,
 								nodeType: this.nodeType
 							};
 							if (fld.rowId) p.rowId=fld.rowId;
@@ -571,6 +573,11 @@ define(
 			}
 			para.fields=fields;
 			if (g740.xml.getAttrValue(xml,'captionup','0')=='1') para.isLabelTop=true;
+			if (g740.xml.isAttr(xml,'color.readonly')) {
+				var color=g740.xml.getAttrValue(xml,'color.readonly','');
+				if (color=='white') color='';
+				para.colorReadOnly=color;
+			}
 			var result=new g740.PanelFields(para, null);
 			return result;
 		};
@@ -776,6 +783,11 @@ define(
 			}
 			
 			if (g740.xml.getAttrValue(xml,'captionup','0')=='1') para.isLabelTop=true;
+			if (g740.xml.isAttr(xml,'color.readonly')) {
+				var color=g740.xml.getAttrValue(xml,'color.readonly','');
+				if (color=='white') color='';
+				para.colorReadOnly=color;
+			}
 			var result=new g740.PanelAttribute(para, null);
 			return result;
 		};

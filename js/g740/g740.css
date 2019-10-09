@@ -284,12 +284,6 @@ html, body {
 	background-color: orange !important;
 	color: White !important;
 }
-.dijitTreeContainer .g740-mark {
-	background-color: gold !important;
-}
-.dijitTreeContainer .g740-mark.dijitTreeRowSelected{
-	background-color: gold !important;
-}
 .g740 .dijitTreeLabel:focus {
 	outline-color: orange !important;
 }
@@ -419,7 +413,7 @@ html, body {
 	border-color: transparent;
 }
 .g740-widget-icons.g740-readonly{
-	opacity: 0.4;
+	opacity: 0.9;
 }
 .g740-widget-icons.g740-widget-focused {
 	border-color: #d4464e;
@@ -442,6 +436,9 @@ html, body {
 	background-size: cover;
 	cursor: pointer;
 }
+.g740-widget-icons.g740-readonly .g740-widget-icons-icon{
+	cursor: default;
+}
 .g740-widget-icons .check-on {
 	background-image: url('icons/widget/check-on.png');
 }
@@ -454,6 +451,11 @@ html, body {
 	top: 1px;
 	line-height: 14px;
 	font-size: 12px;
+	user-select: none;
+	-ms-user-select: none;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
 }
 
 /* g740.FieldEditor.RadioGroupBox */
@@ -471,7 +473,7 @@ html, body {
 	border-color: #d4464e;
 }
 .g740-radiogroupbox.g740-readonly{
-	opacity: 0.4;
+	opacity: 0.9;
 }
 .g740-radiogroupbox .g740-focused {
 	position: absolute;
@@ -491,6 +493,9 @@ html, body {
 	background-size: cover;
 	cursor: pointer;
 }
+.g740-radiogroupbox.g740-readonly .g740-radio-icon {
+	cursor: default;
+}
 .g740-radiogroupbox .check-off  .g740-radio-icon{
 	background-image: url('icons/widget/radiobutton-off.png');
 	width: 16px;
@@ -508,6 +513,9 @@ html, body {
 	line-height: 14px;
 	font-size: 12px;
 	cursor: pointer;
+}
+.g740-radiogroupbox.g740-readonly .g740-radio-label {
+	cursor: default;
 }
 
 

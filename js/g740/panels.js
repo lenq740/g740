@@ -3265,6 +3265,7 @@ define(
 				params: {},
 				domTextArea: null,
 				enter: false,
+				colorReadOnly: 'gray',
 				destroy: function() {
 					var procedureName='g740.PanelMemo.destroy';
 					this.params={};
@@ -3367,11 +3368,15 @@ define(
 					var oldReadOnly=this.domTextArea.readOnly;
 					if (oldReadOnly!=readOnly) {
 						this.domTextArea.readOnly=readOnly;
-						if (readOnly) {
-							if (!dojo.hasClass(this.domTextArea, 'dijitTextBoxReadOnly')) dojo.addClass(this.domTextArea, 'dijitTextBoxReadOnly');
-						}
-						else {
-							if (dojo.hasClass(this.domTextArea, 'dijitTextBoxReadOnly')) dojo.removeClass(this.domTextArea, 'dijitTextBoxReadOnly');
+						if (this.colorReadOnly) {
+							// dijitTextBoxReadOnly
+							var classColorReadOnly='g740-color-'+this.colorReadOnly;
+							if (readOnly) {
+								dojo.addClass(this.domTextArea, classColorReadOnly);
+							}
+							else {
+								dojo.removeClass(this.domTextArea, classColorReadOnly);
+							}
 						}
 					}
 				},
@@ -4481,6 +4486,11 @@ define(
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
 			if (g740.xml.isAttr(xml,'field')) para.fieldName=g740.xml.getAttrValue(xml,'field','');
 			if (g740.xml.isAttr(xml,'enter')) para.enter=g740.xml.getAttrValue(xml,'enter','0');
+			if (g740.xml.isAttr(xml,'color.readonly')) {
+				var color=g740.xml.getAttrValue(xml,'color.readonly','');
+				if (color=='white') color='';
+				para.colorReadOnly=color;
+			}
 			var result=new g740.PanelMemo(para, null);
 			return result;
 		};

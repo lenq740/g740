@@ -297,6 +297,7 @@ define(
 				buttonVisible: false,
 				_readOnly: false,
 				_buttonOnly: false,
+				colorReadOnly: 'gray',
 				set: function(name, value) {
 					if (name=='value') {
 						this.domNodeInput.value=value;
@@ -305,12 +306,16 @@ define(
 					if (name=='readOnly' || name=='buttonOnly') {
 						if (name=='readOnly') this._readOnly=value;
 						if (name=='buttonOnly') this._buttonOnly=value;
-						var inputReadOnly=(this._readOnly || this._buttonOnly);
-						if (this._readOnly) {
-							dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-						}
-						else {
-							dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+						
+						if (this.colorReadOnly) {
+							//dijitTextBoxReadOnly
+							var classColorReadOnly='g740-color-'+this.colorReadOnly;
+							if (this._readOnly) {
+								dojo.addClass(this.domNodeInput, classColorReadOnly);
+							}
+							else {
+								dojo.removeClass(this.domNodeInput, classColorReadOnly);
+							}
 						}
 						if (this._readOnly || this._buttonOnly) {
 							this.domNodeInput.readOnly=true;
@@ -419,6 +424,7 @@ define(
 				'</div>',
 				_readOnly: false,
 				_buttonOnly: false,
+				colorReadOnly: 'gray',
 				set: function(name, value) {
 					if (name=='value') {
 						this.domNodeTextArea.value=value;
@@ -428,13 +434,18 @@ define(
 						if (name=='readOnly') this._readOnly=value;
 						if (name=='buttonOnly') this._buttonOnly=value;
 						this.domNodeTextArea.readOnly=(this._readOnly || this._buttonOnly);
-						if (this._readOnly) {
-							dojo.addClass(this.domNodeTextArea, 'dijitTextBoxReadOnly');
+
+						if (this.colorReadOnly) {
+							// dijitTextBoxReadOnly
+							var classColorReadOnly='g740-color-'+this.colorReadOnly;
+							if (this._readOnly) {
+								dojo.addClass(this.domNodeTextArea, classColorReadOnly);
+							}
+							else {
+								dojo.removeClass(this.domNodeTextArea, classColorReadOnly);
+							}
 						}
-						else {
-							dojo.removeClass(this.domNodeTextArea, 'dijitTextBoxReadOnly');
-						}
-						
+
 						if (this._buttonOnly && !this._readOnly) {
 							if (!dojo.hasClass(this.domNodeTextArea.parentNode, 'cursorpointer')) dojo.addClass(this.domNodeTextArea.parentNode, 'cursorpointer');
 						}
@@ -443,18 +454,6 @@ define(
 						}
 						return true;
 					}
-/*
-					if (name=='readOnly') {
-						this.domNodeTextArea.readOnly=value;
-						if (value) {
-							dojo.addClass(this.domNodeTextArea, 'dijitTextBoxReadOnly');
-						}
-						else {
-							dojo.removeClass(this.domNodeTextArea, 'dijitTextBoxReadOnly');
-						}
-						return true;
-					}
-*/
 					this.inherited(arguments);
 				},
 				postCreate: function() {
@@ -512,6 +511,7 @@ define(
 				_readOnly: false,
 				_buttonOnly: false,
 				_value: '',
+				colorReadOnly: 'gray',
 				getReadOnly: function() {
 					return this._readOnly;
 				},
@@ -527,12 +527,18 @@ define(
 						if (name=='readOnly') this._readOnly=value;
 						if (name=='buttonOnly') this._buttonOnly=value;
 						var inputReadOnly=(this._readOnly || this._buttonOnly);
-						if (this._readOnly) {
-							dojo.addClass(this.domNodeInput, 'dijitTextBoxReadOnly');
+
+						if (this.colorReadOnly) {
+							// dijitTextBoxReadOnly
+							var classColorReadOnly='g740-color-'+this.colorReadOnly;
+							if (this._readOnly) {
+								dojo.addClass(this.domNodeInput, classColorReadOnly);
+							}
+							else {
+								dojo.removeClass(this.domNodeInput, classColorReadOnly);
+							}
 						}
-						else {
-							dojo.removeClass(this.domNodeInput, 'dijitTextBoxReadOnly');
-						}
+
 						if (this._readOnly || this._buttonOnly) {
 							this.domNodeInput.readOnly=true;
 							if (!dojo.hasClass(this.domNodeInput.parentNode, 'readonly')) dojo.addClass(this.domNodeInput.parentNode, 'readonly');
@@ -1534,13 +1540,19 @@ define(
 				},
 				_onDropDownClick: function(e) {
 					if (this.dropDown) {
-						var lst=this.dropDown.getChildren();
-						for (var i=0; i<lst.length; i++) {
-							var obj=lst[i];
-							if (obj.doG740Repaint) {
-								obj.doG740Repaint({});
+						g740.execDelay.go({
+							obj: this,
+							delay: 100,
+							func: function() {
+								var lst=this.dropDown.getChildren();
+								for (var i=0; i<lst.length; i++) {
+									var obj=lst[i];
+									if (obj.doG740Repaint) {
+										obj.doG740Repaint({});
+									}
+								}
 							}
-						}
+						});
 					}
 					this.inherited(arguments);
 				},
@@ -1900,7 +1912,6 @@ define(
 						}
 						return false;
 					}
-					
 					if (!this.objForm) return false;
 					if (this.objForm.isActionExecuted) return false;
 					if (this.objForm.fifoRequests.length>0) return false;
