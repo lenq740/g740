@@ -577,6 +577,7 @@ define(
 				},
 				onDomNodeInputChanged: function() {
 					if (this.isOnChange) return;
+					if (!this.domNodeInput) return;
 					this.isOnChange=true;
 					try {
 						var value=dojo.trim(this.domNodeInput.value);
