@@ -766,7 +766,7 @@ define(
 					this.focused=true;
 				}
 			}
-		)
+		);
 // g740._ListAbstract - виджет: абстрактный предок списка
 		dojo.declare(
 			'g740._ListAbstract',
@@ -1294,11 +1294,14 @@ define(
 				g740className: 'g740.ToolbarButton',	// Имя базового класса
 				objAction: null,
 				g740size: 'small',
+				description: '',
+				visible: true,
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
 						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						if (this.objAction.description) this.set('description',this.objAction.description);
 						return true;
 					}
 					if (name=='focused') {
@@ -1308,6 +1311,30 @@ define(
 					if (name=='g740size') {
 						if (value!='large' && value!='medium') value='small';
 						this.g740size=value;
+						return true;
+					}
+					if (name=='description') {
+						if (this.description!=value) {
+							this.description=value;
+							return true;
+						}
+						return true;
+					}
+					if (name=='visible') {
+						var value=value?true:false;
+						if (this.visible!=value) {
+							if (value) {
+								if (dojo.hasClass(this.domNode, 'g740-hide')) dojo.removeClass(this.domNode, 'g740-hide');
+							}
+							else {
+								if (!dojo.hasClass(this.domNode, 'g740-hide')) dojo.addClass(this.domNode, 'g740-hide');
+							}
+							this.visible=value;
+							if (this.getParent) {
+								var objParent=this.getParent();
+								if (objParent && objParent.layout) objParent.layout();
+							}
+						}
 						return true;
 					}
 					this.inherited(arguments);
@@ -1355,6 +1382,9 @@ define(
 						var r=this.objAction.request;
 						if (r.js_icon) {
 							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+						if (r.js_visible) {
+							this.set('visible',this.objAction.getVisible());
 						}
 					}
 					
@@ -1437,7 +1467,7 @@ define(
 					if (this.region=='top') {
 						dojo.addClass(this.domNode,'btnstretch');
 					}
-					if (this.domNode) this.domNode.title='';
+					if (this.domNode) this.domNode.title=this.description;
 				},
 				onG740KeyDown: function(e) {
 					if (!e.ctrlKey && e.keyCode==13) {
@@ -1466,6 +1496,9 @@ define(
 						if (r.js_icon) {
 							this.set('iconClass',this.objAction.getIconClass('medium'));
 						}
+						if (r.js_visible) {
+							this.set('visible',this.objAction.getVisible());
+						}
 					}
 					this.set('label',this.objAction.getCaption().toHtml());
 				},
@@ -1486,16 +1519,44 @@ define(
 				objAction: null,
 				g740size: 'small',
 				js_enabled: '',
+				description: '',
+				visible: true,
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
 						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						if (this.objAction.description) this.set('description',this.objAction.description);
 						return true;
 					}
 					if (name=='g740size') {
 						if (value!='large' && value!='medium') value='small';
 						this.g740size=value;
+						return true;
+					}
+					if (name=='description') {
+						if (this.description!=value) {
+							this.description=value;
+							this.domNode.title=value;
+							return true;
+						}
+						return true;
+					}
+					if (name=='visible') {
+						var value=value?true:false;
+						if (this.visible!=value) {
+							if (value) {
+								if (dojo.hasClass(this.domNode, 'g740-hide')) dojo.removeClass(this.domNode, 'g740-hide');
+							}
+							else {
+								if (!dojo.hasClass(this.domNode, 'g740-hide')) dojo.addClass(this.domNode, 'g740-hide');
+							}
+							this.visible=value;
+							if (this.getParent) {
+								var objParent=this.getParent();
+								if (objParent && objParent.layout) objParent.layout();
+							}
+						}
 						return true;
 					}
 					this.inherited(arguments);
@@ -1521,19 +1582,24 @@ define(
 					}
 				},
 				doG740Repaint: function(para) {
-					if (this.objAction && this.objAction.request.js_enabled) {
-						var isEnabled=false;
-						var obj=this.objAction.getObjRowSet();
-						if (!obj) obj=this.objAction.objForm;
-						if (obj) {
-							var isEnabled=g740.js_eval(obj, this.objAction.request.js_enabled, true);
-						}
-						this.set('disabled', !isEnabled);
-						if (this.objAction.request.js_icon) {
+					if (this.objAction && this.objAction.request) {
+						var r=this.objAction.request;
+						if (r.js_icon) {
 							this.set('iconClass',this.objAction.getIconClass(this.g740size));
 						}
-						if (this.objAction.request.js_caption) {
+						if (r.js_enabled) {
+							var obj=this.objAction.getObjRowSet();
+							if (!obj) obj=this.objAction.objForm;
+							if (obj) {
+								var isEnabled=g740.js_eval(obj, r.js_enabled, true);
+							}
+							this.set('disabled', !isEnabled);
+						}
+						if (r.js_caption) {
 							this.set('label',this.objAction.getCaption());
+						}
+						if (r.js_visible) {
+							this.set('visible',this.objAction.getVisible());
 						}
 					}
 					return true;
@@ -1562,6 +1628,267 @@ define(
 				}
 			}
 		);
+		
+// g740.CustomButton
+		dojo.declare(
+			'g740.CustomButton',
+			[dijit._Widget, dijit._TemplatedMixin],
+			{
+				g740className: 'g740.CustomButton',	// Имя базового класса
+				templateString: 
+					'<div class="g740-custombutton" data-dojo-attach-event="'+
+						'onclick: onBtnClick'+
+					'">'+
+						'<table calss="g740-table">'+
+							'<tr>'+
+								'<td class="icons-white"><div class="g740-icon" data-dojo-attach-point="domNodeIcon"></div></td>'+
+								'<td><div class="g740-label" data-dojo-attach-point="domNodeLabel"></div></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>',
+				objAction: null,
+				btnstyle: '',
+				label: '',
+				description: '',
+				visible: true,
+				set: function(name, value) {
+					if (name=='objAction') {
+						this.objAction=value;
+						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
+						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass('medium'));
+						if (this.objAction.description) this.set('description',this.objAction.description);
+						return true;
+					}
+					if (name=='label') {
+						if (this.label!=value) {
+							this.domNodeLabel.innerText=value;
+							this.label=value;
+							if (this.getParent) {
+								var objParent=this.getParent();
+								if (objParent && objParent.layout) objParent.layout();
+							}
+							return true;
+						}
+						return true;
+					}
+					if (name=='description') {
+						if (this.description!=value) {
+							this.domNode.title=value;
+							this.description=value;
+							return true;
+						}
+						return true;
+					}
+					if (name=='iconClass') {
+						if (value) {
+							dojo.removeClass(this.domNodeIcon, 'g740-hide');
+							dojo.addClass(this.domNodeIcon, value);
+						}
+						else {
+							this.domNodeIcon.className='g740-icon g740-hide';
+						}
+						return true;
+					}
+					if (name=='btnstyle') {
+						if (value!='success' && value!='info' && value!='warning' && value!='danger') value='default';
+						if (this.btnstyle!=value) {
+							if (this.btnstyle) dojo.removeClass(this.domNode, 'g740-style-'+this.btnstyle);
+							this.btnstyle=value;
+							dojo.addClass(this.domNode, 'g740-style-'+this.btnstyle);
+							return true;
+						}
+						return true;
+					}
+					if (name=='disabled') {
+						if (value) {
+							if (!dojo.hasClass(this.domNode, 'g740-disabled')) dojo.addClass(this.domNode, 'g740-disabled');
+						}
+						else {
+							if (dojo.hasClass(this.domNode, 'g740-disabled')) dojo.removeClass(this.domNode, 'g740-disabled');
+						}
+						return true;
+					}
+					if (name=='visible') {
+						var value=value?true:false;
+						if (this.visible!=value) {
+							if (value) {
+								if (dojo.hasClass(this.domNode, 'g740-hide')) dojo.removeClass(this.domNode, 'g740-hide');
+							}
+							else {
+								if (!dojo.hasClass(this.domNode, 'g740-hide')) dojo.addClass(this.domNode, 'g740-hide');
+							}
+							this.visible=value;
+							if (this.getParent) {
+								var objParent=this.getParent();
+								if (objParent && objParent.layout) objParent.layout();
+							}
+						}
+						return true;
+					}
+					this.inherited(arguments);
+				},
+				postCreate: function() {
+					{
+						var btnStyle=this.btnstyle;
+						this.btnstyle='';
+						this.set('btnstyle', btnStyle);
+					}
+					this.inherited(arguments);
+				},
+				doG740Repaint: function(para) {
+					if (!this.objAction) {
+						this.set('disabled', true);
+						return;
+					}
+					var isEnabled=this.objAction.getEnabled();
+					this.set('disabled', !isEnabled);
+					if (this.objAction.request) {
+						var r=this.objAction.request;
+						if (r.js_icon) {
+							this.set('iconClass',this.objAction.getIconClass(this.g740size));
+						}
+						if (r.js_visible) {
+							this.set('visible',this.objAction.getVisible());
+						}
+					}
+					this.set('label',this.objAction.getCaption().toHtml());
+					
+				},
+				onBtnClick: function() {
+					var objPanel=this.getPanelForFocus();
+					if (objPanel && objPanel.doG740FocusChildFirst) objPanel.doG740FocusChildFirst();
+
+					if (this._isClickTimeout) return false;
+					this._isClickTimeout=true;
+					g740.execDelay.go({
+						delay: 400,
+						obj: this,
+						func: this._setClickTimeoutOff
+					});
+					
+					if (this.objAction) return this.objAction.exec();
+					return false;
+				},
+				getPanelForFocus: function() {
+					var objForm=null;
+					var objToolBarPanel=null;
+
+					var obj=this.getParent();
+					if (obj && obj.getParent) obj=obj.getParent();
+					if (obj.g740className=='g740.Panel') {
+						objToolBarPanel=obj;
+						objForm=objToolBarPanel.objForm;
+					}
+					
+					if (!this.objAction) {
+						if (!objForm) return null;
+						var objFocusedPanel=objForm.objFocusedPanel;
+						if (objFocusedPanel) return objFocusedPanel;
+						if (objToolBarPanel) return objToolBarPanel;
+						return null;
+					}
+					
+					if (!objForm) objForm=this.objAction.objForm;
+					if (!objForm) return null;
+					var objFocusedPanel=objForm.objFocusedPanel;
+					
+					var rowsetName=this.objAction.rowsetName;
+					if (!rowsetName || rowsetName=='#focus' || rowsetName=='#form') {
+						if (objFocusedPanel) return objFocusedPanel;
+						return null;
+					}
+					if (objToolBarPanel && objToolBarPanel.rowsetName==rowsetName) return objToolBarPanel;
+					if (objFocusedPanel && objFocusedPanel.rowsetName==rowsetName) return objFocusedPanel;
+					return null;
+				},
+				_isClickTimeout: false,
+				_setClickTimeoutOff: function() {
+					this._isClickTimeout=false;
+				}
+			}
+		);
+
+
+// g740.WidgetButtonContainer
+		dojo.declare(
+			'g740.WidgetButtonContainer',
+			[dijit._Widget, dijit._TemplatedMixin],
+			{
+				g740className: 'g740.WidgetButtonContainer',	// Имя базового класса
+				templateString: 
+					'<div class="g740-buttoncontainer">'+
+						'<div class="g740-items" data-dojo-attach-point="domNodeItems">'+
+							'<div style="clear:both" data-dojo-attach-point="domNodeLast"></div>'+
+						'</div>'+
+					'</div>',
+				child: null,
+				constructor: function(para, domElement) {
+					var procedureName='g740.ButtonContainer.constructor';
+					this.child=[];
+				},
+				destroy: function() {
+					var procedureName='g740.WidgetButtonContainer.destroy';
+					if (this.child) {
+						var lst=this.getChildren();
+						for(var i=0; i<lst.length; i++) {
+							var obj=lst[i];
+							if (obj) obj.destroyRecursive();
+						}
+						this.child=[];
+					}
+					this.inherited(arguments);
+				},
+				addChild: function(obj, insertIndex) {
+					if (!obj) return false;
+					if (!obj.domNode) return false;
+					if (obj.region=='top' || obj.region=='bottom') {
+						dojo.style(obj.domNode, 'width', '99%');
+					}
+					else {
+						var align='left';
+						if (obj.region=='right') align='right';
+						dojo.style(obj.domNode, 'float', align);
+					}
+					this.domNodeItems.insertBefore(obj.domNode, this.domNodeLast);
+					this.child.push(obj);
+				},
+				getChildren: function() {
+					return this.child;
+				},
+				doG740Repaint: function(para) {
+					var lst=this.getChildren();
+					for(var i=0; i<lst.length; i++) {
+						var obj=lst[i];
+						if (obj && obj.doG740Repaint) obj.doG740Repaint(para);
+					}
+				},
+				_resizeHeight: 0,
+				resize: function(size) {
+					var pos=dojo.geom.position(this.domNodeItems, false);
+					dojo.style(this.domNode,'width','100%');
+					if (this._resizeHeight!=pos.h) {
+						this._resizeHeight=pos.h;
+						dojo.style(this.domNode,'height',pos.h+'px');
+						if (this.getParent) {
+							var objParent=this.getParent();
+							if (objParent && objParent.layout) {
+								g740.execDelay.go({
+									delay: 50,
+									obj: objParent,
+									func: objParent.layout
+								});
+							}
+						}
+					}
+				},
+				layout: function() {
+					this.resize();
+				}
+			}
+		);
+
+
+		
 // g740.Menu - выпадающее по правой кнопке меню
 		dojo.declare(
 			'g740.Menu',
@@ -1784,6 +2111,7 @@ define(
 				rowsetName: '',							// Ссылка на имя набора строк
 				request: {},							// Описание запроса
 				label: '',
+				description: '',
 				icon: 'default',
 				iconClass: '',
 				constructor: function(para) {
@@ -1798,6 +2126,7 @@ define(
 						
 						var label=this.request.caption;
 						var icon=this.request.icon;
+						var description=this.request.description;
 						
 						if (this.request.name=='connect') this.rowsetName='#form';
 						if (this.request.name=='disconnect') this.rowsetName='#form';
@@ -1831,23 +2160,28 @@ define(
 								if (r) {
 									if (!this.request.js_caption && r.js_caption) this.request.js_caption=r.js_caption;
 									if (!this.request.js_icon && r.js_icon) this.request.js_icon=r.js_icon;
+									if (!this.request.js_visible && r.js_visible) this.request.js_visible=r.js_visible;
 									if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
 
 									if (!label) label=r.caption;
 									if (!icon) icon=r.icon;
+									if (!description) description=r.description;
 								}
 							}
-						} else {
+						}
+						else {
 							var objRowSet=this.getObjRowSet();
 							if (objRowSet) {
 								var r=objRowSet.getRequestForAnyNodeType(this.request.name, this.request.mode);
 								if (r) {
 									if (!this.request.js_caption && r.js_caption) this.request.js_caption=r.js_caption;
 									if (!this.request.js_icon && r.js_icon) this.request.js_icon=r.js_icon;
+									if (!this.request.js_visible && r.js_visible) this.request.js_visible=r.js_visible;
 									if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
 
 									if (!label) label=r.caption;
 									if (!icon) icon=r.icon;
+									if (!description) description=r.description;
 								}
 							}
 						}
@@ -1861,6 +2195,7 @@ define(
 							if (!icon) icon=this.request.name;
 						}
 						
+						this.description=description;
 						this.label=label;
 						this.icon=icon;
 						this.iconClass=g740.icons.getIconClassName(icon);
@@ -2042,6 +2377,17 @@ define(
 						}
 					}
 					return g740.icons.getIconClassName(icon, size);
+				},
+				getVisible: function() {
+					if (this.request.js_visible) {
+						var obj=this.getObjRowSet();
+						if (!obj) obj=this.objForm;
+						if (obj && obj.isObjectDestroed) obj=null;
+						if (obj) {
+							return g740.js_eval(obj, this.request.js_visible, true)?1:0;
+						}
+					}
+					return 1;
 				},
 				getCaption: function() {
 					var result=this.label;

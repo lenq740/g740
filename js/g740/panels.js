@@ -239,6 +239,7 @@ define(
 				if (!objForm) g740.systemError(procedureName, 'errorValueUndefined', 'objPanel.objForm');
 				var requests=this.getRequests(xml, objPanel);
 				if (!requests || requests.length==0) return false;
+				var isBootStrap=g740.xml.getAttrValue(xml,'style','')=='bootstrap';
 				
 				var buttonCount=0;
 				var isVertical=false;
@@ -251,16 +252,14 @@ define(
 				
 				var p={};
 				p.region='bottom';
-				p.style='padding-left:5px;padding-right:5px;height:30px;border-width:0px;';
-				p.height='30px';
-				if (isVertical) p.height=(buttonCount*30)+'px';
-				p.style+='height:'+p.height+';';
+				p.style='border-width:0px;';
 				p.color=g740.xml.getAttrValue(xml, 'color', '');
 				
-				var objPanelButtons=new g740.Panel(p,null);
+				var objPanelButtons=new g740.WidgetButtonContainer(p,null);
 				objPanelButtons.isG740PanelButtons=true;
+				if (isBootStrap) objPanelButtons.isBootStrap=true;
 				objPanel.addChild(objPanelButtons);
-				
+
 				if (isVertical) {
 					for(var i=0; i<requests.length; i++) {
 						var xmlRequest=requests[i];
@@ -477,14 +476,22 @@ define(
 							result = new g740.ToolbarButton(p);
 						}
 					}
-					if (objParent.g740className=='g740.Panel') {
+					else if ((objParent.g740className=='g740.WidgetButtonContainer' || objParent.g740className=='g740.Panel') && objParent.isBootStrap) {
+						var style=g740.xml.getAttrValue(xml,'style','icontext');
+						if (style=='icon') p.showLabel=false;
+						if (style=='text') p.objAction.iconClass='';
+						p.region=g740.xml.getAttrValue(xml,'align','left');
+						p.btnstyle=g740.xml.getAttrValue(xml,'style','default');
+						result=new g740.CustomButton(p);
+					}
+					else if ((objParent.g740className=='g740.WidgetButtonContainer' || objParent.g740className=='g740.Panel') && !objParent.isBootStrap) {
 						var style=g740.xml.getAttrValue(xml,'style','icontext');
 						if (style=='icon') p.showLabel=false;
 						if (style=='text') p.objAction.iconClass='';
 						p.region=g740.xml.getAttrValue(xml,'align','left');
 						result = new g740.PanelButton(p);
 					}
-					if (objParent.g740className=='g740.Menu') {
+					else if (objParent.g740className=='g740.Menu') {
 						var style=g740.xml.getAttrValue(xml,'style','icontext');
 						if (style=='icon') p.objAction.label='';
 						if (style=='text') p.objAction.iconClass='';
@@ -617,6 +624,9 @@ define(
 				if (g740.xml.isAttr(xmlRequest,'caption')) {
 					request.caption=g740.xml.getAttrValue(xmlRequest,'caption','');
 				}
+				if (g740.xml.isAttr(xmlRequest,'description')) {
+					request.description=g740.xml.getAttrValue(xmlRequest,'description','');
+				}
 				if (g740.xml.isAttr(xmlRequest,'icon')) {
 					request.icon=g740.xml.getAttrValue(xmlRequest,'icon','');
 				}
@@ -629,6 +639,9 @@ define(
 				
 				if (g740.xml.isAttr(xmlRequest,'js_enabled')) {
 					request.js_enabled=g740.xml.getAttrValue(xmlRequest,'js_enabled','');
+				}
+				if (g740.xml.isAttr(xmlRequest,'js_visible')) {
+					request.js_visible=g740.xml.getAttrValue(xmlRequest,'js_visible','');
 				}
 				if (g740.xml.isAttr(xmlRequest,'js_icon')) {
 					request.js_icon=g740.xml.getAttrValue(xmlRequest,'js_icon','');
@@ -644,6 +657,7 @@ define(
 					var name=g740.xml.getAttrValue(xmlScript, 'name', '');
 					if (!name) name=g740.xml.getAttrValue(xmlScript, 'script', '');
 					if (name=='enabled') request.js_enabled=g740.panels.buildScript(xmlScript);
+					if (name=='visible') request.js_visible=g740.panels.buildScript(xmlScript);
 					if (name=='icon') request.js_icon=g740.panels.buildScript(xmlScript);
 					if (name=='caption') request.js_caption=g740.panels.buildScript(xmlScript);
 				}

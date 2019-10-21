@@ -12,6 +12,119 @@ html, body {
 	overflow: hidden;
 }
 
+/* Кнопки */
+.g740-custombutton {
+	display: inline-block;
+    font-size: 14px;
+    font-weight: normal;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+	border-radius: 7px;
+
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-left: 3px;
+	margin-right: 3px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	
+	box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
+	-webkit-box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
+	-moz-box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
+}
+.g740-custombutton.g740-hide {
+	display: none;
+}
+
+.g740-custombutton .g740-table {
+	width: 100%;
+	height: 100%;
+	padding: 0px;
+	margin: 0px;
+	border-style: none;
+}
+.g740-custombutton .g740-icon {
+	margin-left: -6px;
+	margin-right: 3px;
+}
+.g740-custombutton .g740-icon.g740-hide {
+	display: none;
+}
+.g740-custombutton .g740-label {
+    white-space: nowrap;
+}
+
+.g740-custombutton.g740-style-default {
+	color: #fff;
+	background-color: #0275d8;
+    border-color: #0275d8;	
+}
+.g740-custombutton.g740-style-default:hover {
+    background-color: #025aa5;
+    border-color: #01549b;
+}
+.g740-custombutton.g740-style-success {
+	color: #fff;
+    background-color: #5cb85c;
+    border-color: #5cb85c;
+}
+.g740-custombutton.g740-style-success:hover {
+    background-color: #449d44;
+    border-color: #449d44;
+}
+.g740-custombutton.g740-style-info {
+	color: #fff;
+    background-color: #5bc0de;
+    border-color: #5bc0de;
+}
+.g740-custombutton.g740-style-info:hover {
+    background-color: #31b0d5;
+    border-color: #31b0d5;
+}
+.g740-custombutton.g740-style-warning {
+	color: #fff;
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+}
+.g740-custombutton.g740-style-warning:hover {
+    background-color: #ec971f;
+    border-color: #ec971f;
+}
+.g740-custombutton.g740-style-danger {
+	color: #fff;
+    background-color: #d9534f;
+    border-color: #d9534f;
+}
+.g740-custombutton.g740-style-danger:hover {
+    background-color: #c9302c;
+    border-color: #c9302c;
+}
+.g740-custombutton.g740-disabled {
+	cursor: default !important;
+	color: #373a3c !important;
+    background-color: #e6e6e6 !important;
+    border-color: #e6e6e6 !important;
+	opacity: 0.8;
+}
+
+.dijitButton.g740-hide {
+	display: none;
+}
+.dijitDropDownButton.g740-hide {
+	display: none;
+}
+
+.g740-buttoncontainer {
+}
+.g740-buttoncontainer .g740-items{
+	padding: 4px;
+}
+
+
 /* Размеры иконок */
 .g740-iconsize-small {
 	background-size: cover;
