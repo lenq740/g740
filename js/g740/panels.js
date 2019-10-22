@@ -938,6 +938,12 @@ define(
 				},
 				postCreateBeforeChilds: function() {
 				},
+				startup: function() {
+					if (this.splitter && this._splitterWidget) {
+						this._splitterWidget.live=false;
+					}
+					this.inherited(arguments);
+				},
 				onG740AfterBuild: function() {
 					var lst=[];
 					if (this.getChildren) lst=this.getChildren();
@@ -970,11 +976,20 @@ define(
 								if (visible) {
 									dojo.style(objPanel.domNode,'display','block');
 									if (objPanel.doG740Repaint) {
+										if (objPanel.splitter && objPanel._splitterWidget) {
+											objSplitter=objPanel._splitterWidget;
+											dojo.style(objSplitter.domNode,'display','block');
+										}
 										objPanel.visible=visible;
 										objPanel.doG740Repaint({isFull: true});
+										if (objPanel.layout) objPanel.layout();
 									}
 								}
 								else {
+									if (objPanel.splitter && objPanel._splitterWidget) {
+										objSplitter=objPanel._splitterWidget;
+										dojo.style(objSplitter.domNode,'display','none');
+									}
 									dojo.style(objPanel.domNode,'display','none');
 								}
 								objPanel.visible=visible;
@@ -1384,12 +1399,11 @@ define(
 				},
 				
 				_isLayoutProcess: false,
+				_layoutH: -1,
 				layout: function() {
 					if (this._isLayoutProcess) return;
 					this._isLayoutProcess=true;
 					try {
-						this.inherited(arguments);
-						
 						if (this.isAutoHeight && this.domNode) {
 							var h=1;
 							var childs=this.getChildren();
@@ -1400,8 +1414,16 @@ define(
 								if (!objChild.domNode) continue;
 								h+=objChild.domNode.offsetHeight;
 							}
-							this.resize({h: h});
+							if (this._layoutH!=h) {
+								this._layoutH=h;
+								this.resize({h: h});
+								var objParent=this.getParent();
+								if (objParent && objParent.layout) {
+									objParent.layout();
+								}
+							}
 						}
+						this.inherited(arguments);
 					}
 					finally {
 						this._isLayoutProcess=false;

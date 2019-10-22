@@ -1628,7 +1628,6 @@ define(
 				}
 			}
 		);
-		
 // g740.CustomButton
 		dojo.declare(
 			'g740.CustomButton',
@@ -1639,7 +1638,7 @@ define(
 					'<div class="g740-custombutton" data-dojo-attach-event="'+
 						'onclick: onBtnClick'+
 					'">'+
-						'<table calss="g740-table">'+
+						'<table class="g740-table">'+
 							'<tr>'+
 								'<td class="icons-white"><div class="g740-icon" data-dojo-attach-point="domNodeIcon"></div></td>'+
 								'<td><div class="g740-label" data-dojo-attach-point="domNodeLabel"></div></td>'+
@@ -1752,7 +1751,6 @@ define(
 						}
 					}
 					this.set('label',this.objAction.getCaption().toHtml());
-					
 				},
 				onBtnClick: function() {
 					var objPanel=this.getPanelForFocus();
@@ -1807,8 +1805,6 @@ define(
 				}
 			}
 		);
-
-
 // g740.WidgetButtonContainer
 		dojo.declare(
 			'g740.WidgetButtonContainer',
@@ -1841,10 +1837,7 @@ define(
 				addChild: function(obj, insertIndex) {
 					if (!obj) return false;
 					if (!obj.domNode) return false;
-					if (obj.region=='top' || obj.region=='bottom') {
-						dojo.style(obj.domNode, 'width', '99%');
-					}
-					else {
+					if (obj.region!='top' || obj.region!='bottom') {
 						var align='left';
 						if (obj.region=='right') align='right';
 						dojo.style(obj.domNode, 'float', align);
@@ -1855,16 +1848,47 @@ define(
 				getChildren: function() {
 					return this.child;
 				},
+				
+				_isLayoutExecuted: false,
+				_isLayoutWaiting: false,
 				doG740Repaint: function(para) {
-					var lst=this.getChildren();
-					for(var i=0; i<lst.length; i++) {
-						var obj=lst[i];
-						if (obj && obj.doG740Repaint) obj.doG740Repaint(para);
+					this._isLayoutWaiting=true;
+					try {
+						this._isLayoutExecuted=false;
+						var lst=this.getChildren();
+						for(var i=0; i<lst.length; i++) {
+							var obj=lst[i];
+							if (obj && obj.doG740Repaint) {
+								if (obj.doG740Repaint(para)) isChanged=true;
+							}
+						}
 					}
+					finally {
+						this._isLayoutWaiting=false;
+					}
+					if (this._isLayoutExecuted) {
+						this.layout();
+					}
+				},
+				layout: function() {
+					this._isLayoutExecuted=true;
+					if (this._isLayoutWaiting) return;
+					this.resize();
 				},
 				_resizeHeight: 0,
 				resize: function(size) {
 					var pos=dojo.geom.position(this.domNodeItems, false);
+					var lst=this.getChildren();
+					var isChildVisibleExists=false;
+					for(var i=0; i<lst.length; i++) {
+						var obj=lst[i];
+						if (obj.visible) isChildVisibleExists=true;
+						if (obj.region=='top' || obj.region=='bottom') {
+							dojo.style(obj.domNode, 'width', (pos.w-18)+'px');
+						}
+					}
+					if (!isChildVisibleExists) pos.h=0;
+					
 					dojo.style(this.domNode,'width','100%');
 					if (this._resizeHeight!=pos.h) {
 						this._resizeHeight=pos.h;
@@ -1880,15 +1904,10 @@ define(
 							}
 						}
 					}
-				},
-				layout: function() {
-					this.resize();
+					this.inherited(arguments);
 				}
 			}
 		);
-
-
-		
 // g740.Menu - выпадающее по правой кнопке меню
 		dojo.declare(
 			'g740.Menu',

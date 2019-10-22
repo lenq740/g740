@@ -25,12 +25,12 @@ html, body {
 
 	border-radius: 7px;
 
-	padding-left: 15px;
-	padding-right: 15px;
 	margin-left: 3px;
 	margin-right: 3px;
 	margin-top: 2px;
 	margin-bottom: 2px;
+	
+	overflow: hidden;
 	
 	box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
 	-webkit-box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
@@ -41,16 +41,16 @@ html, body {
 }
 
 .g740-custombutton .g740-table {
-	width: 100%;
-	height: 100%;
 	padding: 0px;
 	margin: 0px;
+	margin-left: 5px;
+	margin-right: 5px;
 	border-style: none;
 }
 .g740-custombutton .g740-icon {
-	margin-left: -6px;
-	margin-right: 3px;
+	margin-right: 2px;
 }
+
 .g740-custombutton .g740-icon.g740-hide {
 	display: none;
 }
@@ -1526,8 +1526,31 @@ html, body {
 	color: white;
 }
 
+.g740listhtml-panel.g740listhtml-vertical .linklist{
+}
+.g740listhtml-panel.g740listhtml-vertical .linklist .item{
+	cursor: pointer;
+	
+	color: #5d80b6;
+	font-family: Verdana;
+	font-size: 13px;
+	line-height: 17px;
 
+	padding-left: 25px;
+	padding-top: 6px;
+	padding-bottom: 2px;
 
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+.g740listhtml-panel.g740listhtml-vertical .linklist .item:hover{
+	text-decoration: underline;
+}
+.g740listhtml-panel.g740listhtml-vertical .linklist .item.current{
+	text-decoration: underline;
+	font-weight: bold;
+}
 
 /* Окно блокировки экрана */
 #g740-lockscreen {
