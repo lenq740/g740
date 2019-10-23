@@ -1648,15 +1648,28 @@ define(
 				objAction: null,
 				btnstyle: '',
 				label: '',
+				size: 'medium',
 				description: '',
 				visible: true,
 				set: function(name, value) {
 					if (name=='objAction') {
 						this.objAction=value;
 						if (this.objAction.label) this.set('label',this.objAction.label.toHtml());
-						if (this.objAction.iconClass) this.set('iconClass',this.objAction.getIconClass('medium'));
 						if (this.objAction.description) this.set('description',this.objAction.description);
+						if (this.objAction.icon && this.objAction.icon!='default') {
+							this.set('iconClass',this.objAction.getIconClass(this.size));
+						}
+						else {
+							this.set('iconClass','');
+						}
 						return true;
+					}
+					if (name=='size') {
+						if (this.size!=value) {
+							dojo.removeClass(this.domNode,'g740-custombutton-'+this.size);
+							this.size=value;
+							dojo.addClass(this.domNode,'g740-custombutton-'+this.size);
+						}
 					}
 					if (name=='label') {
 						if (this.label!=value) {
@@ -1731,6 +1744,10 @@ define(
 						var btnStyle=this.btnstyle;
 						this.btnstyle='';
 						this.set('btnstyle', btnStyle);
+						
+						var btnSize=this.size;
+						this.size='';
+						this.set('size', btnSize);
 					}
 					this.inherited(arguments);
 				},

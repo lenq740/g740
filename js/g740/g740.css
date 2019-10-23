@@ -36,6 +36,7 @@ html, body {
 	-webkit-box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
 	-moz-box-shadow:1px 1px 1px 1px rgba(96,96,96,1);
 }
+
 .g740-custombutton.g740-hide {
 	display: none;
 }
@@ -47,6 +48,14 @@ html, body {
 	margin-right: 5px;
 	border-style: none;
 }
+
+.g740-custombutton.g740-custombutton-medium .g740-table{
+	min-height: 30px;
+}
+.g740-custombutton.g740-custombutton-large .g740-table{
+	min-height: 43px;
+}
+
 .g740-custombutton .g740-icon {
 	margin-right: 2px;
 }

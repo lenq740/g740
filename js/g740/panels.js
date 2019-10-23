@@ -477,11 +477,10 @@ define(
 						}
 					}
 					else if ((objParent.g740className=='g740.WidgetButtonContainer' || objParent.g740className=='g740.Panel') && objParent.isBootStrap) {
-						var style=g740.xml.getAttrValue(xml,'style','icontext');
-						if (style=='icon') p.showLabel=false;
-						if (style=='text') p.objAction.iconClass='';
 						p.region=g740.xml.getAttrValue(xml,'align','left');
 						p.btnstyle=g740.xml.getAttrValue(xml,'style','default');
+						p.size=g740.xml.getAttrValue(xml,'size','medium');
+						if (p.size!='large' && p.size!='medium') p.size='medium';
 						result=new g740.CustomButton(p);
 					}
 					else if ((objParent.g740className=='g740.WidgetButtonContainer' || objParent.g740className=='g740.Panel') && !objParent.isBootStrap) {
