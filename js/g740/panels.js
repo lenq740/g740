@@ -1139,7 +1139,6 @@ define(
 					if (this.evt_onaction) return true;
 					return false;
 				},
-				
 
 				// Передача фокуса ввода
 				canFocused: function() {
@@ -3883,7 +3882,7 @@ define(
 					
 					this.domNodeTitle.innerHTML='';
 					if (this.title) {
-						objDiv=document.createElement('div');
+						var objDiv=document.createElement('div');
 						objDiv.className='g74-paneltitle';
 						var objText=document.createTextNode(this.title);
 						objDiv.appendChild(objText);
@@ -4186,6 +4185,33 @@ define(
 				onG740Focus: function() {
 					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
 					return true;
+				}
+			}
+		);
+// g740.PanelAllIcons - все зарегистрированные в проекте иконки
+		dojo.declare(
+			'g740.PanelAllIcons',
+			[g740._PanelAbstract, dijit._TemplatedMixin],
+			{
+				isG740CanToolBar: false,
+				isG740CanButtons: false,
+				isLayoutContainer: false,
+				
+				templateString: '<div class="g740allicons-panel">'+
+					'<div data-dojo-attach-point="domNodeDivBody"></div>'+
+				'</div>',
+				postCreate: function() {
+					this.inherited(arguments);
+					dojo.attr(this.domNode,'title','');
+					for(var icon in g740.icons._items) {
+						var objIcon=document.createElement('div');
+						objIcon.className='g74-icon '+g740.icons._items[icon];
+						objIcon.title=icon;
+						this.domNodeDivBody.appendChild(objIcon);
+					}
+					var objDiv=document.createElement('div');
+					dojo.style(objDiv,'clear','both');
+					this.domNodeDivBody.appendChild(objDiv);
 				}
 			}
 		);
@@ -4557,6 +4583,18 @@ define(
 			return result;
 		};
 		g740.panels.registrate('form', g740.panels._builderPanelForm);
+
+		g740.panels._builderPanelAllIcons=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelAllIcons';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			var result=new g740.PanelAllIcons(para, null);
+			return result;
+		};
+		g740.panels.registrate('allicons', g740.panels._builderPanelAllIcons);
 
 		return g740;
 	}

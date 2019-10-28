@@ -1561,7 +1561,7 @@ define(
 
 					var p={
 						region: 'center',
-						style: 'overflow-y:auto;'
+						style: 'overflow-y:auto;overflow-x:hidden;'
 					};
 					if (this.mode=='error') {
 						p['style']+='background-color: red; color: white';
