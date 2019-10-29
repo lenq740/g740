@@ -4204,10 +4204,22 @@ define(
 					this.inherited(arguments);
 					dojo.attr(this.domNode,'title','');
 					for(var icon in g740.icons._items) {
+						var objItem=document.createElement('div');
+						objItem.className='g740-item';
+						objItem.title=icon;
+						dojo.on(objItem, 'mouseover', function(){
+							dojo.addClass(this, 'icons-white');
+							dojo.addClass(this, 'darkitem');
+						});
+						dojo.on(objItem, 'mouseout', function(){
+							dojo.removeClass(this, 'icons-white');
+							dojo.removeClass(this, 'darkitem');
+						});
+						
 						var objIcon=document.createElement('div');
-						objIcon.className='g74-icon '+g740.icons._items[icon];
-						objIcon.title=icon;
-						this.domNodeDivBody.appendChild(objIcon);
+						objIcon.className='g740-icon '+g740.icons._items[icon];
+						objItem.appendChild(objIcon);
+						this.domNodeDivBody.appendChild(objItem);
 					}
 					var objDiv=document.createElement('div');
 					dojo.style(objDiv,'clear','both');

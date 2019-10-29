@@ -100,7 +100,7 @@
 /*--------------------------------------------------------------------
 app-color-black
 --------------------------------------------------------------------*/
-/* MenuBar и Menu*/
+/* MenuBar Рё Menu*/
 .g740.app-color-black .dijitMenuBar {
 	background-color: #6e6e6e;
 	border-color: #6e6e6e !important;
@@ -191,7 +191,7 @@ app-color-black
 /*--------------------------------------------------------------------
 app-color-red
 --------------------------------------------------------------------*/
-/* MenuBar и Menu*/
+/* MenuBar Рё Menu*/
 .g740.app-color-red .dijitMenuBar {
 	background-color: #d4464e;
 	border-color: #d4464e !important;
@@ -282,13 +282,13 @@ app-color-red
 app-color-m
 !!!!!!!
 color.romanuke.com/tsvetovaya-palitra-1874
-#101e5a - темный фон заголовка окна приложениЯ, темный цвет шрифтов заголовков
-#5d80b6 - фон заголовка модальгого окна, цвет рамок выделениЯ
-#acbdd3 - цвет фона выделениЯ текущей строки - разделить на несколько оттенков
-  #dce1e9 - светлее
-  #859abe - темнее
-#f7f8f9 - белый
-#cbc6c3 - светлокоричневый
+#101e5a - С‚РµРјРЅС‹Р№ С„РѕРЅ Р·Р°РіРѕР»РѕРІРєР° РѕРєРЅР° РїСЂРёР»РѕР¶РµРЅРёСЏ, С‚РµРјРЅС‹Р№ С†РІРµС‚ С€СЂРёС„С‚РѕРІ Р·Р°РіРѕР»РѕРІРєРѕРІ
+#5d80b6 - С„РѕРЅ Р·Р°РіРѕР»РѕРІРєР° РјРѕРґР°Р»СЊРіРѕРіРѕ РѕРєРЅР°, С†РІРµС‚ СЂР°РјРѕРє РІС‹РґРµР»РµРЅРёСЏ
+#acbdd3 - С†РІРµС‚ С„РѕРЅР° РІС‹РґРµР»РµРЅРёСЏ С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё - СЂР°Р·РґРµР»РёС‚СЊ РЅР° РЅРµСЃРєРѕР»СЊРєРѕ РѕС‚С‚РµРЅРєРѕРІ
+  #dce1e9 - СЃРІРµС‚Р»РµРµ
+  #859abe - С‚РµРјРЅРµРµ
+#f7f8f9 - Р±РµР»С‹Р№
+#cbc6c3 - СЃРІРµС‚Р»РѕРєРѕСЂРёС‡РЅРµРІС‹Р№
 --------------------------------------------------------------------*/
 .g740.app-color-m .dojoxGridMasterView .dojoxGridRowSelected {
 	background-color: #dce1e9 !important;
@@ -312,7 +312,7 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	color: black;
 }
 
-/* таблица в поле HTML Grid-а */
+/* С‚Р°Р±Р»РёС†Р° РІ РїРѕР»Рµ HTML Grid-Р° */
 .g740.app-color-m .dojoxGridMasterView .dojoxGridCell .table.hover tr:hover{
 	background-color: #acbdd3 !important;
 }
@@ -380,7 +380,7 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	color: #5d80b6 !important;
 }
 
-/* оттенок черезполосицы в grid */
+/* РѕС‚С‚РµРЅРѕРє С‡РµСЂРµР·РїРѕР»РѕСЃРёС†С‹ РІ grid */
 .g740.app-color-m .dojoxGridRowOdd {
     background-color: #f7f8f9;
 }
@@ -390,7 +390,7 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	color: #101e5a !important;
 }
 
-/* ‡аголовки */
+/* Р—Р°РіРѕР»РѕРІРєРё */
 .g740.app-color-m .g74-paneltitle {
 	color: #5d80b6;
 }
@@ -398,7 +398,7 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	color: #5d80b6;
 }
 
-/* MenuBar и Menu*/
+/* MenuBar Рё Menu*/
 .g740.app-color-m .dijitMenuBar {
 	background-color: #6e6e6e;
 	border-color: #6e6e6e !important;
@@ -614,4 +614,9 @@ color.romanuke.com/tsvetovaya-palitra-1874
     background-color: red !important;
     color: white !important;
 	border-width: 0px;
+}
+
+/* allicons - РїР°РЅРµР»СЊ СЃРїРёСЃРєР° РёРєРѕРЅРѕРє */
+.g740.app-color-m .g740allicons-panel .g740-item.darkitem {
+	background-color: #859abe;
 }

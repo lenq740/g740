@@ -1562,27 +1562,24 @@ html, body {
 }
 
 /* allicons - панель списка иконок */
-.g740allicons-panel .g74-icon {
+.g740allicons-panel {
+	background-color: #F0F0F0;
+}
+.g740allicons-panel .g740-item {
+	float: left;
+	cursor: pointer;
+}
+.g740allicons-panel .g740-item.darkitem {
+	background-color: black;
+}
+.g740allicons-panel .g740-item .g740-icon {
 	width: 32px;
 	height: 32px;
+	margin: 4px;
 	background-size: contain;
 	background-position: center;
 	background-repeat: no-repeat;
-	float: left;
-	margin: 5px;
-	cursor: pointer;
 }
-.g740allicons-panel .g74-icon:hover {
-	width: 36px;
-	height: 36px;
-	background-size: contain;
-	background-position: center;
-	background-repeat: no-repeat;
-	float: left;
-	margin: 3px;
-	cursor: pointer;
-}
-
 
 /* Окно блокировки экрана */
 #g740-lockscreen {
