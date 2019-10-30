@@ -4108,7 +4108,7 @@ define(
 					}
 					if (htmlItem.html!=html) {
 						htmlItem.html=html;
-						htmlItem.domNode.innerHTML=html;
+						htmlItem.domNode.innerHTML='<div class="element">'+html+'</div>';
 					}
 					return true;
 				},

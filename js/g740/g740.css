@@ -1517,23 +1517,43 @@ html, body {
 .g740listhtml-panel.g740listhtml-vertical .list{
 }
 .g740listhtml-panel.g740listhtml-vertical .list .item{
-	min-height: 18px;
+	min-height: 34px;
+	width: 100%;
+	display: table;
 	cursor: pointer;
-
-	padding: 2px;
-
-	border-style: dotted;
-    border-width: 1px;
-    border-color: lightgray;
-
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+
+	box-sizing: border-box;
+	border-left-width: 3px;
+	border-left-color: rgba(255, 255, 255, 0);
+	border-left-style: solid;
 }
 .g740listhtml-panel.g740listhtml-vertical .list .item.current{
-	background-color: orange;
-	color: white;
+	background-color: #f5f5f5;
 }
+
+.g740listhtml-panel.g740listhtml-vertical .list .item .element{
+	display: table-cell;
+	vertical-align: middle;
+	padding: 2px;
+	padding-left: 15px;
+	
+	font-family: Helvetica, Verdana;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+
+	box-sizing: border-box;
+	border-left-width: 5px;
+	border-left-color: rgba(255, 255, 255, 0);
+	border-left-style: solid;
+}
+.g740listhtml-panel.g740listhtml-vertical .list .item.current .element{
+	border-left-color: red;
+}
+
 
 .g740listhtml-panel.g740listhtml-vertical .linklist{
 }
@@ -1541,8 +1561,8 @@ html, body {
 	cursor: pointer;
 	
 	color: #5d80b6;
-	font-family: Verdana;
-	font-size: 13px;
+	font-family: Helvetica, Verdana;
+	font-size: 14px;
 	line-height: 17px;
 
 	padding-left: 25px;
@@ -1563,7 +1583,8 @@ html, body {
 
 /* allicons - панель списка иконок */
 .g740allicons-panel {
-	background-color: #F0F0F0;
+	background-color: #F8F8F8;
+	overflow-y: auto;
 }
 .g740allicons-panel .g740-item {
 	float: left;
