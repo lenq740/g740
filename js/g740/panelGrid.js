@@ -1013,6 +1013,7 @@ define(
 				region: 'center',
 				isFocusOnShow: isFocusOnShow
 			};
+			if (g740.xml.isAttr(xml,'noheader')) p.isShowHeaders=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noheader','1'),'check');
 			if (para.js_onaction) {
 				p.js_onaction=para.js_onaction;
 				delete para.js_onaction;
@@ -1038,23 +1039,29 @@ define(
 				cell['name']=' ';
 				cell['styles']='';
 				cell['classes']='';
-				cell['width']='17px';
+				cell['width']='24px';
+				cell['markIcon']=g740.xml.getAttrValue(xml,'mark.icon','mark');
 				cell['formatter']=function (value, rowIndex) {
 					var result='';
 					try {
 						var objGrid=this.grid;
 						var node=objGrid.getItem(rowIndex);
 						var objRowSet=objGrid.objRowSet;
-						
-						var iconName='mark-off';
-						if (objRowSet.getIsNodeMarked(node)) iconName='mark-on';
-						var result='<div class="g740-grid-icons '+g740.icons.getIconClassName(iconName,'small')+'"></div>';
+						if (this.markIcon=='check') {
+							var iconName='check-off';
+							if (objRowSet.getIsNodeMarked(node)) iconName='check-on';
+						}
+						else {
+							var iconName='mark-off';
+							if (objRowSet.getIsNodeMarked(node)) iconName='mark-on';
+						}
+						var result='<div class="g740-grid-icons '+g740.icons.getIconClassName(iconName,'medium')+'"></div>';
 					}
 					catch(e) {
 					}
 					return result;
 				};
-				if (!isIE) {
+				if (!isIE && p.isShowHeaders) {
 					cellsNoScroll.push(cell);
 				}
 				else {
@@ -1210,7 +1217,7 @@ define(
 					cell['readonly']=true;
 				}
 				
-				if (!isIE && fldNew.noscroll) {
+				if (!isIE && fldNew.noscroll && p.isShowHeaders) {
 					cell['noscroll']=true;
 					cellsNoScroll.push(cell);
 				}
@@ -1241,7 +1248,6 @@ define(
 				objPanel.addChild(objPaginator);
 			}
 			
-			if (g740.xml.isAttr(xml,'noheader')) p.isShowHeaders=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noheader','1'),'check');
 			if (g740.xml.isAttr(xml,'noselect')) p.isShowSelected=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noselect','1'),'check');
 			if (g740.xml.isAttr(xml,'color.readonly')) {
 				var color=g740.xml.getAttrValue(xml,'color.readonly','');
