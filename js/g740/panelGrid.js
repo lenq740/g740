@@ -1039,7 +1039,7 @@ define(
 				cell['name']=' ';
 				cell['styles']='';
 				cell['classes']='';
-				cell['width']='24px';
+				cell['width']='20px';
 				cell['markIcon']=g740.xml.getAttrValue(xml,'mark.icon','mark');
 				cell['formatter']=function (value, rowIndex) {
 					var result='';
@@ -1048,14 +1048,15 @@ define(
 						var node=objGrid.getItem(rowIndex);
 						var objRowSet=objGrid.objRowSet;
 						if (this.markIcon=='check') {
-							var iconName='check-off';
-							if (objRowSet.getIsNodeMarked(node)) iconName='check-on';
+							var iconClass='g740-grid-check-off';
+							if (objRowSet.getIsNodeMarked(node)) iconClass='g740-grid-check-on';
+							var result='<div class="g740-grid-check '+iconClass+'"></div>';
 						}
 						else {
 							var iconName='mark-off';
 							if (objRowSet.getIsNodeMarked(node)) iconName='mark-on';
+							var result='<div class="g740-grid-icons '+g740.icons.getIconClassName(iconName,'small')+'"></div>';
 						}
-						var result='<div class="g740-grid-icons '+g740.icons.getIconClassName(iconName,'medium')+'"></div>';
 					}
 					catch(e) {
 					}
