@@ -229,6 +229,33 @@ define(
 							if (treeNode) this.doNodeDblClick(treeNode);
 						}));
 						
+						dojo.on(domItemElement, 'mouseover', dojo.hitch(this, function(e){
+							var domItemElement=null;
+							var d=e.target;
+							while(d) {
+								if (d.treeNode) {
+									domItemElement=d;
+									break;
+								}
+								d=d.parentNode;
+								if (d==this.domNode) break;
+							}
+							if (domItemElement) this.onNodeMouseOver(domItemElement);
+						}));
+						dojo.on(domItemElement, 'mouseout', dojo.hitch(this, function(e){
+							var domItemElement=null;
+							var d=e.target;
+							while(d) {
+								if (d.treeNode) {
+									domItemElement=d;
+									break;
+								}
+								d=d.parentNode;
+								if (d==this.domNode) break;
+							}
+							if (domItemElement) this.onNodeMouseOut(domItemElement);
+						}));
+						
 						var domParent=this.domNodeBody;
 						if (treeNode.parentNode && treeNode.parentNode.info && treeNode.parentNode.info.domItemChilds) {
 							domParent=treeNode.parentNode.info.domItemChilds;
@@ -504,6 +531,11 @@ define(
 					if (!info) return;
 					objRowSet.setFocusedNode(info.node);
 					objRowSet.exec({requestName: 'mark'});
+				},
+				
+				onNodeMouseOver: function(domItemElement) {
+				},
+				onNodeMouseOut: function(domItemElement) {
 				},
 				
 				onG740Focus: function() {
@@ -825,6 +857,16 @@ define(
 						this.doNodeExpandCollapse();
 					}
 				},
+
+				onNodeMouseOver: function(domItemElement) {
+					var colorItem=g740.appColorScheme.getItem();
+					if (colorItem.panelTreeMenuWhiteIcons) dojo.addClass(domItemElement, 'icons-white');
+				},
+				onNodeMouseOut: function(domItemElement) {
+					var colorItem=g740.appColorScheme.getItem();
+					if (colorItem.panelTreeMenuWhiteIcons) dojo.removeClass(domItemElement, 'icons-white');
+				},
+
 				_lastFormName: '',
 				_doSetFocusedNode: function(treeNode) {
 					if (this._treeNodeFocused==treeNode) return true;
