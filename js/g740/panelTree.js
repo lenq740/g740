@@ -65,6 +65,7 @@ define(
 				postCreate: function() {
 					this.domNode.title='';
 					dojo.on(this.domNode, 'click', dojo.hitch(this, function(e){
+						if (!e) var e=window.event;
 						this.set('focused', true);
 					}));
 					this.inherited(arguments);
@@ -201,6 +202,7 @@ define(
 						info.domItemChilds=domItemChilds;
 						domItemElement.treeNode=treeNode;
 						dojo.on(domItemElement, 'click', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							var treeNode=null;
 							while(d) {
@@ -214,6 +216,7 @@ define(
 							if (treeNode) this.doNodeClick(treeNode);
 						}));
 						dojo.on(domItemElement, 'dblclick', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							if (dojo.hasClass(d,'g740tree-item-expander')) return;
 							if (dojo.hasClass(d,'g740tree-item-icon')) return;
@@ -230,6 +233,7 @@ define(
 						}));
 						
 						dojo.on(domItemElement, 'mouseover', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var domItemElement=null;
 							var d=e.target;
 							while(d) {
@@ -243,6 +247,7 @@ define(
 							if (domItemElement) this.onNodeMouseOver(domItemElement);
 						}));
 						dojo.on(domItemElement, 'mouseout', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var domItemElement=null;
 							var d=e.target;
 							while(d) {
@@ -338,6 +343,7 @@ define(
 						domItemElement.appendChild(domExpander);
 						info.domItemExpander=domExpander;
 						dojo.on(domExpander, 'click', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							var treeNode=null;
 							while(d) {
@@ -359,6 +365,7 @@ define(
 						domItemElement.appendChild(domItemIcon);
 						info.domItemIcon=domItemIcon;
 						dojo.on(domItemIcon, 'click', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							var treeNode=null;
 							while(d) {
@@ -374,6 +381,7 @@ define(
 							}
 						}));
 						dojo.on(domItemIcon, 'dblclick', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							var treeNode=null;
 							while(d) {
@@ -548,6 +556,7 @@ define(
 					return true;
 				},
 				onKeyDown: function(e) {
+					if (!e) var e=window.event;
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return;
 					if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==40) {
@@ -648,6 +657,7 @@ define(
 					}
 				},
 				onKeyPress: function(e) {
+					if (!e) var e=window.event;
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return;
 					if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyChar=='+') {
@@ -1010,6 +1020,7 @@ define(
 						domItemElement.appendChild(domExpander);
 						info.domItemExpander=domExpander;
 						dojo.on(domExpander, 'click', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							var treeNode=null;
 							while(d) {
@@ -1029,6 +1040,7 @@ define(
 						domItemElement.appendChild(domItemIcon);
 						info.domItemIcon=domItemIcon;
 						dojo.on(domItemIcon, 'click', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var d=e.target;
 							var treeNode=null;
 							while(d) {

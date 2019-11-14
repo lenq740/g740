@@ -560,6 +560,7 @@ define(
 					});
 				},
 				onG740KeyPress: function(e) {
+					if (!e) var e=window.event;
 				},
 				doG740Focus: function() {
 					var node=this.domNode;
@@ -616,6 +617,7 @@ define(
 					if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
 				},
 				onKeyDown: function(e) {
+					if (!e) var e=window.event;
 					var rr=null;
 					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
 					if (rr) {
@@ -719,6 +721,7 @@ define(
 					}
 				},
 				onG740KeyPress: function(e) {
+					if (!e) var e=window.event;
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);
@@ -880,6 +883,7 @@ define(
 					if (dojo.hasClass(this.domNode, 'g740-widget-focused')) dojo.removeClass(this.domNode, 'g740-widget-focused');
 				},
 				onKeyPress: function(e) {
+					if (!e) var e=window.event;
 					if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
 						// Enter, Tab
 						dojo.stopEvent(e);
@@ -951,6 +955,7 @@ define(
 
 				isDialogOpened: false,
 				onButtonClick: function(e) {
+					if (!e) var e=window.event;
 					if (this.getReadOnly()) return false;
 					if (this.objRowSet && this.rowId!==null) {
 						if (this.objRowSet.getFocusedId()!=this.rowId) {
@@ -992,6 +997,7 @@ define(
 					this.onG740Change('');
 				},
 				onKeyDown: function(e) {
+					if (!e) var e=window.event;
 					var rr=null;
 					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
 					if (rr) {
@@ -1128,6 +1134,7 @@ define(
 					}
 				},
 				onKeyDown: function(e) {
+					if (!e) var e=window.event;
 					var rr=null;
 					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
 					if (rr) {
@@ -1181,6 +1188,7 @@ define(
 				},
 				isDialogOpened: false,
 				onButtonClick: function(e) {
+					if (!e) var e=window.event;
 					var isFiltered=false;
 					if (e && e.isFiltered) isFiltered=true;
 					if (this.getReadOnly()) return false;
@@ -1258,6 +1266,7 @@ define(
 					objRowSet.doG740Repaint({ isRowUpdate: true });
 				},
 				onKeyDown: function(e) {
+					if (!e) var e=window.event;
 					var rr=null;
 					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
 					if (rr) {
@@ -1399,6 +1408,7 @@ define(
 					this.on('blur', this._onWidgetBlur);
 					this.focusNode.obj=this;
 					this.focusNode.onkeypress=function(e) {
+						if (!e) var e=window.event;
 						if (this.obj) this.obj.onKeyPress(e);
 					};
 					this.render();
@@ -1489,6 +1499,7 @@ define(
 					this._selectedIndex=index;
 				},
 				onKeyPress: function(e) {
+					if (!e) var e=window.event;
 					if (e.charCode==32 && !e.ctrlKey) {
 						// Space
 						dojo.stopEvent(e);
@@ -1726,6 +1737,7 @@ define(
 					if (!dojo.hasClass(this.domNode,'g740-widget-focused')) dojo.addClass(this.domNode,'g740-widget-focused');
 				},
 				onKeyPress : function(e) {
+					if (!e) var e=window.event;
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);
@@ -1746,6 +1758,7 @@ define(
 					}
 				},
 				_onItemsClick: function(e) {
+					if (!e) var e=window.event;
 					this.set('focused',true);
 				},
 				getHeight: function() {

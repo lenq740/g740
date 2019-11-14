@@ -1855,6 +1855,7 @@ define(
 				postCreate: function() {
 					this.tablist.TabContainer=this;
 					this.tablist.on('KeyDown',function(e){
+						if (!e) var e=window.event;
 						if (this.TabContainer && this.TabContainer.onG740KeyDown) this.TabContainer.onG740KeyDown(e);
 					});
 					this.inherited(arguments);
@@ -2705,16 +2706,19 @@ define(
 					var result=document.createElement('div');
 					dojo.attr(result,'data-name',objChildForm.name);
 					dojo.attr(result,'data-title',objChildForm.title);
-					
+			
 					var domSpan=document.createElement('span');
 					var txt=document.createTextNode(objChildForm.title);
 					domSpan.appendChild(txt);
 					result.appendChild(domSpan);
 					
+					dojo.addClass(result,'tabitem');
+					
 					if (objChildForm.isClosable) {
 						var domClose=document.createElement('div');
 						dojo.addClass(domClose,'btnclose');
 						dojo.on(domClose,'click',dojo.hitch(this,function(e) {
+							if (!e) var e=window.event;
 							var domNode=e.target;
 							while(domNode) {
 								if (dojo.hasClass(domNode,'tabitem')) break;
@@ -2725,9 +2729,8 @@ define(
 						}));
 						result.appendChild(domClose);
 					}
-					
-					dojo.addClass(result,'tabitem');
 					dojo.on(result,'click',dojo.hitch(this,function(e) {
+						if (!e) var e=window.event;
 						var domNode=e.target;
 						while(domNode) {
 							if (dojo.hasClass(domNode,'tabitem')) break;
@@ -2736,7 +2739,89 @@ define(
 						var name=dojo.attr(domNode,'data-name');
 						this.onSelectChild(name);
 					}));
+					
+					dojo.on(result,'mousemove',dojo.hitch(this,function(e) {
+						if (!e) var e=window.event;
+						var isLeftButton=false;
+						if (typeof(e.buttons)=='number') {
+							if (e.buttons==1) isLeftButton=true;
+						}
+						else if (typeof(e.which)=='number') {
+							if (e.which==1) isLeftButton=true;
+						}
+						
+						var domNode=e.target;
+						while(domNode) {
+							if (dojo.hasClass(domNode,'tabitem')) break;
+							domNode=domNode.parentNode;
+						}
+						var name=dojo.attr(domNode,'data-name');
+						
+						if (dojo.hasClass(domNode,'selected')) {
+							if (isLeftButton) {
+								var d=new Date();
+								this._mouseMoveT=d.getTime();
+								if (!dojo.hasClass(domNode,'moved')) dojo.addClass(domNode,'moved');
+							}
+							else {
+								this._mouseMoveT=0;
+								if (dojo.hasClass(domNode,'moved')) dojo.removeClass(domNode,'moved');
+							}
+						}
+						else {
+							if (isLeftButton) {
+								var d=new Date();
+								if (d.getTime()-this._mouseMoveT<100) {
+									this._mouseMoveT=0;
+									this.doMoveSelectedChildTo(name);
+								}
+							}
+							else {
+								this._mouseMoveT=0;
+							}
+						}
+					}));
+					dojo.on(result,'mouseout',dojo.hitch(this,function(e) {
+						if (!e) var e=window.event;
+						var domNode=e.target;
+						while(domNode) {
+							if (dojo.hasClass(domNode,'tabitem')) break;
+							domNode=domNode.parentNode;
+						}
+						if (!dojo.hasClass(domNode,'selected')) return;
+						if (dojo.hasClass(domNode,'moved')) dojo.removeClass(domNode,'moved');
+					}));
 					return result;
+				},
+				doMoveSelectedChildTo: function(name) {
+					if (!name) return;
+					if (!this.objStackContainer) return;
+					var selectedForm=this.objStackContainer.selectedChildWidget;
+					if (!selectedForm) return;
+
+					lstChilds=this.objStackContainer.getChildren();
+					var index0=-1;
+					var index1=-1;
+					for(var i=0; i<lstChilds.length; i++) {
+						var objChild=lstChilds[i];
+						if (!objChild) continue;
+						if (objChild.name==name) index0=i;
+						if (objChild==selectedForm) index1=i;
+					}
+					if (index0<0) return;
+					if (index1<0) return;
+					if (index0==index1) return;
+					var obj=lstChilds[index0];
+					lstChilds[index0]=lstChilds[index1];
+					lstChilds[index1]=obj;
+					for(var i=0; i<lstChilds.length; i++) {
+						var objChild=lstChilds[i];
+						if (!objChild) continue;
+						this.objStackContainer.addChild(objChild);
+					}
+					this.objStackContainer.selectedChildWidget=null;
+					this.objStackContainer.selectChild(selectedForm);
+					this.doG740Repaint();
 				},
 				onSelectChild: function(name) {
 					if (!this.objStackContainer) return;
@@ -2915,6 +3000,7 @@ define(
 						var domNode=document.createElement('div');
 						dojo.addClass(domNode,'item');
 						dojo.on(domNode,'click',dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var domNode=e.target;
 							while(domNode && domNode.parentNode!=this.domNodeMultiTab) domNode=domNode.parentNode;
 							var name=domNode.getAttribute('data-name');
@@ -4092,12 +4178,14 @@ define(
 						htmlItem.domNode=domNode;
 
 						dojo.on(domNode, 'click', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							var domNode=e.target;
 							while(domNode && domNode.parentNode!=this.domNodeDivBody) domNode=domNode.parentNode;
 							var id=domNode.getAttribute('data-id');
 							if (id) this.onItemClick(id);
 						}));
 						dojo.on(domNode, 'dblclick', dojo.hitch(this, function(e){
+							if (!e) var e=window.event;
 							this.execEventOnAction();
 						}));
 

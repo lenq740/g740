@@ -22,10 +22,10 @@ html, body {
     font-size: 14px;
     font-weight: normal;
     cursor: pointer;
+    user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;
 
 	border-radius: 7px;
 
@@ -796,6 +796,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 .g74-paneltitle.g740-dialog-title {
 	margin-left: 0px;
@@ -822,6 +823,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 .g740-fieldcontainer .g740-fieldcontainer-field {
 	position: absolute;
@@ -1309,6 +1311,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 .g740html-panel.title .connecteduser {
     position: absolute;
@@ -1385,6 +1388,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 
 .g740html-panel.caption {
@@ -1397,6 +1401,7 @@ html, body {
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
+	-ms-user-select: none;
 }
 .g740html-panel.g740small.caption{
 	font-size: 16px;
@@ -1444,6 +1449,7 @@ html, body {
 	height: 42px;
 	
 	user-select: none;
+	-ms-user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
 }
@@ -1476,6 +1482,11 @@ html, body {
 .g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem:hover{
 	color: #3498db;
 }
+
+.g740-panelmultitabsform .g74-multitabs .g74-multitabs-items .tabitem.selected.moved{
+	cursor: move;
+}
+
 
 /* DialogLogin */
 .g740-dialoglogin-table {
@@ -1513,6 +1524,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 .g740listhtml-panel.g740listhtml-horizontal .tab .item.current{
 	border-bottom-color: black;
@@ -1528,6 +1540,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 
 	box-sizing: border-box;
 	border-left-width: 3px;
@@ -1576,6 +1589,7 @@ html, body {
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
+	-ms-user-select: none;
 }
 .g740listhtml-panel.g740listhtml-vertical .linklist .item:hover{
 	text-decoration: underline;

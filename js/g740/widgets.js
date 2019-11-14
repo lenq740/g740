@@ -586,6 +586,7 @@ define(
 				onButtonClick: function() {
 				},
 				onKeyDown: function(e) {
+					if (!e) var e=window.event;
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);
@@ -937,6 +938,7 @@ define(
 					return n*18+25;
 				},
 				doInputKeyDown: function(e) {
+					if (!e) var e=window.event;
 					if (!e.ctrlKey && e.keyCode==40) {
 						// Dn
 						this.set('value',this.getIdNext(this.value));
@@ -1443,6 +1445,7 @@ define(
 					return null;
 				},
 				onG740KeyDown: function(e) {
+					if (!e) var e=window.event;
 					dojo.stopEvent(e);
 				},
 				onG740Focus: function() {
@@ -1470,6 +1473,7 @@ define(
 					if (this.domNode) this.domNode.title=this.description;
 				},
 				onG740KeyDown: function(e) {
+					if (!e) var e=window.event;
 					if (!e.ctrlKey && e.keyCode==13) {
 						dojo.stopEvent(e);
 						this.onClick();
@@ -1605,6 +1609,7 @@ define(
 					return true;
 				},
 				_onDropDownClick: function(e) {
+					if (!e) var e=window.event;
 					if (this.dropDown) {
 						g740.execDelay.go({
 							obj: this,
