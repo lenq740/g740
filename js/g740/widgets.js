@@ -1318,6 +1318,7 @@ define(
 					if (name=='description') {
 						if (this.description!=value) {
 							this.description=value;
+							if (this.titleNode) this.titleNode.title=value;
 							return true;
 						}
 						return true;
@@ -1392,9 +1393,11 @@ define(
 					
 					if (isEnabled) {
 						this.set('label',this.objAction.getCaption().toHtml());
+						if (this.description && this.titleNode) this.titleNode.title=this.description;
 					}
 					else {
 						if (!this.showLabel) this.set('label','');
+						if (this.description && this.titleNode) this.titleNode.title='';
 					}
 				},
 				onG740Click: function() {

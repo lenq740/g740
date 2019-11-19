@@ -1893,15 +1893,14 @@ define(
 				doG740Repaint: function(para) {
 					this.inherited(arguments);
 					if (!para) para={};
-					var isBest=false;
 					if (para.objRowSet && para.objRowSet==this.getRowSet() && (para.isFull || para.isNavigate)) {
-						isBest=true;
-					}
-					var bestChild=this.getBestChild(isBest);
-					if (bestChild && bestChild!=this.selectedChildWidget) {
-						this.selectChild(bestChild);
+						var bestChild=this.getBestChild(true);
+						if (bestChild && bestChild!=this.selectedChildWidget) {
+							this.selectChild(bestChild);
+						}
 					}
 				},
+
 				doG740RepaintChildsVisible: function() {
 					var isChanged=false;
 					
@@ -1977,6 +1976,8 @@ define(
 				selectChild: function(objPage) {
 					var old=this.selectedChildWidget;
 					this.inherited(arguments);
+					if (!this.get('focused')) return true;
+					
 					if (old && old!=objPage && objPage && objPage.getChildren) {
 						lst=objPage.getChildren();
 						for (var i=0; i<lst.length; i++) {

@@ -2925,6 +2925,7 @@ define(
 			        this._indexRefreshChilds--;
 			        if (this._indexRefreshChilds > 0) return false;
 			        this._indexRefreshChilds=0;
+					
 			        return this.doRefreshChilds();
 			    },
 // Блок навигации - посмотреть и сменить текущий узел
