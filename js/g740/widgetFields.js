@@ -539,10 +539,18 @@ define(
 				},
 				
 				convertFromValueToTextValue: function(value) {
-					return value;
+					var result=value;
+					if (this.fieldDef.type=='date') {
+						result=g740.convertor.js2text(value,'date');
+					}
+					return result;
 				},
 				convertFromTextValueToValue: function(text) {
-					return text;
+					var result=text;
+					if (this.fieldDef.type=='date') {
+						result=g740.convertor.text2js(text,'date');
+					}
+					return result;
 				},
 				
 				onG740Focus: function() {
