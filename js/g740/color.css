@@ -632,3 +632,22 @@ color.romanuke.com/tsvetovaya-palitra-1874
 .g740.app-color-m .g740allicons-panel .g740-item.darkitem {
 	background-color: #859abe;
 }
+
+
+.g740.app-color-m .g740-custombutton.g740-style-default {
+	background-color: #5d80b6;
+    border-color: #5d80b6;	
+}
+.g740.app-color-m .g740-custombutton.g740-style-default:hover {
+    background-color: #025aa5;
+    border-color: #01549b;
+}
+
+.g740.app-color-m .g740-color-scheme3 .g740-custombutton.g740-style-default {
+    background-color: #5bc0de;
+    border-color: #5bc0de;
+}
+.g740.app-color-m .g740-color-scheme3 .g740-custombutton.g740-style-default:hover {
+    background-color: #31b0d5;
+    border-color: #31b0d5;
+}

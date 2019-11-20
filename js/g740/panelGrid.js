@@ -524,7 +524,7 @@ define(
 							});
 							return;
 						}
-						if (!e.ctrlKey && e.keyCode==13) {
+						if (!e.ctrlKey && !e.altKey  && !e.shiftKey && e.keyCode==13) {
 							if (this.getEventOnActionEnabled()) {
 								this.execEventOnAction();
 								dojo.stopEvent(e);
@@ -556,28 +556,28 @@ define(
 							}
 						}
 			            // Esc
-			            if (e.keyCode==27) {
+			            if (!e.ctrlKey && !e.altKey  && !e.shiftKey && e.keyCode==27) {
 							if (this.edit && this.edit.cancel) this.edit.cancel();
 			                this.objRowSet.undoUnsavedChanges();
 			                dojo.stopEvent(e);
 			                return true;
 			            }
 			            // Ctrl+Del
-			            if (e.ctrlKey && e.keyCode==46) {
+			            if (e.ctrlKey && !e.altKey  && !e.shiftKey && e.keyCode==46) {
 							if (this.edit && this.edit.cancel) this.edit.cancel();
 			                this.objRowSet.execConfirmDelete();
 			                dojo.stopEvent(e);
 			                return true;
 			            }
-			            // Ins, Ctrl+Ins
-			            if (e.keyCode==45) {
+			            // Ins
+			            if (!e.ctrlKey && !e.altKey  && !e.shiftKey && e.keyCode==45) {
 							if (this.edit && this.edit.apply) this.edit.apply();
 			                this.objRowSet.exec({ requestName: 'append' });
 			                dojo.stopEvent(e);
 			                return true;
 			            }
 			            // F2
-			            if (!e.ctrlKey && e.keyCode==113) {
+			            if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==113) {
 							if (this.edit && this.edit.apply) this.edit.apply();
 			                this.objRowSet.exec({ requestName: 'save' });
 			                dojo.stopEvent(e);
@@ -585,7 +585,7 @@ define(
 			            }
 			        }
 					if (e && e.type=='keydown') {
-						if (!e.ctrlKey && !e.shiftKey && e.keyCode==9) {
+						if (!e.ctrlKey && !e.shiftKey && !e.altKey && e.keyCode==9) {
 							// Tab
 							if (this.edit && this.edit.apply) this.edit.apply();
 							dojo.stopEvent(e);
@@ -600,7 +600,7 @@ define(
 								});
 							}
 						}
-						if (!e.ctrlKey && e.shiftKey && e.keyCode==9) {
+						if (!e.ctrlKey && e.shiftKey && !e.altKey && e.keyCode==9) {
 							// Shift+Tab
 							if (this.edit && this.edit.apply) this.edit.apply();
 							dojo.stopEvent(e);

@@ -607,7 +607,7 @@ define(
 							objParent.doG740FocusChildNext(this);
 						}
 					}
-					else if (!e.ctrlKey && e.shiftKey && e.keyCode==9) {
+					else if (!e.ctrlKey && !e.altKey && e.shiftKey && e.keyCode==9) {
 						// Shift+Tab
 						dojo.stopEvent(e);
 						var objParent=this.getParent();
