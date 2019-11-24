@@ -196,6 +196,12 @@ define(
 	            specread: true,
 	            speclocal: true,
 	            specnofilter: true
+	        },
+	        'markall': {
+	            captionId: 'requestMarkAll',
+	            specread: true,
+	            speclocal: true,
+	            specnofilter: true
 	        }
 	    };
 // список допустимых типов полей
@@ -213,6 +219,7 @@ define(
 			'reftree': true,
 			'html': true
 		};
+
 // g740.RowSet - набор строк
 	    dojo.declare(
 			"g740.RowSet",
@@ -348,6 +355,8 @@ define(
 				
 				firstFocusId: '',				// позиционирование при первой перечитке
 				firstFocusPath: '',
+				
+				firstMarkAll: false,			// помечать все элементы после первой перечитки
 				
 				evt_onnavigate: '',				// Обработка события на навигацию
 				js_onnavigate: '',
@@ -993,6 +1002,32 @@ define(
 						if (!node.childs) return false;
 						return true;
 					}
+					if (requestName=='unmarkall') {
+						if (this.getRequest('mark')) {
+							if (this.isFilter) return false;
+							if (!this.isEnabled) return false;
+							if (!this.getMarkCount()) return false;
+							var r=this.getRequest('unmarkall');
+							if (r) {
+								if (r.enabled===false) return false;
+								if (!g740.js_eval(this, r.js_enabled, true)) return false;
+							}
+							return true;
+						}
+					}
+					if (requestName=='markall') {
+						if (this.getRequest('mark')) {
+							if (this.isTree) return false;
+							if (this.isFilter) return false;
+							if (this.paginatorCount) return false;
+							var r=this.getRequest('markall');
+							if (r) {
+								if (r.enabled===false) return false;
+								if (!g740.js_eval(this, r.js_enabled, true)) return false;
+							}
+							return true;
+						}
+					}
 					var r=this.getRequest(requestName, requestMode);
 					if (r) {
 						if (r.enabled===false) return false;
@@ -1005,10 +1040,6 @@ define(
 						// В состоянии this.isEnabled==false доступно только refresh
 						if (this.objParent && !this.objParent.isEnabled) return false;
 						if (r.name=='refresh') return true;
-						if (r.name=='unmarkall') {
-							if (!this.getMarkCount()) return false;
-							return true;
-						}
 						
 						if (!this.isEnabled) return false;
 
@@ -1231,6 +1262,13 @@ define(
 							para.requestMode='';
 						}
 					}
+					if (para.requestName=='unmarkall') {
+						return this.unmarkAll();
+					}
+					if (para.requestName=='markall') {
+						return this.markAll();
+					}
+
 					var r=this.getRequest(para.requestName, para.requestMode);
 					if (r) {
 						if (r.specwrite) {
@@ -1255,9 +1293,6 @@ define(
 									}
 								}
 								return false;
-							}
-							if (r.name=='unmarkall') {
-								return this.unmarkAll();
 							}
 							if (r.name=='set') {
 								var node=this.getFocusedNode();
@@ -1768,6 +1803,26 @@ define(
 					}
 					return true;
 				},
+				markAll: function() {
+					var nt=this.getNt();
+					if (!nt.markRowset) {
+						nt.mark={};
+						nt.markCount=0;
+						var parentNode=this.getFocusedParentNode();
+						if (parentNode && parentNode.childs) {
+							for(var id in parentNode.childs.nodes) {
+								if (nt.mark[id]) continue;
+								nt.mark[id]=true;
+								nt.markCount++;
+							}
+						}
+						this.doG740Repaint({
+							isFull: true,
+							parentNode: this.objTreeStorage.rootNode
+						});
+					}
+				},
+				
 				loadMarkFromRowset: function() {
 					if (!this.objForm) return false;
 					if (this.objForm.isObjectDestroed) return false;
@@ -2030,6 +2085,10 @@ define(
 								this.isEnabled=true;
 								this._g740repaint.isFull=true;
 								if (!this._nextFocusedNode) this._nextFocusedNode=this.objTreeStorage.getFirstChildNode(this.objTreeStorage.rootNode);
+								if (this.firstMarkAll) {
+									this.markAll();
+									this.firstMarkAll=false;
+								}
 							}
 							if (r.name=='move') {
 								if (this.getMarkCount()) {
@@ -2073,6 +2132,11 @@ define(
 									node.isEmpty=true;
 								}
 							}
+
+							for (var xml=xmlResponse.firstChild; xml; xml=xml.nextSibling) {
+								if (xml.nodeName=='marked') this.doResponseMarked(xml);
+							}
+							
 							return true;
 						}
 						g740.responseError('errorResponseName', responseName);
@@ -2324,7 +2388,91 @@ define(
 			    },
 // Построение структуры набора строк по XML описанию
 // Построить все
-			    build: function(xmlRowSet) {
+				doResponseMarked: function(xmlMarked) {
+					this._g740repaint.isFull=true;
+					var mode=g740.xml.getAttrValue(xmlMarked, 'mode', 'list');
+					if (mode!='list' && mode!='mark' && mode!='unmark' && mode!='markall' && mode!='unmarkall') mode='list';
+					var nodeType=g740.xml.getAttrValue(xmlMarked, 'row.type', '');
+					var markedList='';
+					if (xmlMarked.firstChild) markedList=xmlMarked.firstChild.nodeValue;
+					markedList=markedList.toString().split(',');
+					if (mode=='list' || mode=='mark' || mode=='unmark') {
+						var nt=this.getNt(nodeType);
+						if (!nt.markRowset) {
+							if (!nt.mark) {
+								nt.mark={};
+								nt.markCount=0;
+							}
+							if (mode=='list') {
+								nt.mark={};
+								nt.markCount=0;
+								for(var i=0; i<markedList.length; i++) {
+									var id=dojo.trim(markedList[i]);
+									if (id=='') continue;
+									if (nt.mark[id]) continue;
+									nt.mark[id]=true;
+									nt.markCount++;
+								}
+							}
+							else if (mode=='mark') {
+								for(var i=0; i<markedList.length; i++) {
+									var id=dojo.trim(markedList[i]);
+									if (id=='') continue;
+									if (nt.mark[id]) continue;
+									nt.mark[id]=true;
+									nt.markCount++;
+								}
+							}
+							else if (mode=='unmark') {
+								for(var i=0; i<markedList.length; i++) {
+									var id=dojo.trim(markedList[i]);
+									if (id=='') continue;
+									if (nt.mark[id]) {
+										delete nt.mark[id];
+										nt.markCount--;
+									}
+								}
+							}
+						}
+					}
+					else if (mode=='markall') {
+						if (!this.isTree && !this.paginatorCount) {
+							var nt=this.getNt();
+							if (!nt.markRowset) {
+								nt.mark={};
+								nt.markCount=0;
+								var parentNode=this.getFocusedParentNode();
+								if (parentNode && parentNode.childs) {
+									for(var id in parentNode.childs.nodes) {
+										if (nt.mark[id]) continue;
+										nt.mark[id]=true;
+										nt.markCount++;
+									}
+								}
+							}
+						}
+					}
+					else if (mode=='unmarkall') {
+						if (nodeType) {
+							var nt=this.getNt(nodeType);
+							if (!nt.markRowset) {
+								nt.mark={};
+								nt.markCount=0;
+							}
+						}
+						else {
+							for(var nodeType in this.nodeTypes) {
+								var nt=this.getNt(nodeType);
+								if (!nt.markRowset) {
+									nt.mark={};
+									nt.markCount=0;
+								}
+							}
+						}
+					}
+				},
+				
+				build: function(xmlRowSet) {
 			        var procedureName='g740.RowSet[' + this.name + '].build';
 					if (this.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject');
 					if (!this.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'objForm');
@@ -2387,6 +2535,9 @@ define(
 					if (g740.xml.isAttr(xmlRowSet, 'row.focus.path')) {
 						this.firstFocusPath=g740.xml.getAttrValue(xmlRowSet, 'row.focus.path', '');
 					}
+					if (g740.xml.isAttr(xmlRowSet, 'mark.all')) {
+						this.firstMarkAll=g740.xml.getAttrValue(xmlRowSet, 'mark.all', '')==1;
+					}
 					
 					if (g740.xml.isAttr(xmlRowSet,'onnavigate')) {
 						this.evt_onnavigate=g740.xml.getAttrValue(xmlRowSet, 'onnavigate', '');
@@ -2445,6 +2596,27 @@ define(
 							nt.markRowset.rowsetName=ntDef.markRowset.rowsetName;
 							nt.markRowset.fieldMark=ntDef.markRowset.fieldMark;
 							nt.markRowset.fieldNodeType=ntDef.markRowset.fieldNodeType;
+							nt.mark={};
+							nt.markCount=0;
+						}
+					}
+					// Обрабатываем значения пометок (marked) по умолчанию
+					if (!nt.markRowset) {
+						var lstMarked=g740.xml.findArrayOfChild(xmlSection, { nodeName: 'marked' });
+						for (var i=0; i<lstMarked.length; i++) {
+							var xmlMarked=lstMarked[i];
+							if (!g740.xml.isXmlNode(xmlMarked)) continue;
+							var markedList=[];
+							if (xmlMarked.firstChild) markedList=xmlMarked.firstChild.nodeValue;
+							markedList=markedList.toString().split(',');
+							for(var j=0; j<markedList.length; j++) {
+								var id=dojo.trim(markedList[j]);
+								if (id=='') continue;
+								if (!nt.mark[id]) {
+									nt.mark[id]=true;
+									nt.markCount++;
+								}
+							}
 						}
 					}
 					
@@ -2585,7 +2757,8 @@ define(
 							}
 						}
 					}
-			        return true;
+			        
+					return true;
 			    },
 // Построить структуру запросов
 			    _buildRequest: function(xmlRequest, nodeType) {
@@ -2641,6 +2814,7 @@ define(
 					nt.requests[fullname]=request;
 			        return true;
 			    },
+
 // Построить структуру полей
 			    _buildField: function(xmlField, nodeType) {
 			        var procedureName='g740.RowSet[' + this.name + ']._buildField';

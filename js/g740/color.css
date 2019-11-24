@@ -616,17 +616,24 @@ color.romanuke.com/tsvetovaya-palitra-1874
 	border-width: 0px;
 }
 
-/* listhtml - панель списка */
-.g740.app-color-m .g740listhtml-panel.g740listhtml-vertical .list .item.current {
+/* list - панель списка */
+.g740.app-color-m .g740list-panel.g740list-vertical .list .item.current {
 	background-color:  #f7f8f9;
 }
-.g740.app-color-m .g740listhtml-panel.g740listhtml-vertical .list .item .element{
-	color: #5d80b6;
+.g740.app-color-m .g740list-panel.g740list-vertical .list .item .element{
+	color: black;
 }
-.g740.app-color-m .g740listhtml-panel.g740listhtml-vertical .list .item.current .element{
+.g740.app-color-m .g740list-panel.g740list-vertical .list .item.current .element{
 	border-left-color: #859abe;
 }
-
+/* tab - панель списка */
+.g740.app-color-m .g740list-panel.g740list-horizontal .tab .item .element{
+	margin-top: 5px;
+	color: #5d80b6;
+}
+.g740.app-color-m .g740list-panel.g740list-horizontal .tab .item.current{
+	border-bottom-color: #5d80b6;
+}
 
 /* allicons - панель списка иконок */
 .g740.app-color-m .g740allicons-panel .g740-item.darkitem {

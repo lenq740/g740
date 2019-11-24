@@ -108,6 +108,7 @@
 	requestCollapse: 'Свернуть узел дерева',
 	requestMark: 'Пометить/снять пометку',
 	requestUnMarkAll: 'Очистить все пометки',
+	requestMarkAll: 'Пометить все',
 	
 	// Paginator
 	paginatorFirst: 'На первую страницу',

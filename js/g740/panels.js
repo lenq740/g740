@@ -3858,49 +3858,88 @@ define(
 				}
 			}
 		);
-// g740.PanelListHTML - список произвольного HTML содержимого из всех строк источника данных
+// g740.PanelAllIcons - все зарегистрированные в проекте иконки
 		dojo.declare(
-			'g740.PanelListHTML',
+			'g740.PanelAllIcons',
+			[g740._PanelAbstract, dijit._TemplatedMixin],
+			{
+				isG740CanToolBar: false,
+				isG740CanButtons: false,
+				isLayoutContainer: false,
+				
+				templateString: '<div class="g740allicons-panel">'+
+					'<div data-dojo-attach-point="domNodeDivBody"></div>'+
+				'</div>',
+				postCreate: function() {
+					this.inherited(arguments);
+					dojo.attr(this.domNode,'title','');
+					for(var icon in g740.icons._items) {
+						var objItem=document.createElement('div');
+						objItem.className='g740-item';
+						objItem.title=icon;
+						dojo.on(objItem, 'mouseover', function(){
+							dojo.addClass(this, 'icons-white');
+							dojo.addClass(this, 'darkitem');
+						});
+						dojo.on(objItem, 'mouseout', function(){
+							dojo.removeClass(this, 'icons-white');
+							dojo.removeClass(this, 'darkitem');
+						});
+						
+						var objIcon=document.createElement('div');
+						objIcon.className='g740-icon '+g740.icons._items[icon];
+						objItem.appendChild(objIcon);
+						this.domNodeDivBody.appendChild(objItem);
+					}
+					var objDiv=document.createElement('div');
+					dojo.style(objDiv,'clear','both');
+					this.domNodeDivBody.appendChild(objDiv);
+				}
+			}
+		);
+
+
+
+
+
+
+// g740.PanelAbstractList - абстрактный предок панелей списков (вертикальных и горизонтальных)
+		dojo.declare(
+			'g740.PanelAbstractList',
 			[g740._PanelAbstract, dijit._TemplatedMixin],
 			{
 				isG740CanToolBar: true,
 				isG740CanButtons: true,
 				isLayoutContainer: true,
+				isFocused: true,
 				
-				templateString: '<div class="g740listhtml-panel">'+
+				templateString: '<div class="g740list-panel">'+
+					'<input type="checkbox" class="g740-focused"'+
+						' data-dojo-attach-point="focusNode"'+
+						' data-dojo-attach-event="onkeypress: onKeyPress, onkeydown: onKeyDown"'+
+					'></input>'+
 					'<div data-dojo-attach-point="domNodeTitle"></div>'+
 					'<div data-dojo-attach-point="domNodeToolbar"></div>'+
-					'<div data-dojo-attach-point="domNodeDivBody"></div>'+
+					'<div data-dojo-attach-point="domNodeDivBody" class="g740list-body"></div>'+
 					'<div data-dojo-attach-point="domNodeButtons"></div>'+
 					'<div data-dojo-attach-point="domNodePaginator"></div>'+
 				'</div>',
 
 				g740style: '',
 				orientation: 'vertical',
-				
-				js_tp: '',
-				js_tpname: '',
-				js_tpvalue: '',
-				
 				title: '',
 
 				htmlItems: {},
-				templates: {},
 				
 				_size: 0,
 				_oldId: '',
 				objToolBar: null,
 				objPanelButtons: null,
 				objPaginator: null,
-//	var template=this.templates[name]
-//		template.js_enabled
-//		template.html
 				constructor: function(para, domElement) {
-					this.templates={};
 					this.htmlItems={};
 				},
 				destroy: function() {
-					this.templates={};
 					this.htmlItems={};
 					if (this.objToolBar) {
 						this.objToolBar.destroyRecursive();
@@ -3921,20 +3960,10 @@ define(
 						this.g740style=value;
 						return true;
 					}
-					else if (name=='js_tp') {
-						this.js_tp=value;
-						return true;
-					}
-					else if (name=='js_tpname') {
-						this.js_tpname=value;
-						return true;
-					}
-					else if (name=='js_tpvalue') {
-						this.js_tpvalue=value;
-						return true;
-					}
-					else if (name=='templates') {
-						this.templates=value;
+					if (name=='focused') {
+						if (value) {
+							this.focusNode.focus();
+						}
 						return true;
 					}
 					else {
@@ -3956,17 +3985,25 @@ define(
 				},
 				postCreate: function() {
 					this.inherited(arguments);
+					dojo.on(this.domNode, 'click', dojo.hitch(this, function(e){
+						if (!e) var e=window.event;
+						this.set('focused', true);
+					}));
 					if (this.g740style) dojo.addClass(this.domNodeDivBody, this.g740style);
 					if (this.orientation=='vertical') {
-						dojo.addClass(this.domNode,'g740listhtml-vertical');
+						dojo.addClass(this.domNode,'g740list-vertical');
 						dojo.style(this.domNodeDivBody,'overflow-y','auto');
 						dojo.style(this.domNodeDivBody,'position','relative');
 					}
 					if (this.orientation=='horizontal') {
-						dojo.addClass(this.domNode,'g740listhtml-horizontal');
+						dojo.addClass(this.domNode,'g740list-horizontal');
 					}
-					dojo.attr(this.domNode,'title','');
 					
+					if (!this.isFocused) {
+						this.focusNode.disabled=true;
+					}
+					
+					dojo.attr(this.domNode,'title','');
 					this.domNodeTitle.innerHTML='';
 					if (this.title) {
 						var objDiv=document.createElement('div');
@@ -4029,8 +4066,11 @@ define(
 					}
 				},
 
+				focus: function() {
+					this.set('focused',true);
+				},
 				canFocused: function() {
-					return false;
+					return this.isFocused;
 				},
 				doG740Repaint: function(para) {
 					if (!para) para={};
@@ -4153,22 +4193,6 @@ define(
 					if (!objRowSet) return false;
 					if (objRowSet.isObjectDestroed) return false;
 					
-					var oldFocusedPath=[];
-					for (var i=0; i<objRowSet.focusedPath.length; i++) oldFocusedPath.push(objRowSet.focusedPath[i]);
-					var html='';
-					try {
-						if (objRowSet.focusedPath.length>0) {
-							objRowSet.focusedPath[objRowSet.focusedPath.length-1]=id;
-						}
-						else {
-							objRowSet.focusedPath.push(id);
-						}
-						var template=this.getTemplate();
-						var html=this.getTemplateHtml(template);
-					}
-					finally {
-						objRowSet.focusedPath=oldFocusedPath;
-					}
 					var htmlItem=this.htmlItems[id];
 					if (!htmlItem) {
 						htmlItem={};
@@ -4195,17 +4219,193 @@ define(
 						htmlItem.id=id;
 						this.htmlItems[id]=htmlItem;
 					}
+					var html=this.getHtmlItemHtml(id);
 					if (htmlItem.html!=html) {
 						htmlItem.html=html;
 						htmlItem.domNode.innerHTML='<div class="element">'+html+'</div>';
 					}
 					return true;
 				},
+				getHtmlItemHtml: function(id) {
+					return '';
+				},
 				onItemClick: function(id) {
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return false;
 					if (objRowSet.isObjectDestroed) return false;
 					objRowSet.setFocusedId(id);
+				},
+				onG740Focus: function() {
+					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
+					if (!dojo.hasClass(this.domNodeDivBody,'focused')) dojo.addClass(this.domNodeDivBody,'focused');
+					this.focus();
+					return true;
+				},
+				onG740Blur: function() {
+					if (dojo.hasClass(this.domNodeDivBody,'focused')) dojo.removeClass(this.domNodeDivBody,'focused');
+					return true;
+				},
+				onKeyDown: function(e) {
+					if (!e) var e=window.event;
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return;
+					if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==40) {
+						// Dn
+						var node=objRowSet.getFocusedNode();
+						if (node) {
+							if (node.childs && node.childs.firstNode) {
+								objRowSet.setFocusedNode(node.childs.firstNode);
+							}
+							else if (node.nextNode) {
+								objRowSet.setFocusedNode(node.nextNode);
+							}
+							else {
+								for(var p=node.parentNode; p; p=p.parentNode) {
+									if (p.nextNode) {
+										objRowSet.setFocusedNode(p.nextNode);
+										break;
+									}
+								}
+							}
+						}
+						dojo.stopEvent(e);
+					}
+					else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==38) {
+						// Up
+						var node=objRowSet.getFocusedNode();
+						if (node) {
+							if (node.prevNode) {
+								var p=node.prevNode;
+								while(true) {
+									if (!p.childs) break;
+									if (!p.childs.lastNode) break;
+									p=p.childs.lastNode;
+								}
+								objRowSet.setFocusedNode(p);
+							}
+							else if (node.parentNode && node.parentNode.nodeType!='root') {
+								objRowSet.setFocusedNode(node.parentNode);
+							}
+						}
+						dojo.stopEvent(e);
+					}
+					else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==9) {
+						// Tab
+						dojo.stopEvent(e);
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildNext) {
+							objParent.doG740FocusChildNext(this);
+						}
+					}
+					else if (!e.ctrlKey && !e.altKey && e.shiftKey && e.keyCode==9) {
+						// Shift+Tab
+						dojo.stopEvent(e);
+						var objParent=this.getParent();
+						if (objParent && objParent.doG740FocusChildPrev) {
+							objParent.doG740FocusChildPrev(this);
+						}
+					}
+					else {
+						var rr=null;
+						if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+						if (rr) {
+							dojo.stopEvent(e);
+							this.objForm.exec({
+								requestName: rr.name,
+								requestMode: rr.mode
+							});
+							return;
+						}
+						if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==13) {
+							// Enter
+							this.execEventOnAction();
+							dojo.stopEvent(e);
+						}
+						else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==45) {
+							// Ins
+							objRowSet.exec({
+								requestName: 'append'
+							});
+							dojo.stopEvent(e);
+						}
+						else if (e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==46) {
+							// Ctrl+Del
+							objRowSet.execConfirmDelete();
+							dojo.stopEvent(e);
+						}
+						else {
+							//console.log(e);
+						}
+					}
+				},
+				onKeyPress: function(e) {
+				}
+			}
+		);
+// g740.PanelListHTML - список произвольного HTML содержимого из всех строк источника данных
+		dojo.declare(
+			'g740.PanelListHTML',
+			[g740.PanelAbstractList],
+			{
+				js_tp: '',
+				js_tpname: '',
+				js_tpvalue: '',
+				templates: {},
+				isFocused: false,
+				
+//	var template=this.templates[name]
+//		template.js_enabled
+//		template.html
+				constructor: function(para, domElement) {
+					this.templates={};
+				},
+				destroy: function() {
+					this.templates={};
+					this.inherited(arguments);
+				},
+				set: function(name, value) {
+					if (name=='js_tp') {
+						this.js_tp=value;
+						return true;
+					}
+					else if (name=='js_tpname') {
+						this.js_tpname=value;
+						return true;
+					}
+					else if (name=='js_tpvalue') {
+						this.js_tpvalue=value;
+						return true;
+					}
+					else if (name=='templates') {
+						this.templates=value;
+						return true;
+					}
+					else {
+						this.inherited(arguments);
+					}
+				},
+				getHtmlItemHtml: function(id) {
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return '';
+					if (objRowSet.isObjectDestroed) return '';
+					var result='';
+					var oldFocusedPath=[];
+					for (var i=0; i<objRowSet.focusedPath.length; i++) oldFocusedPath.push(objRowSet.focusedPath[i]);
+					var html='';
+					try {
+						if (objRowSet.focusedPath.length>0) {
+							objRowSet.focusedPath[objRowSet.focusedPath.length-1]=id;
+						}
+						else {
+							objRowSet.focusedPath.push(id);
+						}
+						var template=this.getTemplate();
+						result=this.getTemplateHtml(template);
+					}
+					finally {
+						objRowSet.focusedPath=oldFocusedPath;
+					}
+					return result;
 				},
 				// Выбирает из списка шаблонов первый подходящий
 				getTemplate: function() {
@@ -4270,52 +4470,67 @@ define(
 					if (!result && result!==0) result='';
 					result=result.toString().toHtml();
 					return result;
-				},
-				onG740Focus: function() {
-					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
-					return true;
 				}
 			}
 		);
-// g740.PanelAllIcons - все зарегистрированные в проекте иконки
+// g740.PanelList - вертикальный список, с поддержкой клавиатуры
 		dojo.declare(
-			'g740.PanelAllIcons',
-			[g740._PanelAbstract, dijit._TemplatedMixin],
+			'g740.PanelList',
+			[g740.PanelAbstractList],
 			{
-				isG740CanToolBar: false,
-				isG740CanButtons: false,
-				isLayoutContainer: false,
-				
-				templateString: '<div class="g740allicons-panel">'+
-					'<div data-dojo-attach-point="domNodeDivBody"></div>'+
-				'</div>',
-				postCreate: function() {
-					this.inherited(arguments);
-					dojo.attr(this.domNode,'title','');
-					for(var icon in g740.icons._items) {
-						var objItem=document.createElement('div');
-						objItem.className='g740-item';
-						objItem.title=icon;
-						dojo.on(objItem, 'mouseover', function(){
-							dojo.addClass(this, 'icons-white');
-							dojo.addClass(this, 'darkitem');
-						});
-						dojo.on(objItem, 'mouseout', function(){
-							dojo.removeClass(this, 'icons-white');
-							dojo.removeClass(this, 'darkitem');
-						});
-						
-						var objIcon=document.createElement('div');
-						objIcon.className='g740-icon '+g740.icons._items[icon];
-						objItem.appendChild(objIcon);
-						this.domNodeDivBody.appendChild(objItem);
+				isFocused: true,
+				fieldName: '',
+				g740style: 'list',
+				set: function(name, value) {
+					if (name=='g740style') {
+						if (value=='list' || value=='linklist')	this.g740style=value;
+						return true;
 					}
-					var objDiv=document.createElement('div');
-					dojo.style(objDiv,'clear','both');
-					this.domNodeDivBody.appendChild(objDiv);
+					else {
+						this.inherited(arguments);
+					}
+				},
+				getHtmlItemHtml: function(id) {
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return '';
+					var result=objRowSet.getFieldProperty({
+						fieldName: this.fieldName,
+						id: id,
+						propertyName: 'text'
+					});
+					if (result==null) result='';
+					var result=result.toString().toHtml();
+					return result;
 				}
 			}
 		);
+// g740.PanelList - горизонтальный список tab закладок
+		dojo.declare(
+			'g740.PanelTabList',
+			[g740.PanelAbstractList],
+			{
+				isFocused: false,
+				fieldName: '',
+				orientation: 'horizontal',
+				g740style: 'tab',
+				getHtmlItemHtml: function(id) {
+					var objRowSet=this.getRowSet();
+					if (!objRowSet) return '';
+					var result=objRowSet.getFieldProperty({
+						fieldName: this.fieldName,
+						id: id,
+						propertyName: 'text'
+					});
+					if (result==null) result='';
+					var result=result.toString().toHtml();
+					return result;
+				}
+			}
+		);
+
+
+
+
 		
 		g740.panels._builderPanel=function(xml, para) {
 			var result=null;
@@ -4638,6 +4853,35 @@ define(
 			return result;
 		};
 		g740.panels.registrate('htmllist', g740.panels._builderPanelListHTML);
+
+		g740.panels._builderPanelList=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelList';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			if (g740.xml.isAttr(xml,'style')) para.g740style=g740.xml.getAttrValue(xml,'style','');
+			para.fieldName=g740.xml.getAttrValue(xml,'field','');
+
+			var result=new g740.PanelList(para, null);
+			return result;
+		};
+		g740.panels.registrate('list', g740.panels._builderPanelList);
+
+		g740.panels._builderPanelTabList=function(xml, para) {
+			var result=null;
+			var procedureName='g740.panels._builderPanelTabList';
+			if (!g740.xml.isXmlNode(xml)) g740.systemError(procedureName, 'errorValueUndefined', 'xml');
+			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
+			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			para.fieldName=g740.xml.getAttrValue(xml,'field','');
+
+			var result=new g740.PanelTabList(para, null);
+			return result;
+		};
+		g740.panels.registrate('tablist', g740.panels._builderPanelTabList);
 
 		g740.panels._builderPanelMemo=function(xml, para) {
 			var result=null;

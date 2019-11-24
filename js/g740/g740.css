@@ -1501,15 +1501,15 @@ html, body {
 }
 
 
-.g740listhtml-panel {
+.g740list-panel {
 }
-.g740listhtml-panel.g740listhtml-horizontal {
+.g740list-panel.g740list-horizontal {
 }
-.g740listhtml-panel.g740listhtml-horizontal .item{
+.g740list-panel.g740list-horizontal .item{
 	float: left;
 }
 
-.g740listhtml-panel.g740listhtml-horizontal .tab .item{
+.g740list-panel.g740list-horizontal .tab .item{
 	cursor: pointer;
     font-size: 16px;
     line-height: 20px;
@@ -1526,13 +1526,13 @@ html, body {
 	-webkit-user-select: none;
 	-ms-user-select: none;
 }
-.g740listhtml-panel.g740listhtml-horizontal .tab .item.current{
+.g740list-panel.g740list-horizontal .tab .item.current{
 	border-bottom-color: black;
 }
 
-.g740listhtml-panel.g740listhtml-vertical .list{
+.g740list-panel.g740list-vertical .list{
 }
-.g740listhtml-panel.g740listhtml-vertical .list .item{
+.g740list-panel.g740list-vertical .list .item{
 	min-height: 34px;
 	width: 100%;
 	display: table;
@@ -1547,11 +1547,11 @@ html, body {
 	border-left-color: rgba(255, 255, 255, 0);
 	border-left-style: solid;
 }
-.g740listhtml-panel.g740listhtml-vertical .list .item.current{
+.g740list-panel.g740list-vertical .list .item.current{
 	background-color: #f5f5f5;
 }
 
-.g740listhtml-panel.g740listhtml-vertical .list .item .element{
+.g740list-panel.g740list-vertical .list .item .element{
 	display: table-cell;
 	vertical-align: middle;
 	padding: 2px;
@@ -1567,14 +1567,14 @@ html, body {
 	border-left-color: rgba(255, 255, 255, 0);
 	border-left-style: solid;
 }
-.g740listhtml-panel.g740listhtml-vertical .list .item.current .element{
+.g740list-panel.g740list-vertical .list .item.current .element{
 	border-left-color: red;
 }
 
 
-.g740listhtml-panel.g740listhtml-vertical .linklist{
+.g740list-panel.g740list-vertical .linklist{
 }
-.g740listhtml-panel.g740listhtml-vertical .linklist .item{
+.g740list-panel.g740list-vertical .linklist .item{
 	cursor: pointer;
 	
 	color: #5d80b6;
@@ -1591,12 +1591,21 @@ html, body {
 	-webkit-user-select: none;
 	-ms-user-select: none;
 }
-.g740listhtml-panel.g740listhtml-vertical .linklist .item:hover{
+.g740list-panel.g740list-vertical .linklist .item:hover{
 	text-decoration: underline;
 }
-.g740listhtml-panel.g740listhtml-vertical .linklist .item.current{
+.g740list-panel.g740list-vertical .linklist .item.current{
 	text-decoration: underline;
 	font-weight: bold;
+}
+.g740list-panel .g740-focused {
+	position: absolute;
+	height: 0px;
+	width: 0px;
+	left: 0px;
+	top: 0px;
+	opacity: 0;
+	z-index: -1;
 }
 
 /* allicons - панель списка иконок */

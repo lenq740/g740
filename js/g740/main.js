@@ -560,6 +560,26 @@ define(
 					g740.registerBaseIcons();
 				}
 				
+/*
+				dojo.on(document,'keydown', function(e){
+					if (!e) var e=window.event;
+					var objForm=g740.application.getFocusedForm();
+					if (objForm && objForm.getRequestByKey) {
+						var rowsetName='';
+						if (objForm.objFocusedPanel) rowsetName=objForm.objFocusedPanel.rowsetName;
+						var rr=objForm.getRequestByKey(e, rowsetName);
+						if (rr) {
+							dojo.stopEvent(e);
+							objForm.exec({
+								requestName: rr.name,
+								requestMode: rr.mode
+							});
+							return;
+						}
+					}
+				});
+*/
+				
 				g740.application.doG740ShowForm();
 			}
 		};
