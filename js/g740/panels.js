@@ -4806,6 +4806,17 @@ define(
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
 
+			var objRowSet=para.objForm.rowsets[para.rowsetName];
+			if (!objRowSet) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'htmllist',
+					rowsetName: para.rowsetName,
+					messageId: 'errorRowSetNotFoundInForm'
+				});
+				return null;
+			}
+
 			if (g740.xml.isAttr(xml,'style')) para.g740style=g740.xml.getAttrValue(xml,'style','');
 			
 			var orientation=g740.xml.getAttrValue(xml,'orientation','vertical');
@@ -4861,8 +4872,41 @@ define(
 			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+
+			var objRowSet=para.objForm.rowsets[para.rowsetName];
+			if (!objRowSet) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'list',
+					rowsetName: para.rowsetName,
+					messageId: 'errorRowSetNotFoundInForm'
+				});
+				return null;
+			}
+
 			if (g740.xml.isAttr(xml,'style')) para.g740style=g740.xml.getAttrValue(xml,'style','');
 			para.fieldName=g740.xml.getAttrValue(xml,'field','');
+			if (!para.fieldName) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'list',
+					rowsetName: para.fieldName,
+					messageId: 'errorIncorrectFieldName'
+				});
+				return null;
+			}
+			if (!objRowSet.isTree) {
+				var fields=objRowSet.getFieldsByNodeType();
+				if (!fields[para.fieldName]) {
+					g740.trace.goBuilder({
+						formName: para.objForm.name,
+						panelType: 'list',
+						rowsetName: para.fieldName,
+						messageId: 'errorNotFoundFieldName'
+					});
+					return null;
+				}
+			}
 
 			var result=new g740.PanelList(para, null);
 			return result;
@@ -4876,7 +4920,40 @@ define(
 			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+			var objRowSet=para.objForm.rowsets[para.rowsetName];
+
+			if (!objRowSet) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'tablist',
+					rowsetName: para.rowsetName,
+					messageId: 'errorRowSetNotFoundInForm'
+				});
+				return null;
+			}
+
 			para.fieldName=g740.xml.getAttrValue(xml,'field','');
+			if (!para.fieldName) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'tablist',
+					rowsetName: para.fieldName,
+					messageId: 'errorIncorrectFieldName'
+				});
+				return null;
+			}
+			if (!objRowSet.isTree) {
+				var fields=objRowSet.getFieldsByNodeType();
+				if (!fields[para.fieldName]) {
+					g740.trace.goBuilder({
+						formName: para.objForm.name,
+						panelType: 'tablist',
+						rowsetName: para.fieldName,
+						messageId: 'errorNotFoundFieldName'
+					});
+					return null;
+				}
+			}
 
 			var result=new g740.PanelTabList(para, null);
 			return result;
@@ -4890,7 +4967,41 @@ define(
 			if (xml.nodeName!='panel') g740.systemError(procedureName, 'errorXmlNodeNotFound', xml.nodeName);
 			if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
 			if (!para.objForm) g740.systemError(procedureName, 'errorValueUndefined', 'para.objForm');
+
+			var objRowSet=para.objForm.rowsets[para.rowsetName];
+			if (!objRowSet) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'memo',
+					rowsetName: para.rowsetName,
+					messageId: 'errorRowSetNotFoundInForm'
+				});
+				return null;
+			}
+
 			if (g740.xml.isAttr(xml,'field')) para.fieldName=g740.xml.getAttrValue(xml,'field','');
+			if (!para.fieldName) {
+				g740.trace.goBuilder({
+					formName: para.objForm.name,
+					panelType: 'memo',
+					rowsetName: para.fieldName,
+					messageId: 'errorIncorrectFieldName'
+				});
+				return null;
+			}
+			if (!objRowSet.isTree) {
+				var fields=objRowSet.getFieldsByNodeType();
+				if (!fields[para.fieldName]) {
+					g740.trace.goBuilder({
+						formName: para.objForm.name,
+						panelType: 'memo',
+						rowsetName: para.fieldName,
+						messageId: 'errorNotFoundFieldName'
+					});
+					return null;
+				}
+			}
+			
 			if (g740.xml.isAttr(xml,'enter')) para.enter=g740.xml.getAttrValue(xml,'enter','0');
 			if (g740.xml.isAttr(xml,'color.readonly')) {
 				var color=g740.xml.getAttrValue(xml,'color.readonly','');
