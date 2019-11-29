@@ -19,6 +19,8 @@ define(
 				title: '',
 				closable: true,
 				lockscreenopacity: '0.7',
+				lockscreenbackgroundcolor: 'white',
+				dialogBodyClassName: '',
 				hideonlockscreenclick: false,
 				
 				objBody: null,
@@ -101,6 +103,7 @@ define(
 					this.domNodeLockScreen=document.createElement('div');
 					this.domNodeLockScreen.className='g740-dialog-lockscreen';
 					dojo.style(this.domNodeLockScreen, 'opacity', this.lockscreenopacity);
+					dojo.style(this.domNodeLockScreen, 'background-color', this.lockscreenbackgroundcolor);
 					if (this.hideonlockscreenclick) {
 						dojo.on(this.domNodeLockScreen, 'click', dojo.hitch(this, this.hide));
 					}
@@ -109,6 +112,7 @@ define(
 
 					this.domNode=document.createElement('div');
 					this.domNode.className='g740-dialog-body';
+					if (this.dialogBodyClassName) dojo.addClass(this.domNode,this.dialogBodyClassName);
 					this.domNodeDialog.appendChild(this.domNode);
 					
 					this.objBody=new dijit.layout.BorderContainer(
@@ -214,6 +218,9 @@ define(
 			g740.Dialog,
 			{
 				isObjectDestroed: false,				// Признак - объект уничтожен
+				lockscreenopacity: '0.35',
+				lockscreenbackgroundcolor: 'black',
+				dialogBodyClassName: 'g740-modalform-body',
 				attr: {},
 				set: function(name, value) {
 					if (name=='attr') {

@@ -276,6 +276,18 @@ html, body {
 	border-color: black !important;
 	border-width: 1px !important;
 }
+
+.g740-dialog  .g740-dialog-body.g740-modalform-body{
+	border-style: solid !important;
+	border-color: black !important;
+	border-width: 1px !important;
+	border-left-width: 1px !important;
+	border-right-width: 1px !important;
+	border-top-width: 1px !important;
+}
+
+
+
 .g740-dialog .g740-dialogconfirm-content {
 	margin-left: 0px;
 	margin-right: 0px;
