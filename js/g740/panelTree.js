@@ -549,6 +549,8 @@ define(
 				onG740Focus: function() {
 					if (this.objForm) this.objForm.onG740ChangeFocusedPanel(this);
 					if (!dojo.hasClass(this.domNode,'focused')) dojo.addClass(this.domNode,'focused');
+					var objRowSet=this.getRowSet();
+					if (objRowSet) objRowSet.setFocusedFieldName('');
 					return true;
 				},
 				onG740Blur: function() {
@@ -687,11 +689,12 @@ define(
 				},
 				
 				doG740Repaint: function(para) {
-					if (!para) return true;
-					if (!para.objRowSet) return true;
-					if (para.objRowSet.name!=this.rowsetName) return true;
+					if (!para) para={};
 					if (this.objToolBar && this.objToolBar.doG740Repaint) this.objToolBar.doG740Repaint(para);
 					if (this.objPanelButtons && this.objPanelButtons.doG740Repaint) this.objPanelButtons.doG740Repaint(para);
+					if (para.isEnabledOnly && !para.isFull && !para.isRowUpdate && !para.isNavigate) return true;
+					if (!para.objRowSet) return true;
+					if (para.objRowSet.name!=this.rowsetName) return true;
 
 					if (para.isFull && para.parentNode) {
 						var nn=this.getNodes(para.parentNode);

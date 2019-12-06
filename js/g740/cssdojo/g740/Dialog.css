@@ -27,28 +27,6 @@
 	padding: 0 4px;
 }
 
-.g740 .dijitDialogCloseIcon {
-	/* the default close icon for the dialog */
-	/* background : url("images/spriteRoundedIconsSmall.png") no-repeat right top; */
-	background: url("images/tabClose.png") no-repeat right top;
-	position: absolute;
-	vertical-align: middle;
-	right: 6px;
-	top: 4px;
-	height: 15px;
-	width: 15px;
-}
-.dj_ie6 .g740 .dijitDialogCloseIcon {
-	background : url("images/tabClose.gif") no-repeat right top;
-}
-
-.g740 .dijitDialogCloseIconHover {
-	background: url("images/tabCloseHover.png") no-repeat right top;
-}
-.dj_ie6 .g740 .dijitDialogCloseIconHover {
-	background : url("images/tabCloseHover.gif") no-repeat right top;
-}
-
 /* Tooltip and TooltipDialog */
 
 .g740 .dijitTooltip,

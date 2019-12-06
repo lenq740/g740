@@ -125,11 +125,11 @@ define(
 			    isRepainted: false,
 			    isFirstRepaint: false,
 				doG740Repaint: function (para) {
-			        if (!para) para={};
-					
 			        var procedureName='g740.Grid.doG740Repaint';
+			        if (!para) para={};
+					if (para.isEnabledOnly && !para.isFull && !para.isRowUpdate && !para.isNavigate) return true;
 			        if (!this.objRowSet) return false;
-					
+
 					if (para.objRowSet && para.objRowSet.name==this.rowsetName && !this.isFirstRepaint) {
 						this.doG740RepaintCells();
 						this.isFirstRepaint=true;
@@ -424,7 +424,10 @@ define(
 			        if (this.objForm.getFocusedRowSet() != this.objRowSet) return false;
 
 			        var cellIndex=0;
-			        if (objCell) cellIndex=objCell.index;
+			        if (objCell) {
+						cellIndex=objCell.index;
+						this.objRowSet.setFocusedFieldName(objCell.field);
+					}
 			        if (!this.isOnCellFocused) {
 			            this.isOnCellFocused=true;
 			            try {
@@ -1013,7 +1016,7 @@ define(
 				region: 'center',
 				isFocusOnShow: isFocusOnShow
 			};
-			if (g740.xml.isAttr(xml,'noheader')) p.isShowHeaders=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noheader','1'),'check');
+			p.isShowHeaders=!g740.convertor.toJavaScript(g740.xml.getAttrValue(xml,'noheader','0'),'check');
 			if (para.js_onaction) {
 				p.js_onaction=para.js_onaction;
 				delete para.js_onaction;

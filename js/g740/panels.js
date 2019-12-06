@@ -239,7 +239,7 @@ define(
 				if (!objForm) g740.systemError(procedureName, 'errorValueUndefined', 'objPanel.objForm');
 				var requests=this.getRequests(xml, objPanel);
 				if (!requests || requests.length==0) return false;
-				var isBootStrap=g740.xml.getAttrValue(xml,'style','')=='bootstrap';
+				var isBootStrap=g740.xml.getAttrValue(xml,'style','bootstrap')=='bootstrap';
 				
 				var buttonCount=0;
 				var isVertical=false;
@@ -1698,6 +1698,7 @@ define(
 				panelExpand: function() {
 					if (this._isAnimation) return;
 					if (this.expanded) return;
+					if (!this.domNode) return;
 
 					dojo.removeClass(this.domNode,'collapsed');
 					dojo.addClass(this.domNode,'expanded');
@@ -2498,7 +2499,9 @@ define(
 						g740.execDelay.go({
 							delay: 50,
 							obj: this,
-							func: this.layout
+							func: function() {
+								if (!this.isObjectDestroed) this.layout();
+							}
 						});
 						
 					}
@@ -2553,6 +2556,7 @@ define(
 								delay: 300,
 								obj: this,
 								func: function() {
+									if (!this.objStackContainer) return;
 									var lst=this.objStackContainer.getChildren();
 									if (lst.length>0) return;
 									if (!this.objTreeMenu) return;
@@ -2576,7 +2580,9 @@ define(
 					g740.execDelay.go({
 						delay: 10,
 						obj: this,
-						func: this.layout
+						func: function() {
+							if (!this.isObjectDestroed) this.layout();
+						}
 					});
 				},
 				closeFocusedForm: function() {
@@ -2611,6 +2617,7 @@ define(
 				
 				doG740Repaint: function(para) {
 					// Начитываем список существующих закладок
+					if (!this.domNodeItems) return;
 					var lstDiv={};
 					for(var domChild=this.domNodeItems.firstChild; domChild; domChild=domChild.nextSibling) {
 						if (domChild.tagName!='DIV') continue;
@@ -3897,12 +3904,6 @@ define(
 				}
 			}
 		);
-
-
-
-
-
-
 // g740.PanelAbstractList - абстрактный предок панелей списков (вертикальных и горизонтальных)
 		dojo.declare(
 			'g740.PanelAbstractList',
@@ -4527,11 +4528,7 @@ define(
 				}
 			}
 		);
-
-
-
-
-		
+	
 		g740.panels._builderPanel=function(xml, para) {
 			var result=null;
 			var procedureName='g740.panels._builderPanel';

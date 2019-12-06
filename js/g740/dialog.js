@@ -9,67 +9,53 @@ define(
 	function() {
 		if (typeof(g740)=='undefined') g740={};
 		
-// g740.Dialog - предок модального диалога, стандартный диалог dojo иногда зависает Internet Explorer 11
+// g740.Dialog - предок модального диалога, улучшенный и украшенный
 		dojo.declare(
 			'g740.Dialog',
-			dijit._Widget,
+			[dijit._Widget, dijit._TemplatedMixin],
 			{
+				templateString: 
+					'<div class="g740-dialog" data-dojo-attach-point="domNode">'+
+						'<div class="g740-dialog-lockscreen" data-dojo-attach-point="domNodeLockScreen"></div>'+
+						'<div class="g740-dialog-body" data-dojo-attach-point="domNodeDialog">'+
+							'<div class="g740-dialog-title" data-dojo-attach-point="domNodeTitle">'+
+								'<span class="g740-dialog-title-text" data-dojo-attach-point="domNodeTitleText"></span>'+
+								'<span class="g740-dialog-closeicon" role="button" '+
+									'data-dojo-attach-point="domNodeCloseButton"'+
+									'data-dojo-attach-event="onclick: hide" '+
+									'></span>'+
+							'</div>'+
+							'<div class="g740-dialog-domnodebody" data-dojo-attach-point="domNodeBody">'+
+							'</div>'+
+						'</div>'+
+					'</div>',
 				width: '50%',
 				height: '50%',
 				title: '',
 				closable: true,
+				titlevisible: true,
 				lockscreenopacity: '0.7',
 				lockscreenbackgroundcolor: 'white',
-				dialogBodyClassName: '',
+				bodypadding: 10,
 				hideonlockscreenclick: false,
 				
 				objBody: null,
-				objTitle: null,
-
-				domNodeDialog: null,
-				domNodeLockScreen: null,
-				domNodeCloseButton: null,
-				domNodeCloseButton: null,
-				
+				objMoveable: null,
 				signalWindowOnResize: null,
-				signalCloseButtonClick: null,
-				
-				constructor: function(para) {
-				},
 				destroy: function() {
 					if (this.signalWindowOnResize) {
 						this.signalWindowOnResize.remove();
 						this.signalWindowOnResize=null;
 					}
-					if (this.signalCloseButtonClick) {
-						this.signalCloseButtonClick.remove();
-						this.signalCloseButtonClick=null;
-					}
-					
-					if (this.objTitle) {
-						this.objTitle.destroyRecursive();
-						this.objTitle=null;
-					}
 					if (this.objBody) {
 						this.objBody.destroyRecursive();
 						this.objBody=null;
 					}
-					if (this.domNodeCloseButton) {
-						if (this.domNodeCloseButton.parentNode) this.domNodeCloseButton.parentNode.removeChild(this.domNodeCloseButton);
-						this.domNodeCloseButton=null;
+					if (this.objMoveable) {
+						this.objMoveable.destroy();
+						this.objMoveable=null;
 					}
-					if (this.domNode) {
-						if (this.domNode.parentNode) this.domNode.parentNode.removeChild(this.domNode);
-						this.domNode=null;
-					}
-					if (this.domNodeLockScreen) {
-						if (this.domNodeLockScreen.parentNode) this.domNodeLockScreen.parentNode.removeChild(this.domNodeLockScreen);
-						this.domNodeLockScreen=null;
-					}
-					if (this.domNodeDialog) {
-						if (this.domNodeDialog.parentNode) this.domNodeDialog.parentNode.removeChild(this.domNodeDialog);
-						this.domNodeDialog=null;
-					}
+					this.inherited(arguments);
 				},
 				set: function(name, value) {
 					if (name=='width') {
@@ -77,109 +63,82 @@ define(
 						this.doG740Resize();
 						return true;
 					}
-					if (name=='height') {
+					else if (name=='height') {
 						this.height=value;
 						this.doG740Resize();
 						return true;
 					}
-					if (name=='title') {
+					else if (name=='title') {
 						this.title=value;
-						this._refreshTitleVisible();
+						if (this.domNodeTitleText) this.domNodeTitleText.innerText=value;
+						return true;
 					}
-					if (name=='closable') {
+					else if (name=='titlevisible') {
+						this.titlevisible=value;
+						if (this.titlevisible) {
+							if (this.domNodeTitle) {
+								dojo.style(this.domNodeTitle,'display','block');
+								dojo.addClass(this.domNodeDialog,'g740-dialog-window');
+								this.bodypadding=10;
+							}
+						}
+						else {
+							if (this.domNodeTitle) {
+								dojo.style(this.domNodeTitle,'display','none');
+								dojo.removeClass(this.domNodeDialog,'g740-dialog-window');
+								this.bodypadding=0;
+							}
+						}
+						return true;
+					}
+					else if (name=='closable') {
 						this.closable=value;
-						this._refreshTitleVisible();
+						if (this.closable) {
+							if (this.domNodeCloseButton) dojo.style(this.domNodeCloseButton,'display','block');
+						}
+						else {
+							if (this.domNodeCloseButton) dojo.style(this.domNodeCloseButton,'display','none');
+						}
+						return true;
 					}
-					if (name=='lockscreenopacity') {
+					else if (name=='lockscreenopacity') {
 						this.lockscreenopacity=value;
 						if (this.domNodeLockScreen) dojo.style(this.domNodeLockScreen, 'opacity', this.lockscreenopacity);
+						return true;
+					}
+					else if (name=='lockscreenbackgroundcolor') {
+						this.lockscreenbackgroundcolor=value;
+						if (this.domNodeLockScreen) dojo.style(this.domNodeLockScreen, 'background-color', this.lockscreenbackgroundcolor);
+						return true;
 					}
 					this.inherited(arguments);
 				},
-				buildRendering: function() {
-					this.domNodeDialog=document.createElement('div');
-					this.domNodeDialog.className='g740-dialog';
-					
-					this.domNodeLockScreen=document.createElement('div');
-					this.domNodeLockScreen.className='g740-dialog-lockscreen';
-					dojo.style(this.domNodeLockScreen, 'opacity', this.lockscreenopacity);
-					dojo.style(this.domNodeLockScreen, 'background-color', this.lockscreenbackgroundcolor);
+				postCreate: function() {
+					this.objBody=new dijit.layout.BorderContainer(
+						{
+							design: 'headline'
+						}, 
+						this.domNodeBody
+					);
+					this.set('titlevisible', this.titlevisible);
+					this.set('title', this.title);
+					this.set('closable', this.closable);
+					this.set('lockscreenopacity', this.lockscreenopacity);
+					this.set('lockscreenbackgroundcolor', this.lockscreenbackgroundcolor);
+					this.set('width', this.width);
+					this.set('height', this.height);
+					this.inherited(arguments);
 					if (this.hideonlockscreenclick) {
 						dojo.on(this.domNodeLockScreen, 'click', dojo.hitch(this, this.hide));
 					}
-					
-					this.domNodeDialog.appendChild(this.domNodeLockScreen);
-
-					this.domNode=document.createElement('div');
-					this.domNode.className='g740-dialog-body';
-					if (this.dialogBodyClassName) dojo.addClass(this.domNode,this.dialogBodyClassName);
-					this.domNodeDialog.appendChild(this.domNode);
-					
-					this.objBody=new dijit.layout.BorderContainer(
-						{
-							design: 'headline',
-							style: 'background-color: white'
-						}, 
-						this.domNode
-					);
-					
-					this.objTitle=new g740.PanelTitle({
-						title: this.title,
-						region: 'top',
-						'class': 'g740-dialog-title'
-					}, null);
-					
-					this.domNodeCloseButton=document.createElement('span');
-					this.domNodeCloseButton.className='dijitDialogCloseIcon';
-					this.domNodeCloseButton.role='button';
-					this.domNodeCloseButton.style='z-index:1';
-					this._refreshTitleVisible();
-					
-					
 					this.signalWindowOnResize=dojo.on(window, 'resize', dojo.hitch(this, this.doG740Resize));
-					this.signalCloseButtonClick=dojo.on(this.domNodeCloseButton, 'click', dojo.hitch(this, this.hide));
-				},
-				addChild: function(obj) {
-					if (!this.objBody) this.buildRendering();
-					this.objBody.addChild(obj);
-				},
-				show: function() {
-					if (!this.domNodeDialog) this.buildRendering();
-					document.body.appendChild(this.domNodeDialog);
-					this.domNode.title='';
-					this.doG740Resize();
-					this.onG740Show();
-				},
-				hide: function() {
-					if (!this.domNodeDialog) return false;
-					if (!this.canHide()) return false;
-					if (this.domNodeDialog.parentNode) this.domNodeDialog.parentNode.removeChild(this.domNodeDialog);
-					this.onG740Hide();
-					return true;
-				},
-				
-				_refreshTitleVisible: function() {
-					if (this.objTitle) {
-						this.objTitle.set('title', this.title);
-						if (this.title && !this.objTitle.domNode.parentNode) {
-							this.objBody.addChild(this.objTitle);
-						}
-						if (!this.title && this.objTitle.domNode.parentNode) {
-							this.objBody.removeChild(this.objTitle);
-						}
-						if (this.closable && this.title) {
-							if (!this.domNodeCloseButton.parentNode) this.domNode.appendChild(this.domNodeCloseButton);
-						}
-						else {
-							if (this.domNodeCloseButton.parentNode) this.domNode.removeChild(this.domNodeCloseButton);
-						}
+					if (this.titlevisible) {
+						dojo.addClass(this.domNodeDialog,'moveable');
+						this.objMoveable=new dojo.dnd.Moveable(this.domNodeDialog, {handle:this.domNodeTitle});
 					}
 				},
-				doG740Resize: function() {
-					if (!this.domNode) return false;
-					var size=this.getSize();
-					this.objBody.resize(size);
-					return true;
+				addChild: function(obj) {
+					this.objBody.addChild(obj);
 				},
 				getSize: function() {
 					var posScreen=dojo.geom.position(this.domNodeLockScreen, false);
@@ -203,6 +162,51 @@ define(
 					}
 					return result;
 				},
+				doG740Resize: function() {
+					if (!this.domNode) return false;
+					var size=this.getSize();
+					dojo.style(this.domNodeDialog,'left',size.l+'px');
+					dojo.style(this.domNodeDialog,'top',size.t+'px');
+					dojo.style(this.domNodeDialog,'width',size.w+'px');
+					dojo.style(this.domNodeDialog,'height',size.h+'px');
+					var sizeTitle=dojo.geom.position(this.domNodeTitle, false);
+					
+					if (this.domNodeCloseButton) {
+						dojo.style(this.domNodeCloseButton,'height',sizeTitle.h+'px');
+					}
+					
+					var sizeBody={
+						w: size.w-2*this.bodypadding,
+						h: size.h-sizeTitle.h-2*this.bodypadding,
+						l: this.bodypadding,
+						t: sizeTitle.h+this.bodypadding
+					};
+					if (sizeBody.h<0) sizeBody.h=0;
+					if (sizeBody.w<0) sizeBody.w=0;
+
+					if (this.domNodeBody) {
+						dojo.style(this.domNodeBody,'width',sizeBody.w+'px');
+						dojo.style(this.domNodeBody,'height',sizeBody.h+'px');
+						dojo.style(this.domNodeBody,'left',sizeBody.l+'px');
+						dojo.style(this.domNodeBody,'top',sizeBody.t+'px');
+					}
+					if (this.objBody) this.objBody.resize(sizeBody);
+					return true;
+				},
+				show: function() {
+					document.body.appendChild(this.domNode);
+					this.domNode.title='';
+					this.doG740Resize();
+					this.onG740Show();
+				},
+				hide: function() {
+					if (!this.domNode) return false;
+					if (!this.canHide()) return false;
+					if (this.domNode.parentNode) this.domNode.parentNode.removeChild(this.domNode);
+					this.onG740Hide();
+					this.destroyRecursive();
+					return true;
+				},
 				canHide: function() {
 					return true;
 				},
@@ -220,7 +224,6 @@ define(
 				isObjectDestroed: false,				// Признак - объект уничтожен
 				lockscreenopacity: '0.35',
 				lockscreenbackgroundcolor: 'black',
-				dialogBodyClassName: 'g740-modalform-body',
 				attr: {},
 				set: function(name, value) {
 					if (name=='attr') {
@@ -269,6 +272,35 @@ define(
 						if (objParentForm.continueExecListOfRequest) objParentForm.continueExecListOfRequest();
 					}
 				},
+				getSize: function() {
+					var posScreen=dojo.geom.position(this.domNodeLockScreen, false);
+
+					var w95=Math.round(posScreen.w*95/100);
+					var h95=Math.round(posScreen.h*95/100);
+
+					var w=this.width+'';
+					if (w.indexOf('%')>=0) {
+						w=Math.round(posScreen.w*parseFloat(w)/100);
+					}
+					w=parseInt(w);
+					
+					var h=this.height+'';
+					if (h.indexOf('%')>=0) {
+						h=Math.round(posScreen.h*parseFloat(h)/100);
+					}
+					h=parseInt(h);
+					
+					if (w>w95) w=w95;
+					if (h>h95) h=h95;
+
+					var result={
+						w: w,
+						h: h,
+						l: Math.round((posScreen.w-w)/2),
+						t: Math.round((posScreen.h-h)/2)
+					}
+					return result;
+				},
 				show: function() {
 					this.inherited(arguments);
 					g740.application.lstModalFormDialogs.push(this);
@@ -281,15 +313,13 @@ define(
 					var result=objForm.execEventOnClose();
 					return result;
 				},
-				onG740Hide: function() {
-					this.destroyRecursive();
-				},
 				getObjForm: function() {
-					var lst=this.objBody.getChildren();
-					
-					for(var i=0; i<lst.length; i++) {
-						var obj=lst[i];
-						if (obj.g740className=='g740.Form' && !obj.isObjectDestroed) return obj;
+					if (this.objBody) {
+						var lst=this.objBody.getChildren();
+						for(var i=0; i<lst.length; i++) {
+							var obj=lst[i];
+							if (obj.g740className=='g740.Form' && !obj.isObjectDestroed) return obj;
+						}
 					}
 					return null;
 				}
@@ -316,6 +346,7 @@ define(
 				_isSaveOnHide: false,
 				_saveValueOnHide: null,
 				_oldObjDialogEditor: null,
+
 				set: function(name, value) {
 					if (name=='objForm') {
 						this.objForm=value;
@@ -353,23 +384,18 @@ define(
 					this.inherited(arguments);
 				},
 				destroy: function() {
-					var procedureName='g740.DialogEditorAbstract.destroy';
-					try {
-						if (this.objForm) this.objForm.objDialogEditor=this._oldObjDialogEditor;
-						this._oldObjDialogEditor=null;
-						this.objForm=null;
-						this.domNodeOwner=null;
-						this.posDomNodeOwner=null;
-						this.objOwner=null;
-						this.isObjectDestroed=true;
-						this.inherited(arguments);
-					}
-					finally {
-					}
+					if (this.objForm) this.objForm.objDialogEditor=this._oldObjDialogEditor;
+					this._oldObjDialogEditor=null;
+					this.objForm=null;
+					this.domNodeOwner=null;
+					this.posDomNodeOwner=null;
+					this.objOwner=null;
+					this.isObjectDestroed=true;
+					this.inherited(arguments);
 				},
 				postCreate: function() {
-					this.build();
 					this.inherited(arguments);
+					this.build();
 				},
 				getSize: function() {
 					var result=this.inherited(arguments);
@@ -428,7 +454,6 @@ define(
 							this.objOwner.set('focused',true);
 						}
 					}
-					this.destroyRecursive();
 				}
 			}
 		);
@@ -437,6 +462,7 @@ define(
 			'g740.DialogEditorDate',
 			g740.DialogEditorAbstract,
 			{
+				titlevisible: false,
 				domNodeInput: null,
 				objCalendar: null,
 				destroy: function() {
@@ -612,15 +638,11 @@ define(
 			'g740.DialogEditorRef',
 			g740.DialogEditorAbstract,
 			{
+				titlevisible: false,
 				objListRowSet: null,
 				destroy: function() {
-					var procedureName='g740.DialogEditorRef.destroy';
-					try {
-						this.objListRowSet=null;
-						this.inherited(arguments);
-					}
-					finally {
-					}
+					this.objListRowSet=null;
+					this.inherited(arguments);
 				},
 				build: function() {
 					var procedureName='g740.DialogEditorRef.build';
@@ -791,16 +813,12 @@ define(
 			'g740.DialogEditorList',
 			g740.DialogEditorAbstract,
 			{
+				titlevisible: false,
 				objListItems: null,
 				charHeight: 18,
 				destroy: function() {
-					var procedureName='g740.DialogEditorList.destroy';
-					try {
-						this.objListItems=null;
-						this.inherited(arguments);
-					}
-					finally {
-					}
+					this.objListItems=null;
+					this.inherited(arguments);
 				},
 				build: function() {
 					var procedureName='g740.DialogEditorList.build';
@@ -883,7 +901,7 @@ define(
 				},
 				doG740Resize: function() {
 					this.inherited(arguments);
-					this.objListItems.layout();
+					if (this.objListItems) this.objListItems.layout();
 				},
 				onListKeyDown: function(e) {
 					if (e.keyCode==32 || e.keyCode==13) {
@@ -913,13 +931,8 @@ define(
 				charHeight: 18,
 				_isSaveOnHide: true,
 				destroy: function() {
-					var procedureName='g740.DialogEditorRef.destroy';
-					try {
-						this.objListCheckBox=null;
-						this.inherited(arguments);
-					}
-					finally {
-					}
+					this.objListCheckBox=null;
+					this.inherited(arguments);
 				},
 				build: function() {
 					var objRowSet=this.getRowSet();
@@ -1079,13 +1092,8 @@ define(
 				charHeight: 18,
 				_isSaveOnHide: true,
 				destroy: function() {
-					var procedureName='g740.DialogEditorRef.destroy';
-					try {
-						this.objTreeCheckBox=null;
-						this.inherited(arguments);
-					}
-					finally {
-					}
+					this.objTreeCheckBox=null;
+					this.inherited(arguments);
 				},
 				build: function() {
 					var objRowSet=this.getRowSet();
@@ -1259,6 +1267,8 @@ define(
 			'g740.DialogEditorMemo',
 			g740.DialogEditorAbstract,
 			{
+				lockscreenopacity: '0.35',
+				lockscreenbackgroundcolor: 'black',
 				objTextarea: null,
 				objBtnOk: null,
 				readOnly: false,
@@ -1278,14 +1288,9 @@ define(
 					if (this.objBtnOk) this.objBtnOk.set('disabled',this.readOnly);
 				},
 				destroy: function() {
-					var procedureName='g740.DialogEditorMemo.destroy';
-					try {
-						this.objTextarea=null;
-						this.objBtnOk=null;
-						this.inherited(arguments);
-					}
-					finally {
-					}
+					this.objTextarea=null;
+					this.objBtnOk=null;
+					this.inherited(arguments);
 				},
 				build: function() {
 					var procedureName='g740.DialogEditorMemo.build';
@@ -1301,7 +1306,7 @@ define(
 
 					this.objTextarea=new dijit.form.SimpleTextarea(
 						{
-							style: 'margin:0px;padding:0px;margin-left:1px;border-color:gray',
+							style: 'margin:0px;padding:0px;margin-left:1px;border-width:0px',
 							region: 'center'
 						},
 						null
@@ -1421,7 +1426,6 @@ define(
 				btnGoMessageId: '',
 				btnGoIcon: '',
 
-				objBtnOk: null,
 				objOwner: null,
 
 				onCloseOk: null,
@@ -1429,9 +1433,14 @@ define(
 				onClolseGo: null,
 				closePara: null,
 				closeObj: null,
+				
 				mode: 'confirm',
 				width: '450px',
 				height: '250px',
+				lockscreenopacity: '0.35',
+				lockscreenbackgroundcolor: 'black',
+				
+				focusNode: null,
 
 				set: function(name, value) {
 					if (name=='messageText') {
@@ -1543,24 +1552,22 @@ define(
 					}
 				},
 				destroy: function() {
-					var procedureName='g740.DialogConfirm.destroy';
-					try {
-						this.objBtnOk=null;
-						this.objOwner=null;
-					}
-					finally {
-					}
+					this.objOwner=null;
+					this.inherited(arguments);
 				},
 				postCreate: function() {
 					this.inherited(arguments);
 					this.build();
 				},
 				build: function() {
+					if (this.mode=='error') {
+						dojo.addClass(this.domNodeTitle,'error');
+					}
 					var objPanelBottom=new dijit.layout.BorderContainer(
 						{
 							design: 'headline',
 							region: 'bottom',
-							style: 'height: 28px;padding-top: 1px;border-bottom-style:solid;border-bottom-width:2px;border-bottom-color: rgba(255, 255, 255, 0);'
+							style: 'height: 36px;padding-top: 3px;border-bottom-style:solid;border-bottom-width:2px;border-bottom-color: rgba(255, 255, 255, 0);'
 						},
 						null
 					);
@@ -1570,9 +1577,6 @@ define(
 						region: 'center',
 						style: 'overflow-y:auto;overflow-x:hidden;'
 					};
-					if (this.mode=='error') {
-						p['style']+='background-color: red; color: white';
-					}
 					var objPanelContent=new dijit.layout.ContentPane(p,null);
 					this.addChild(objPanelContent);
 					var lstDom=[];
@@ -1593,14 +1597,12 @@ define(
 					}
 					objPanelContent.set('content',lstDom);
 					objPanelContent.domNode.className='g740-dialogconfirm-content';
-					
 					if (this.mode=='confirm') {
-						var objBtn=new g740.PanelButton(
+						var objBtn=new g740.CustomButton(
 							{
 								region: 'right',
 								label: g740.getMessage(this.btnCancelMessageId),
 								onClick: dojo.hitch(this, this.onBtnCancelClick),
-								onKeyDown: dojo.hitch(this, this.onKeyDown),
 								iconClass: g740.icons.getIconClassName(this.btnCancelIcon,'medium')
 							},
 							null
@@ -1608,18 +1610,16 @@ define(
 						objPanelBottom.addChild(objBtn);
 					}
 					
-					var objBtn=new g740.PanelButton(
+					var objBtn=new g740.CustomButton(
 						{
 							region: 'right',
 							label: g740.getMessage(this.btnOkMessageId),
 							onClick: dojo.hitch(this, this.onBtnOkClick),
-							onKeyDown: dojo.hitch(this, this.onKeyDown),
 							iconClass: g740.icons.getIconClassName(this.btnOkIcon,'medium')
 						},
 						null
 					);
 					objPanelBottom.addChild(objBtn);
-					this.objBtnOk=objBtn;
 					
 					if (this.btnGoMessageId && this.btnGoIcon) {
 						var objBtn=new g740.PanelButton(
@@ -1627,7 +1627,6 @@ define(
 								region: 'right',
 								label: g740.getMessage(this.btnGoMessageId),
 								onClick: dojo.hitch(this, this.onBtnGoClick),
-								onKeyDown: dojo.hitch(this, this.onKeyDown),
 								iconClass: g740.icons.getIconClassName(this.btnGoIcon,'medium')
 							},
 							null
@@ -1636,6 +1635,26 @@ define(
 					}
 					
 					this.set('title',g740.getMessage(this.titleMessageId));
+					
+					var focusNode=document.createElement('input');
+					focusNode.type='checkbox';
+					this.domNodeDialog.appendChild(focusNode);
+					dojo.addClass(focusNode, 'g740-dialog-body-focused');
+					dojo.on(focusNode,'keydown',dojo.hitch(this, function(e) {
+						if (!e) var e=window.event;
+						if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==13) {
+							// Enter
+							this.onBtnOkClick();
+							dojo.stopEvent(e);
+						}
+						else if (!e.ctrlKey && !e.altKey && !e.shiftKey && e.keyCode==27) {
+							// Escape
+							this.onBtnCancelClick();
+							dojo.stopEvent(e);
+						}
+					}));
+
+					this.focusNode=focusNode;
 				},
 				_isOk: false,
 				_isGo: false,
@@ -1655,9 +1674,6 @@ define(
 						this._isGo=true;
 						this.hide();
 					}
-				},
-				onKeyDown: function(e) {
-					if (e.keyCode==27 && this.hide) this.hide();
 				},
 				onG740Hide: function() {
 					if (this.objOwner) {
@@ -1698,18 +1714,17 @@ define(
 							});
 						}
 					}
-					this.destroyRecursive();
 				},
 				onG740Show: function() {
-					this.doObjBtnOkSetFocus();
+					this.doSetFocus();
 					g740.execDelay.go({
 						obj: this,
-						func: this.doObjBtnOkSetFocus,
+						func: this.doSetFocus,
 						delay: 200
 					});
 				},
-				doObjBtnOkSetFocus: function() {
-					if (this.objBtnOk) this.objBtnOk.set('focused',true);
+				doSetFocus: function() {
+					if (this.focusNode) this.focusNode.focus();
 				}
 			}
 		);
@@ -1742,12 +1757,12 @@ define(
 						{
 							design: 'headline',
 							region: 'bottom',
-							style: 'height: 30px; background-color: white; border-width: 0px'
+							style: 'height: 34px; background-color: white; border-width: 0px'
 						},
 						null
 					);
 					this.objBody.addChild(objPanelBottom);
-					var objBtn=new g740.PanelButton(
+					var objBtn=new g740.CustomButton(
 						{
 							region: 'right',
 							label: g740.getMessage('messageBtnOk'),
@@ -1783,6 +1798,7 @@ define(
 					var objTr=document.createElement('tr');
 					objTBody.appendChild(objTr);
 					var objTd=document.createElement('td');
+					dojo.addClass(objTd,'userselect-none');
 					var domText=document.createTextNode(g740.getMessage('messageLogin'));
 					objTd.appendChild(domText);
 					objTr.appendChild(objTd);
@@ -1794,6 +1810,7 @@ define(
 					var objTr=document.createElement('tr');
 					objTBody.appendChild(objTr);
 					var objTd=document.createElement('td');
+					dojo.addClass(objTd,'userselect-none');
 					var domText=document.createTextNode(g740.getMessage('messagePassword'));
 					objTd.appendChild(domText);
 					objTr.appendChild(objTd);
@@ -1836,19 +1853,14 @@ define(
 					);
 				},
 				doResponse: function(para) {
-					var procedureName='g740.DialogLogin.doResponse';
-					try {
-						if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
-						var xmlResponse=para.xmlResponse;
-						if (!g740.xml.isXmlNode(xmlResponse)) g740.responseError('errorNotXml', 'para.xmlResponse');
-						if (xmlResponse.nodeName!='response') g740.responseError('errorXmlNodeNotFound', 'response');
-						var name=g740.xml.getAttrValue(xmlResponse,'name','');
-						if (name=='ok') {
-							this.isLoginOk=true;
-							this.hide();
-						}
-					}
-					finally {
+					if (!para) g740.systemError(procedureName, 'errorValueUndefined', 'para');
+					var xmlResponse=para.xmlResponse;
+					if (!g740.xml.isXmlNode(xmlResponse)) g740.responseError('errorNotXml', 'para.xmlResponse');
+					if (xmlResponse.nodeName!='response') g740.responseError('errorXmlNodeNotFound', 'response');
+					var name=g740.xml.getAttrValue(xmlResponse,'name','');
+					if (name=='ok') {
+						this.isLoginOk=true;
+						this.hide();
 					}
 					return true;
 				},
@@ -1863,14 +1875,12 @@ define(
 				onG740Show: function() {
 					if (this.objTextBoxLogin) this.objTextBoxLogin.focus();
 				},
+				canHide: function() {
+					if (!this.isLoginOk) return false;
+					return true;
+				},
 				onG740Hide: function() {
-					if (!this.isLoginOk) {
-						this.show();
-					}
-					else {
-						this.destroyRecursive();
-						g740.application.doG740ShowApplicationForm();
-					}
+					g740.application.doG740ShowApplicationForm();
 				}
 			}
 		);

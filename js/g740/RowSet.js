@@ -360,6 +360,8 @@ define(
 				
 				evt_onnavigate: '',				// Обработка события на навигацию
 				js_onnavigate: '',
+				
+				focusedFieldName: '',
 
 // Создание и уничтожение объекта
 // Создание экземпляра объекта
@@ -757,12 +759,13 @@ define(
 			        return result;
 			    },
 // Перерисовка экранных элементов, по умолчанию перерисовывается только текущая строка
-//	objRowSet 	- набор строк
-//  parentNode	- родительский узел
-//	node		- узел, обычно не задан, берется из текущего
-//	isFull		- полная перерисовка всех дочерних элементов
-//	isRowUpdate	- изменения в строке
-//	isNavigate	- сменилась текущая строка
+//	objRowSet 		- набор строк
+//  parentNode		- родительский узел
+//	node			- узел, обычно не задан, берется из текущего
+//	isFull			- полная перерисовка всех дочерних элементов
+//	isRowUpdate		- изменения в строке
+//	isNavigate		- сменилась текущая строка
+//	isEnabledOnly	- пересчитать enabled для request: toolbar, buttons, menu
 			    doG740Repaint: function(params) {
 			        var procedureName='g740.RowSet[' + this.name + '].doG740Repaint';
 					if (this.isObjectDestroed) g740.systemError(procedureName, 'errorAccessToDestroedObject');
@@ -3268,6 +3271,15 @@ define(
 			        return this.setFocusedPath(path);
 			    },
 
+				setFocusedFieldName: function(fieldName) {
+					if (this.focusedFieldName==fieldName) return true;
+					this.focusedFieldName=fieldName;
+					this.doG740Repaint({
+						objRowSet: this,
+						isEnabledOnly: true
+					});
+					return true;
+				},
 			    doG740Get: function(name, defValue) {
 			        if (!defValue) defValue='';
 
@@ -3400,11 +3412,12 @@ define(
 							var result=lst.join(';');
 							return result;
 			            }
+						if (propertyName=='field') return this.focusedFieldName;
 			            if (propertyName=='id') {
 							if (!node) return '';
 							return node.id;
 			            }
-			            return defValue;
+						return defValue;
 			        }
 			        if (fieldName=='id') return node.id;
 					

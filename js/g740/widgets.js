@@ -1418,12 +1418,18 @@ define(
 				getPanelForFocus: function() {
 					var objForm=null;
 					var objToolBarPanel=null;
-
-					var obj=this.getParent();
-					if (obj && obj.getParent) obj=obj.getParent();
-					if (obj.g740className=='g740.Panel') {
-						objToolBarPanel=obj;
-						objForm=objToolBarPanel.objForm;
+					try {
+						var obj=this.getParent();
+					}
+					catch(Exception) {
+						var obj=null;
+					}
+					if (obj) {
+						if (obj.getParent) obj=obj.getParent();
+						if (obj.g740className=='g740.Panel') {
+							objToolBarPanel=obj;
+							objForm=objToolBarPanel.objForm;
+						}
 					}
 					
 					if (!this.objAction) {
@@ -1751,6 +1757,11 @@ define(
 					{
 						var btnStyle=this.btnstyle;
 						this.btnstyle='';
+						if (this.label) {
+							var label=this.label;
+							this.label='';
+							this.set('label', label);
+						}
 						this.set('btnstyle', btnStyle);
 						
 						var btnSize=this.size;
@@ -1777,6 +1788,9 @@ define(
 					}
 					this.set('label',this.objAction.getCaption().toHtml());
 				},
+				click: function() {
+					this.onBtnClick();
+				},
 				onBtnClick: function() {
 					var objPanel=this.getPanelForFocus();
 					if (objPanel && objPanel.doG740FocusChildFirst) objPanel.doG740FocusChildFirst();
@@ -1796,11 +1810,18 @@ define(
 					var objForm=null;
 					var objToolBarPanel=null;
 
-					var obj=this.getParent();
-					if (obj && obj.getParent) obj=obj.getParent();
-					if (obj.g740className=='g740.Panel') {
-						objToolBarPanel=obj;
-						objForm=objToolBarPanel.objForm;
+					try {
+						var obj=this.getParent();
+					}
+					catch(Exception) {
+						var obj=null;
+					}
+					if (obj) {
+						if (obj.getParent) obj=obj.getParent();
+						if (obj.g740className=='g740.Panel') {
+							objToolBarPanel=obj;
+							objForm=objToolBarPanel.objForm;
+						}
 					}
 					
 					if (!this.objAction) {

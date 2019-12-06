@@ -413,6 +413,7 @@ define(
 					if (!para) para={};
 					if (this.objToolBar) this.objToolBar.doG740Repaint(para);
 					if (this.objPanelButtons) this.objPanelButtons.doG740Repaint(para);
+					if (para.isEnabledOnly && !para.isFull && !para.isRowUpdate && !para.isNavigate) return true;
 					if (para.objRowSet && para.objRowSet.name!=this.rowsetName) return true;
 					for(var i=0; i<this._childs.length; i++) {
 						var obj=this._childs[i];
@@ -592,6 +593,10 @@ define(
 					var objRowSet=this.getRowSet();
 					if (!objRowSet) return false;
 					if (!para) para={};
+
+					if (this.objToolBar) this.objToolBar.doG740Repaint(para);
+					if (this.objPanelButtons) this.objPanelButtons.doG740Repaint(para);
+					if (para.isEnabledOnly && !para.isFull && !para.isRowUpdate && !para.isNavigate) return true;
 					if (para.objRowSet && objRowSet!=para.objRowSet) return false;
 					if (para.isFull) {
 // Борьба с морганием при перечитке

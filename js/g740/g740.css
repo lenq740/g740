@@ -16,6 +16,13 @@ html, body {
 	outline: none;
 }
 
+.userselect-none {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
 /* Кнопки */
 .g740-custombutton {
 	display: inline-block;
@@ -247,16 +254,48 @@ html, body {
 /* Диалог */
 .g740-dialog {
 }
-.g740-dialog .g740-dialog-title {
-	height: 22px !important;
-	line-height: 22px !important;
-	padding-left: 5px;
-	font-size: 13px !important;
-	text-transform: uppercase;
-	margin-top: 0px !important;
-	margin-left: 0px !important;
-	margin-bottom: 0px !important;
+.g740-dialog .g740-dialog-body.g740-dialog-window {
+	border-radius: 8px;
 }
+.g740-dialog .g740-dialog-body {
+}
+.g740-dialog .g740-dialog-title {
+	color: black;
+	
+	padding-top:10px;
+	padding-bottom:10px;
+	
+	padding-left: 10px;
+	border-bottom-style: solid;
+    border-bottom-color: lightgrey;
+    border-bottom-width: 1px;
+	
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+	cursor: move;
+}
+.g740-dialog .g740-dialog-title.error {
+	border-bottom-style: solid;
+    border-bottom-color: red;
+    border-bottom-width: 2px;
+}
+.g740-dialog .g740-dialog-title .g740-dialog-title-text{
+	font-size: 18px;
+}
+.g740-dialog .g740-dialog-title .g740-dialog-closeicon {
+	position: relative;
+	float: right;
+	width: 48px;
+	top: -10px;
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 32px;
+	background-image: url('icons/widget/dialog-close.svg');
+}
+
 .g740-dialog  .g740-dialog-lockscreen{
 	position: absolute;
 	left: 0px;
@@ -273,11 +312,10 @@ html, body {
 	-moz-box-shadow: 6px 10px 5px -1px rgba(0,0,0,0.36);
 	box-shadow: 6px 10px 5px -1px rgba(0,0,0,0.36);
 	border-style: solid !important;
-	border-color: black !important;
+	border-color: lightgray !important;
 	border-width: 1px !important;
 }
-
-.g740-dialog  .g740-dialog-body.g740-modalform-body{
+.g740-dialog .g740-dialog-body.g740-modalform-body{
 	border-style: solid !important;
 	border-color: black !important;
 	border-width: 1px !important;
@@ -285,16 +323,21 @@ html, body {
 	border-right-width: 1px !important;
 	border-top-width: 1px !important;
 }
-
+.g740-dialog .g740-dialog-body .g740-dialog-domnodebody {
+	position: absolute;
+}
+.g740-dialog .g740-dialog-body .g740-dialog-body-focused {
+	position: absolute;
+	height: 0px;
+	width: 0px;
+	z-index: -1;
+}
 
 
 .g740-dialog .g740-dialogconfirm-content {
 	margin-left: 0px;
 	margin-right: 0px;
 	padding: 5px;
-	border-bottom-style: solid;
-	border-color: lightgray;
-	border-width: 1px;
 	font-size: 14px;
 }
 
@@ -809,9 +852,6 @@ html, body {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
-}
-.g74-paneltitle.g740-dialog-title {
-	margin-left: 0px;
 }
 
 /* FieldContainer */

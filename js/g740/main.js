@@ -459,11 +459,10 @@ define(
 					var objDialog=new g740.DialogModalForm({
 						title: objForm.title,
 						attr: para.attr,
-						closable: isClosable ? true : false,
+						closable: isClosable?true:false,
 						width: w,
 						height: h
 					});
-					
 					objDialog.addChild(objForm);
 					objDialog.show();
 					objForm.startup();

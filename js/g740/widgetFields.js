@@ -554,7 +554,10 @@ define(
 				},
 				
 				onG740Focus: function() {
-					if (this.rowId && this.objRowSet && this.rowId!=this.objRowSet.getFocusedId()) this.objRowSet.setFocusedId(this.rowId);
+					if (this.objRowSet) {
+						this.objRowSet.setFocusedFieldName(this.fieldName);
+						if (this.rowId && this.rowId!=this.objRowSet.getFocusedId()) this.objRowSet.setFocusedId(this.rowId);
+					}
 					this.isLastFocused=true;
 				},
 				onG740Blur: function() {

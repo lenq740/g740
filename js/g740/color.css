@@ -128,19 +128,6 @@ app-color-black
 	color: white;
 }
 
-/* g740.Dialog */
-.g740.app-color-black .g740-dialog .g740-dialog-title {
-	font-family: sans-serif !important;
-	font-size: 14px !important;
-	font-weight: normal !important;
-	background-image: none;
-	background-color: #6e6e6e;
-	color: white;
-}
-.g740.app-color-black .g740-dialog .dijitDialogCloseIcon {
-	background-image: url('icons/widget/close.png') !important;
-}
-
 /* g740._ListAbstract */
 .g740.app-color-black .g740-list .g740-list-items .g740-list-item.selected{
     background-color: #6e6e6e;
@@ -217,19 +204,6 @@ app-color-red
 .g740.app-color-red .dijitMenuItemSelected {
 	background-color: #e5525b;
 	color: white;
-}
-
-/* g740.Dialog */
-.g740.app-color-red .g740-dialog .g740-dialog-title {
-	font-family: sans-serif !important;
-	font-size: 14px !important;
-	font-weight: normal !important;
-	background-image: none;
-	background-color: #d4464e;
-	color: white;
-}
-.g740.app-color-red .g740-dialog .dijitDialogCloseIcon {
-	background-image: url('icons/widget/close.png') !important;
 }
 
 /* g740._ListAbstract */
@@ -423,15 +397,6 @@ color.romanuke.com/tsvetovaya-palitra-1874
 .g740.app-color-m .dijitMenuItemSelected {
 	background-color: #acbdd3;
 	color: white;
-}
-
-/* g740.Dialog */
-.g740.app-color-m .g740-dialog .g740-dialog-title {
-	background-color: #5d80b6;
-	color: white;
-}
-.g740.app-color-m .g740-dialog .dijitDialogCloseIcon {
-	background-image: url('icons/widget/close.png') !important;
 }
 
 /* g740.panelmultitabsform */
