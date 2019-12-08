@@ -241,6 +241,32 @@ define(
 			if (params) {
 				for(var name in params) G740params[name]=g740.convertor.toG740(params[name]);
 			}
+
+			var fullName=requestName;
+			if (requestMode) fullName=requestName+'.'+requestMode;
+			var r=focusedForm.requests[fullName];
+			if (!r) {
+				if (g740.application.objForm && g740.application.objForm.objPanelForm) {
+					var objMainForm=g740.application.objForm;
+					r=objMainForm.requests[fullName];
+					if (r) focusedForm=objMainForm;
+				}
+			}
+			if (!focusedForm.exec) return false;
+			if (!focusedForm.getRequestEnabled(requestName, requestMode)) return false;
+			if (r && r.confirm) {
+				g740.showConfirm({
+					messageText: r.confirm,
+					closeObj: focusedForm,
+					closePara: {
+						requestName: requestName,
+						requestMode: requestMode,
+						G740params: G740params
+					},
+					onCloseOk: focusedForm.exec
+				});
+				return true;
+			}
 			return focusedForm.exec({
 				requestName: requestName,
 				requestMode: requestMode,
