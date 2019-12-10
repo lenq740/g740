@@ -1622,7 +1622,7 @@ define(
 					objPanelBottom.addChild(objBtn);
 					
 					if (this.btnGoMessageId && this.btnGoIcon) {
-						var objBtn=new g740.PanelButton(
+						var objBtn=new g740.CustomButton(
 							{
 								region: 'right',
 								label: g740.getMessage(this.btnGoMessageId),
