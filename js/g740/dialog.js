@@ -1321,13 +1321,13 @@ define(
 						{
 							design: 'headline',
 							region: 'bottom',
-							style: 'height: 30px'
+							style: 'height: 34px'
 						},
 						null
 					);
 					this.addChild(objPanelBottom);
 					
-					var objBtn=new g740.PanelButton(
+					var objBtn=new g740.CustomButton(
 						{
 							region: 'right',
 							label: g740.getMessage('messageDlgMemoCancel'),
@@ -1339,7 +1339,7 @@ define(
 					objBtn.ownerObj=this;
 					
 					objPanelBottom.addChild(objBtn);
-					var objBtn=new g740.PanelButton(
+					var objBtn=new g740.CustomButton(
 						{
 							region: 'right',
 							label: g740.getMessage('messageDlgMemoOk'),
