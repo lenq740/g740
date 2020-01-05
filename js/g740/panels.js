@@ -648,6 +648,9 @@ define(
 				if (g740.xml.isAttr(xmlRequest,'js_caption')) {
 					request.js_icon=g740.xml.getAttrValue(xmlRequest,'js_caption','');
 				}
+				if (g740.xml.isAttr(xmlRequest,'js_confirm')) {
+					request.js_confirm=g740.xml.getAttrValue(xmlRequest,'js_confirm','');
+				}
 				var xmlScripts=g740.xml.findFirstOfChild(xmlRequest, {nodeName: 'scripts'});
 				if (!g740.xml.isXmlNode(xmlScripts)) xmlScripts=xmlRequest;
 				var lstScript=g740.xml.findArrayOfChild(xmlScripts, {nodeName: 'script'});
@@ -659,6 +662,7 @@ define(
 					if (name=='visible') request.js_visible=g740.panels.buildScript(xmlScript);
 					if (name=='icon') request.js_icon=g740.panels.buildScript(xmlScript);
 					if (name=='caption') request.js_caption=g740.panels.buildScript(xmlScript);
+					if (name=='confirm') request.js_confirm=g740.panels.buildScript(xmlScript);
 				}
 				
 				if (!request.params) request.params={};

@@ -1078,6 +1078,9 @@ define(
 						}
 						return true;
 					}
+					else if (g740.rowsetRequestInfo[requestName]) {
+						return false;
+					}
 					else {
 						return this.objForm.getRequestEnabled(requestName, requestMode);
 					}
@@ -3042,7 +3045,6 @@ define(
 					if (!this.isRefreshChildsEnabled) return true;
 					if (!this.childs) return true;
 					var result=true;
-					
 					// очищаем и блокируем подчиненные наборы строк
 					var isChildsExist=false;
 					for (var name in this.childs) {
@@ -3068,7 +3070,7 @@ define(
 							!this.isFilter &&
 							isChildsExist &&
 							!this.getExistUnsavedChanges() &&
-							this.getRequestEnabled({requestName: 'refreshrow'})
+							this.getRequestEnabled('refreshrow')
 						) {
 							var node=this.getFocusedNode();
 							if (node && node.info) {

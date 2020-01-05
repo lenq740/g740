@@ -1027,6 +1027,7 @@ define(
 					else if (!e.ctrlKey && (e.keyCode==13 || (e.keyCode==9 && !e.shiftKey))) {
 						// Enter, Tab
 						dojo.stopEvent(e);
+						this.onG740Change(this.domNodeInput.value);
 						if (this.objPanel) this.objPanel.doG740FocusChildNext(this);
 					}
 					else if (!e.ctrlKey && (e.keyCode==9 && e.shiftKey)) {

@@ -2187,7 +2187,7 @@ define(
 						if (para.rowsetName) this.rowsetName=para.rowsetName;
 						if (para.request) this.request=para.request;
 						
-						if (this.request.name=='delete' && !this.request.confirm) this.request.confirm=g740.getMessage('messageConfirmDelete');
+						if (this.request.name=='delete' && !this.request.confirm && !this.request.js_confirm) this.request.confirm=g740.getMessage('messageConfirmDelete');
 						
 						var label=this.request.caption;
 						var icon=this.request.icon;
@@ -2226,6 +2226,7 @@ define(
 									if (!this.request.js_caption && r.js_caption) this.request.js_caption=r.js_caption;
 									if (!this.request.js_icon && r.js_icon) this.request.js_icon=r.js_icon;
 									if (!this.request.js_visible && r.js_visible) this.request.js_visible=r.js_visible;
+									if (!this.request.js_confirm && r.js_confirm) this.request.js_confirm=r.js_confirm;
 									if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
 
 									if (!label) label=r.caption;
@@ -2242,6 +2243,7 @@ define(
 									if (!this.request.js_caption && r.js_caption) this.request.js_caption=r.js_caption;
 									if (!this.request.js_icon && r.js_icon) this.request.js_icon=r.js_icon;
 									if (!this.request.js_visible && r.js_visible) this.request.js_visible=r.js_visible;
+									if (!this.request.js_confirm && r.js_confirm) this.request.js_confirm=r.js_confirm;
 									if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
 
 									if (!label) label=r.caption;
@@ -2333,7 +2335,7 @@ define(
 					result=obj.getRequestEnabled(this.request.name, this.request.mode);
 					return result;
 				},
-				exec: function(isNoConfirm) {
+				exec: function() {
 					if (!this.getEnabled()) return false;
 					if (this.request.name=='clipboard') {
 						try {
@@ -2350,14 +2352,18 @@ define(
 						var r=obj.getRequest(this.request.name, this.request.mode);
 						if (r) {
 							if (!this.request.confirm && r.confirm) this.request.confirm=r.confirm;
+							if (!this.request.js_confirm && r.js_confirm) this.request.js_confirm=r.js_confirm;
 							if (!this.request.lock && r.lock) this.request.lock=r.lock;
 						}
 					}
-					if (this.request.confirm) {
+					
+					var confirm=this.request.confirm;
+					if (!confirm && this.request.js_confirm) confirm=g740.js_eval(obj, this.request.js_confirm, '');
+					if (confirm) {
 						var objOwner=null;
 						if (this.objForm) objOwner=this.objForm.objFocusedPanel;
 						g740.showConfirm({
-							messageText: this.request.confirm,
+							messageText: confirm,
 							closeObj: this,
 							onCloseOk: this._execGoStart,
 							objOwner: objOwner
