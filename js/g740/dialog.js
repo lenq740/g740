@@ -1787,7 +1787,7 @@ define(
 					this.objBody.addChild(objPanelIcon);
 					if (!confDialogLogin.iconUrl) objPanelIcon.domNode.className='g740-icons-login-128';
 
-					var objPanelContent=new dijit.layout.ContentPane({region: 'center',style: 'border-width: 0px; margin: 5px'},null);
+					var objPanelContent=new dijit.layout.ContentPane({region: 'center',style: 'border-width: 0px; margin: 5px; overflow: hidden'},null);
 					this.objBody.addChild(objPanelContent);
 
 					var objTable=document.createElement('table');

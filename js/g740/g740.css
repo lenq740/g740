@@ -58,6 +58,7 @@ html, body {
 	margin-left: 5px;
 	margin-right: 5px;
 	border-style: none;
+	border-spacing: 0px;
 }
 
 .g740-custombutton.g740-custombutton-medium .g740-table{
