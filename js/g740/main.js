@@ -293,6 +293,15 @@ define(
 		window.execRequest=execRequest;
 		window.execShowForm=execShowForm;
 		
+		window.g740TraceOn=function() {
+			g740.config.isTraceEnabled=true;
+			return g740.config.isTraceEnabled;
+		}
+		window.g740TraceOff=function() {
+			g740.config.isTraceEnabled=false;
+			return g740.config.isTraceEnabled;
+		}
+		
 	    g740.execDelay={
 	        _index: 0,
 	        _indexMax: 100000,
