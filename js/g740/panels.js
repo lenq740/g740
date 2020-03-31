@@ -598,6 +598,20 @@ define(
 					if (g740.xml.isAttr(xmlRequest,'width')) request.width=g740.xml.getAttrValue(xmlRequest,'width','');
 					if (g740.xml.isAttr(xmlRequest,'height')) request.height=g740.xml.getAttrValue(xmlRequest,'height','');
 					request.closable=g740.convertor.toJavaScript(g740.xml.getAttrValue(xmlRequest,'closable','1'),'check')?'1':'0';
+					
+					var results={};
+					var xmlResults=g740.xml.findFirstOfChild(xmlRequest, {nodeName: 'results'});
+					if (!g740.xml.isXmlNode(xmlResults)) xmlResults=xmlRequest;
+					var lstResult=g740.xml.findArrayOfChild(xmlResults, {nodeName: 'result'});
+					for (var indexResult=0; indexResult<lstResult.length; indexResult++) {
+						var xmlResult=lstResult[indexResult];
+						if (!g740.xml.isXmlNode(xmlResult)) continue;
+						var name=g740.xml.getAttrValue(xmlResult, 'name', '');
+						if (!name) name=g740.xml.getAttrValue(xmlResult, 'result', '');
+						var value=g740.xml.getAttrValue(xmlResult, 'value', name);
+						results[name]=value;
+					}
+					request.results=results;
 				}
 				if (request.name=='httpget') {
 					request.url=g740.xml.getAttrValue(xmlRequest,'url','');

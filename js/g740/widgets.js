@@ -2296,6 +2296,7 @@ define(
 						result['closable']=this.request.closable;
 						result['width']=this.request.width;
 						result['height']=this.request.height;
+						result['results']=this.request.results;
 					}
 					if (this.request.name=='httpget' || this.request.name=='httpput') {
 						result['url']=this.request.url;

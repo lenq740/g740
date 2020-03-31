@@ -733,6 +733,19 @@ define(
 				},
 				onG740KeyPress: function(e) {
 					if (!e) var e=window.event;
+					
+					var rr=null;
+					if (this.objForm && this.objForm.getRequestByKey) rr=this.objForm.getRequestByKey(e, this.rowsetName);
+					if (rr) {
+						dojo.stopEvent(e);
+						if (this.domNodeInput) this.onG740Change(this.domNodeInput.value);
+						this.objForm.exec({
+							requestName: rr.name,
+							requestMode: rr.mode
+						});
+						return;
+					}
+					
 					if (e.keyCode==13 && e.ctrlKey) {
 						// Ctrl+Enter
 						dojo.stopEvent(e);

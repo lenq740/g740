@@ -490,7 +490,6 @@ define(
 					var w=objForm.g740Width;
 					var h=objForm.g740Height;
 					objForm.isModal=true;
-
 					var objDialog=new g740.DialogModalForm({
 						title: objForm.title,
 						attr: para.attr,

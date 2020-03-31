@@ -983,6 +983,7 @@ define(
 
 					// Начитка структуры доступна всем всегда
 					if (requestName=='definition') return true;
+					if (requestName=='data') return true;
 					// Справочнику доступна только операция refresh
 					if (this.isRef) {
 						if (requestName=='refresh') {
@@ -1224,6 +1225,9 @@ define(
 						return this._execRefreshFilter();
 					}
 					
+					if (para.requestName=='data') {
+						return this.objForm.exec(para);
+					}
 					if (para.requestName=='refresh') {
 						if (this.firstFocusPath || this.firstFocusId) {
 							if (!para.G740params) para.G740params={};
@@ -2043,6 +2047,15 @@ define(
 							}
 
 							for (var xml=xmlResponse.firstChild; xml; xml=xml.nextSibling) {
+								if (xml.nodeName=='data') {
+									if (xml.attributes) for (var i=0; i<xml.attributes.length; i++) {
+										var xmlAttr=xml.attributes[i];
+										if (this.objForm && this.objForm.data) {
+											this.objForm.data[xmlAttr.name]=xmlAttr.value;
+										}
+									}
+									continue;
+								}
 								if (!lstResponseRowNames[xml.nodeName]) continue;
 								// если ответ содержит 1 строку (так обычно и бывает)
 								if (rowCount==1) {
@@ -3298,7 +3311,7 @@ define(
 						var s=p[0];
 						var n0=s.indexOf('[');
 						if (n0>=0) s=p[0].substr(0, n0);
-						if (s=='#result' || s=='#this' || s=='#parent' || s=='#focus') isRowSet=true;
+						if (s=='#data' || s=='#result' || s=='#this' || s=='#parent' || s=='#focus') isRowSet=true;
 						if (!isRowSet && this.objForm && this.objForm.rowsets[s]) isRowSet=true;
 						if (isRowSet) {
 							p.push('value');
@@ -3319,7 +3332,7 @@ define(
 						rowType=p[0].substr(n0 + 1, n1 - n0 - 1);
 						rowsetName=p[0].substr(0, n0);
 					}
-					if (rowsetName=='#result') {
+					if (rowsetName=='#result' || rowsetName=='#data') {
 						return this.objForm.doG740Get(name, defValue);
 					}
 					if (rowsetName=='#this') rowsetName=this.name;

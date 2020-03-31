@@ -244,8 +244,17 @@ define(
 							g740.application.modalResults[name]=value;
 						}
 					}
-					
 					var objParentForm=this.attr.objForm;
+					if (objParentForm) {
+						if (objForm && this.attr.results) {
+							for(var name in this.attr.results) {
+								var modalResultName=this.attr.results[name];
+								var value=objForm.modalResults[modalResultName];
+								if (typeof(value)=='undefined') value='';
+								objParentForm.data[name]=value;
+							}
+						}
+					}
                     if (this.attr.onClose) {
 						g740.execDelay.go({
 							delay: 100,

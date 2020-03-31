@@ -30,6 +30,8 @@ define(
 				isFormCreated: false,		// Форма построена
 				objPanelForm: null,			// Для формы приложения, панель, в которой отображается экранная форма
 				objFocusedPanel: null,		// Панель, имеющая фокус ввода
+				
+				data: {},					// элементы data формы
 				rowsets: {},				// Список RowSet
 				modalResults: {},
 
@@ -85,12 +87,14 @@ define(
 					this.modalResults={};
 					this.script={};
 					this.fifoRequests=[];
+					this.data={};
 					//console.log(this);
 				},
 // Уничтожение экземпляра объекта
 				destroy: function() {
 					var procedureName='g740.Form.destroy';
 					this.modalResults={};
+					this.data={};
 					this.isObjectDestroed=true;
 					this.fifoRequests=[];
 					this.objPanelForm=null;
@@ -229,6 +233,19 @@ define(
 							result=true;
 							isClose=true;
 						}
+						else if (requestName=='data') {
+							for(var name in G740params) {
+								this.data[name]=G740params[name];
+							}
+							this.doG740Repaint({isFull: true});
+							result=true;
+						}
+						else if (requestName=='result') {
+							for(var name in G740params) {
+								this.modalResults[name]=G740params[name];
+							}
+							result=true;
+						}
 						else if (requestName=='form') {
 							attr.objForm=this;
 							if (r) {
@@ -236,6 +253,7 @@ define(
 								if (r.width) attr['width']=r.width;
 								if (r.height) attr['height']=r.height;
 								if (r.closable) attr['closable']=r.closable;
+								if (r.results) attr['results']=r.results;
 							}
 							result=g740.application.doG740ShowForm({
 								formName: requestMode, 
@@ -326,10 +344,11 @@ define(
 						}
 						if (!result) return false;
 					}
-					if (isClose && this.isModal) {
+					
+					if (isClose) {
 						_execResult='break';
 						g740.execDelay.go({
-							func: g740.application.closeModalForm
+							func: g740.application.closeFocusedForm
 						});
 					}
 					return true;
@@ -483,6 +502,7 @@ define(
 								if (rr.width) attr['width']=rr.width;
 								if (rr.height) attr['height']=rr.height;
 								if (rr.closable) attr['closable']=rr.closable;
+								if (rr.results) attr['results']=rr.results;
 							}
 							if (rr.name=='httpget' || rr.name=='httpput') {
 								attr['url']=rr.url;
@@ -714,6 +734,23 @@ define(
 							var objRowSet=this.rowsets[rowsetName];
 							if (objRowSet) result=objRowSet.doResponse(para);
 						}
+						else {
+							var isChanged=false;
+							for (var xml=xmlResponse.firstChild; xml; xml=xml.nextSibling) {
+								if (xml.nodeName=='data') {
+									if (xml.attributes) for (var i=0; i<xml.attributes.length; i++) {
+										var xmlAttr=xml.attributes[i];
+										if (this.data) {
+											this.data[xmlAttr.name]=xmlAttr.value;
+											isChanged=true;
+										}
+									}
+								}
+							}
+							if (isChanged) {
+								this.doG740Repaint({isFull: true});
+							}
+						}
 					} 
 					else if (name=='form') {
 						isOkResponseName=true;
@@ -792,6 +829,14 @@ define(
 							}
 						}
 
+						var xmlData=g740.xml.findFirstOfChild(xmlForm, {nodeName: 'data'});
+						if (g740.xml.isXmlNode(xmlData)) {
+							if (xmlData.attributes) for (var i=0; i<xmlData.attributes.length; i++) {
+								var xmlAttr=xmlData.attributes[i];
+								this.data[xmlAttr.name]=xmlAttr.value;
+							}
+						}
+						
 						// Строим наборы строк
 						var xmlRowSets=g740.xml.findFirstOfChild(xmlForm, {nodeName:'rowsets'});
 						if (xmlRowSets) {
@@ -1230,6 +1275,12 @@ define(
 					var n1=rowsetName.indexOf(']');
 					if (n0>=0 && n1>n0) {
 						rowsetName=p[0].substr(0,n0);
+					}
+					if (rowsetName=='#data') {
+						var name=p[1];
+						var value=this.data[name];
+						if (!value) value='';
+						return value;
 					}
 					if (rowsetName=='#result') {
 						var name=p[1];
