@@ -3196,7 +3196,10 @@ define(
 					var urlParamDelimiter='';
 					for(var paramName in g740params) {
 						if (g740params[paramName]=='') continue;
-						if (paramName=='http.url') url=g740params[paramName];
+						if (paramName=='http.url') {
+							url=g740params[paramName];
+							continue;
+						}
 						urlParams+=urlParamDelimiter+paramName+'='+encodeURIComponent(g740params[paramName]);
 						urlParamDelimiter='&';
 					}

@@ -112,6 +112,9 @@ define(
 			},
 //	Преобразование даты из JavaScript в формат G740
 			_toG740Date: function(expr) {
+				if (typeof(expr)=='string') {
+					expr=this._toJavaScriptDate(expr);
+				}
 				if (expr===null) return '';
 				if (typeof(expr)=='object') {
 					if (expr.getFullYear && expr.getMonth && expr.getDate) {

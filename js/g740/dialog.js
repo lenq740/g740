@@ -245,14 +245,12 @@ define(
 						}
 					}
 					var objParentForm=this.attr.objForm;
-					if (objParentForm) {
-						if (objForm && this.attr.results) {
-							for(var name in this.attr.results) {
-								var modalResultName=this.attr.results[name];
-								var value=objForm.modalResults[modalResultName];
-								if (typeof(value)=='undefined') value='';
-								objParentForm.data[name]=value;
-							}
+					if (objParentForm && objForm && this.attr.results) {
+						for(var name in this.attr.results) {
+							var fromName=this.attr.results[name];
+							var value=objForm.data[fromName];
+							if (typeof(value)=='undefined') value='';
+							objParentForm.data[name]=value;
 						}
 					}
                     if (this.attr.onClose) {
@@ -611,7 +609,7 @@ define(
 					}
 					else {
 						g740.execDelay.go({
-							delay: 350,
+							delay: 50,
 							obj: this,
 							func: this.onDomNodeInputChanged
 						});

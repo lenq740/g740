@@ -240,12 +240,6 @@ define(
 							this.doG740Repaint({isFull: true});
 							result=true;
 						}
-						else if (requestName=='result') {
-							for(var name in G740params) {
-								this.modalResults[name]=G740params[name];
-							}
-							result=true;
-						}
 						else if (requestName=='form') {
 							attr.objForm=this;
 							if (r) {
@@ -721,7 +715,9 @@ define(
 					if (xmlResponse.nodeName!='response') g740.responseError('errorXmlNodeNotFound', 'response');
 					
 					var name=g740.xml.getAttrValue(xmlResponse,'name','');
-					if (name=='' || name=='ok') {
+					if (!name) name=g740.xml.getAttrValue(xmlResponse,'response','');
+					if (!name) name='ok';
+					if (name=='ok') {
 						var xmlForm=g740.xml.findFirstOfChild(xmlResponse,{nodeName: 'form'});
 						if (xmlForm!=null) name='form';
 						var xmlRowSet=g740.xml.findFirstOfChild(xmlResponse,{nodeName: 'rowset'});

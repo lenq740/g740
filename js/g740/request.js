@@ -268,6 +268,7 @@ define(
 						if (!g740.xml.isXmlNode(xmlItem)) continue;
 						var name=g740.xml.getAttrValue(xmlItem,'name','');
 						if (!name) name=g740.xml.getAttrValue(xmlItem,'response','');
+						if (!name) name='ok';
 						if (!name) continue;
 						var mess=g740.xml.getAttrValue(xmlItem,'message','');
 						if (name=='error' || name=='disconnected') {
@@ -328,6 +329,7 @@ define(
 							if (!g740.xml.isXmlNode(xmlItem)) continue;
 							var name=g740.xml.getAttrValue(xmlItem,'name','');
 							if (!name) name=g740.xml.getAttrValue(xmlItem,'response','');
+							if (!name) name='ok';
 							if (name=='ok' && para.objOwner.doResponse) {
 								var p={};
 								p.xmlResponse=xmlItem;

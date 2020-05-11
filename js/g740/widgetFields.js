@@ -1051,7 +1051,10 @@ define(
 				},
 				onBlur: function() {
 					if (!this.isDialogOpened && this.domNodeInput && this.domNodeInput.value!=this._value) {
-						this.domNodeInput.value=this._value;
+						var newValue=this.convertFromTextValueToValue(this.domNodeInput.value);
+						this.domNodeInput.value=this.convertFromValueToTextValue(newValue);
+						this.onG740Change(this.domNodeInput.value);
+						//this.domNodeInput.value=this._value;
 					}
 					this.inherited(arguments);
 				},

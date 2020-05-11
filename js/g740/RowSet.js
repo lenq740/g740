@@ -1956,7 +1956,8 @@ define(
 					if (!g740.xml.isXmlNode(xmlResponse)) g740.systemError(procedureName, 'errorNotXml', 'xmlResponse');
 					if (xmlResponse.nodeName != 'response') g740.responseError('errorXmlNodeNotFound', 'response');
 					var responseName=g740.xml.getAttrValue(xmlResponse, 'name', '');
-					if (responseName=='') responseName='ok';
+					if (!responseName) responseName=g740.xml.getAttrValue(xmlResponse, 'response', '');
+					if (!responseName) responseName='ok';
 					if (responseName=='error') {
 						return false;
 					}
@@ -3602,7 +3603,6 @@ define(
 											if (fld.type=='num' && (newG740Value+'').length>fld.maxlength) newG740Value=0;
 											if (fld.type=='string' && (newG740Value+'').length>fld.maxlength) newG740Value=newG740Value.substr(0,fld.maxlength);
 										}
-										
 										row[para.fieldName + '.value']=g740.convertor.toJavaScript(newG740Value, fld.type);
 										if (fld.save && this.getExistUnsavedChanges()) {
 											g740.execDelay.go({
