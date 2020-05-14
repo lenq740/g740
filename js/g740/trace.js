@@ -103,7 +103,7 @@ define(
 // 	para.messageId - код вопроса
 //	para.messageText - текст вопроса
 // 	para.onCloseOk - процедура, выполняемая по Ok
-// 	para.onClolseCancel - процедура, выполняемая по Ok
+// 	para.onCloseCancel - процедура, выполняемая по Cancel
 //	para.closePara
 // 	para.closeObj - контекст выпонения
 //	para.objOwner - куда возвращать фокус ввода по закрытии

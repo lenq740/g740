@@ -490,31 +490,64 @@ define(
 							if (!obj.getRequestEnabled(rr.name, rr.mode)) rr=null;
 						}
 						if (rr && obj.exec) {
-							var attr={};
-							if (rr.name=='form') {
-								if (rr.modal) attr['modal']=rr.modal;
-								if (rr.width) attr['width']=rr.width;
-								if (rr.height) attr['height']=rr.height;
-								if (rr.closable) attr['closable']=rr.closable;
-								if (rr.results) attr['results']=rr.results;
+							var confirm='';
+							if (!rr.isConfirmDisabled) {
+								confirm=rr.confirm;
+								if (!confirm && rr.js_confirm) confirm=g740.js_eval(obj, rr.js_confirm, '');
+								if (!confirm) {
+									var r=this.requests[rr.name];
+									if (r) {
+										confirm=r.confirm;
+										if (!confirm && r.js_confirm) confirm=g740.js_eval(obj, r.js_confirm, '');
+									}
+								}
 							}
-							if (rr.name=='httpget' || rr.name=='httpput') {
-								attr['url']=rr.url;
-								attr['ext']=rr.ext;
+							if (confirm) {
+								var objOwner=this.objFocusedPanel;
+								g740.showConfirm({
+									messageText: confirm,
+									closeObj: this,
+									closePara: rr,
+									onCloseOk: function(rr) {
+										var r={};
+										for(var name in rr) r[name]=rr[name];
+										r.isConfirmDisabled=true;
+										this.fifoRequests.unshift(r);
+										this.continueExecListOfRequest();
+									},
+									onCloseCancel: function() {
+										this.continueExecListOfRequest();
+									},
+									objOwner: objOwner
+								});
+								return true;
 							}
-							
-							var p={};
-							if (obj._getRequestG740params) p=obj._getRequestG740params(rr.params);
-							var result=obj.exec({
-								requestName: rr.name,
-								requestMode: rr.mode,
-								exec: rr.exec,
-								sync: true,
-								G740params: p,
-								attr: attr
-							});
-
-							if (!result) this.fifoRequests=[];
+							else {
+								var attr={};
+								if (rr.name=='form') {
+									if (rr.modal) attr['modal']=rr.modal;
+									if (rr.width) attr['width']=rr.width;
+									if (rr.height) attr['height']=rr.height;
+									if (rr.closable) attr['closable']=rr.closable;
+									if (rr.results) attr['results']=rr.results;
+								}
+								if (rr.name=='httpget' || rr.name=='httpput') {
+									attr['url']=rr.url;
+									attr['ext']=rr.ext;
+								}
+								
+								var p={};
+								if (obj._getRequestG740params) p=obj._getRequestG740params(rr.params);
+								var result=obj.exec({
+									requestName: rr.name,
+									requestMode: rr.mode,
+									exec: rr.exec,
+									sync: true,
+									G740params: p,
+									attr: attr
+								});
+								if (!result) this.fifoRequests=[];
+							}
 						}
 					}
 					// Если пауза в цепочке, до завершения асинхронного запроса (fttpget, fttpput, form)
